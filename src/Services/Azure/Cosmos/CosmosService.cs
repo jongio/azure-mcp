@@ -69,7 +69,7 @@ public class CosmosService(ISubscriptionService subscriptionService, ITenantServ
             default:
                 return new CosmosClient(
                     string.Format(CosmosBaseUri, accountName),
-                    GetCredential(tenant),
+                    await GetCredential(tenant),
                     clientOptions);
         }
     }
