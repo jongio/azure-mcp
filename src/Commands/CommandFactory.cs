@@ -61,6 +61,7 @@ public class CommandFactory
         RegisterStorageCommands();
         RegisterMonitorCommands();
         RegisterAppConfigCommands();
+        RegisterSearchCommands();
         RegisterToolsCommands();
         RegisterExtensionCommands();
         RegisterSubscriptionCommands();
@@ -172,6 +173,17 @@ public class CommandFactory
         keyValue.AddCommand("set", new AppConfig.KeyValue.KeyValueSetCommand(GetLogger<AppConfig.KeyValue.KeyValueSetCommand>()));
         keyValue.AddCommand("show", new AppConfig.KeyValue.KeyValueShowCommand(GetLogger<AppConfig.KeyValue.KeyValueShowCommand>()));
         keyValue.AddCommand("delete", new AppConfig.KeyValue.KeyValueDeleteCommand(GetLogger<AppConfig.KeyValue.KeyValueDeleteCommand>()));
+    }
+
+    private void RegisterSearchCommands()
+    {
+        var search = new CommandGroup("search", "Search operations - Commands for managing and listing Azure AI Search services.");
+        _rootGroup.AddSubGroup(search);
+
+        var service = new CommandGroup("service", "Azure AI Search service operations - Commands for listing and managing search services in your Azure subscription.");
+        search.AddSubGroup(service);
+
+        service.AddCommand("list", new Search.Service.ServiceListCommand(GetLogger<Search.Service.ServiceListCommand>()));
     }
 
     private void RegisterToolsCommands()
