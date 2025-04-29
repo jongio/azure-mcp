@@ -143,6 +143,17 @@ public static class ArgumentDefinitions
         );
     }
 
+    public static class Search
+    {
+        public const string ServiceName = "service-name";
+
+        public static readonly ArgumentDefinition<string> Service = new(
+            ServiceName,
+            "The name of the Azure AI Search service (e.g., my-search-service).",
+            required: true
+        );
+    }
+
     public static class Monitor
     {
         public const string WorkspaceIdOrName = "workspace";

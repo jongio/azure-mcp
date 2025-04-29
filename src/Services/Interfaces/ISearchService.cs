@@ -11,4 +11,8 @@ public interface ISearchService
         string subscription,
         string? tenantId = null,
         RetryPolicyArguments? retryPolicy = null);
+
+    Task<List<string>> ListIndexes(
+        string serviceName,
+        RetryPolicyArguments? retryPolicy = null);
 }
