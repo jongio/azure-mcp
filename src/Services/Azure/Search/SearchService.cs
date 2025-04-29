@@ -86,6 +86,33 @@ public sealed class SearchService(ISubscriptionService subscriptionService, ICac
         return indexes;
     }
 
+    public async Task<object> DescribeIndex(
+        string serviceName,
+        string indexName,
+        RetryPolicyArguments? retryPolicy = null)
+    {
+        ValidateRequiredParameters(serviceName, indexName);
+
+        try
+        {
+            var credential = await GetCredential();
+
+            var clientOptions = AddDefaultPolicies(new SearchClientOptions());
+            ConfigureRetryPolicy(clientOptions, retryPolicy);
+
+            var endpoint = new Uri($"https://{serviceName}.search.windows.net");
+            var searchClient = new SearchIndexClient(endpoint, credential, clientOptions);
+
+            var index = await searchClient.GetIndexAsync(indexName);
+
+            return index.Value;
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error retrieving Search index details: {ex.Message}", ex);
+        }
+    }
+
     private static void ConfigureRetryPolicy(SearchClientOptions options, RetryPolicyArguments? retryPolicy)
     {
         if (retryPolicy != null)

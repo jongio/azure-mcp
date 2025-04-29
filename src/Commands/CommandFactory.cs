@@ -190,6 +190,7 @@ public class CommandFactory
         search.AddSubGroup(index);
 
         index.AddCommand("list", new Search.Index.IndexListCommand(GetLogger<Search.Index.IndexListCommand>()));
+        index.AddCommand("describe", new Search.Index.IndexDescribeCommand(GetLogger<Search.Index.IndexDescribeCommand>()));
     }
 
     private void RegisterToolsCommands()
