@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using AzureMcp.Commands.Cosmos;
+using AzureMcp.Commands.Search.Index;
 using AzureMcp.Commands.Server;
 using AzureMcp.Commands.Storage.Blob;
 using AzureMcp.Commands.Subscription;
@@ -184,6 +185,11 @@ public class CommandFactory
         search.AddSubGroup(service);
 
         service.AddCommand("list", new Search.Service.ServiceListCommand(GetLogger<Search.Service.ServiceListCommand>()));
+
+        var index = new CommandGroup("index", "Azure AI Search index operations - Commands for listing and managing search indexes in a specific search service.");
+        search.AddSubGroup(index);
+
+        index.AddCommand("list", new Search.Index.IndexListCommand(GetLogger<Search.Index.IndexListCommand>()));
     }
 
     private void RegisterToolsCommands()

@@ -16,7 +16,7 @@ public sealed class ServiceListCommand(ILogger<ServiceListCommand> logger) : Sub
 
     protected override string GetCommandName() => "list";
 
-    protected override string GetCommandDescription() => 
+    protected override string GetCommandDescription() =>
         "List all Azure AI Search services in a subscription. Returns an array of search service names.\n\n" +
         "Required arguments:\n- subscription";
 
@@ -33,7 +33,7 @@ public sealed class ServiceListCommand(ILogger<ServiceListCommand> logger) : Sub
             }
 
             var searchService = context.GetService<ISearchService>();
-            
+
             var services = await searchService.ListServices(
                 args.Subscription!,
                 args.Tenant,
