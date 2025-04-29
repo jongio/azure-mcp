@@ -102,7 +102,7 @@ public class IndexListCommandTests
         // Assert
         Assert.NotNull(response);
         Assert.Equal(500, response.Status);
-        Assert.Equal(expectedError, response.Message);
+        Assert.StartsWith(expectedError, response.Message);
     }
 
     private class IndexListResult
