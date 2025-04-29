@@ -146,10 +146,17 @@ public static class ArgumentDefinitions
     public static class Search
     {
         public const string ServiceName = "service-name";
+        public const string IndexName = "index-name";
 
         public static readonly ArgumentDefinition<string> Service = new(
             ServiceName,
             "The name of the Azure AI Search service (e.g., my-search-service).",
+            required: true
+        );
+
+        public static readonly ArgumentDefinition<string> Index = new(
+            IndexName,
+            "The name of the search index within the Azure AI Search service.",
             required: true
         );
     }
