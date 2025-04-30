@@ -1,11 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using Azure;
 using Azure.ResourceManager.Search;
 using Azure.Search.Documents;
 using Azure.Search.Documents.Indexes;
+using Azure.Search.Documents.Indexes.Models;
+using Azure.Search.Documents.Models;
 using AzureMcp.Arguments;
 using AzureMcp.Services.Interfaces;
+using Newtonsoft.Json;
+using System.Text.Json;
 
 namespace AzureMcp.Services.Azure.Search;
 
@@ -111,6 +116,106 @@ public sealed class SearchService(ISubscriptionService subscriptionService, ICac
         {
             throw new Exception($"Error retrieving Search index details: {ex.Message}", ex);
         }
+    }
+
+    public async Task<object> QueryIndex(
+        string serviceName,
+        string indexName,
+        string searchText,
+        RetryPolicyArguments? retryPolicy = null)
+    {
+        ValidateRequiredParameters(serviceName, indexName, searchText);
+
+        try
+        {
+            var credential = await GetCredential();
+            var clientOptions = AddDefaultPolicies(new SearchClientOptions());
+            ConfigureRetryPolicy(clientOptions, retryPolicy);
+
+            var endpoint = new Uri($"https://{serviceName}.search.windows.net");
+            var indexClient = new SearchIndexClient(endpoint, credential, clientOptions);
+            var indexDefinition = await indexClient.GetIndexAsync(indexName);
+            var searchClient = indexClient.GetSearchClient(indexName);
+
+            var options = new SearchOptions
+            {
+                IncludeTotalCount = true,
+                Size = 20
+            };
+
+            var vectorFields = FindVectorFields(indexDefinition.Value);
+            var vectorizableFields = FindVectorizableFields(indexDefinition.Value, vectorFields);
+            ConfigureSearchOptions(searchText, options, indexDefinition.Value, vectorFields);
+
+            var searchResponse = await searchClient.SearchAsync<JsonElement>(searchText, options);
+
+            return await ProcessSearchResults(searchResponse);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error querying Search index: {ex.Message}", ex);
+        }
+    }
+
+    private static List<string> FindVectorFields(SearchIndex indexDefinition)
+    {
+        return [.. indexDefinition.Fields
+                    .Where(f => f.VectorSearchDimensions.HasValue)
+                    .Select(f => f.Name)];
+    }
+
+    private static List<string> FindVectorizableFields(SearchIndex indexDefinition, List<string> vectorFields)
+    {
+        var vectorizableFields = new List<string>();
+
+        if (indexDefinition.VectorSearch?.Profiles == null || indexDefinition.VectorSearch.Algorithms == null)
+        {
+            return vectorizableFields;
+        }
+
+        foreach (var field in indexDefinition.Fields)
+        {
+            if (vectorFields.Contains(field.Name) && !string.IsNullOrEmpty(field.VectorSearchProfileName))
+            {
+                var profile = indexDefinition.VectorSearch.Profiles
+                    .FirstOrDefault(p => p.Name == field.VectorSearchProfileName);
+
+                if (profile != null)
+                {
+                    if (!string.IsNullOrEmpty(profile.VectorizerName))
+                    {
+                        vectorizableFields.Add(field.Name);
+                    }
+                }
+            }
+        }
+
+        return vectorizableFields;
+    }
+
+    private static void ConfigureSearchOptions(string q, SearchOptions options, SearchIndex indexDefinition, List<string> vectorFields)
+    {
+        List<string> selectedFields = [.. indexDefinition.Fields.Where(f => !vectorFields.Contains(f.Name)).Select(f => f.Name)];
+        foreach (var field in selectedFields)
+        {
+            options.Select.Add(field);
+        }
+
+        options.VectorSearch = new VectorSearchOptions();
+        foreach (var vf in vectorFields)
+        {
+            options.VectorSearch.Queries.Add(new VectorizableTextQuery(q) { Fields = { vf }, KNearestNeighborsCount = 50 });
+        }
+    }
+
+    private static async Task<List<JsonElement>> ProcessSearchResults(Response<SearchResults<JsonElement>> searchResponse)
+    {
+        var results = new List<JsonElement>();
+        await foreach (var result in searchResponse.Value.GetResultsAsync())
+        {
+            results.Add(result.Document);
+        }
+        return results;
     }
 
     private static void ConfigureRetryPolicy(SearchClientOptions options, RetryPolicyArguments? retryPolicy)
