@@ -54,7 +54,7 @@ public sealed class ToolsListCommand(ILogger<ToolsListCommand> logger) : BaseCom
             {
                 return new ArgumentInfo(
                     name: arg.Name,
-                    description: arg.Description!,                    
+                    description: arg.Description!,
                     required: arg.IsRequired);
             })
             .ToList();

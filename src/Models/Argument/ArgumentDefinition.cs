@@ -44,7 +44,7 @@ public class ArgumentDefinition<T>(string name, string description, string? valu
     public Option<T> ToOption()
     {
         var option = new Option<T>($"--{Name}", Description);
-        
+
         if (DefaultValue != null)
         {
             option.SetDefaultValue(DefaultValue);
