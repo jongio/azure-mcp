@@ -36,7 +36,6 @@ catch (Exception ex)
     {
         Status = 500,
         Message = ex.Message,
-        Arguments = [],
         Duration = 0
     };
 

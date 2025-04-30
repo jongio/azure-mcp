@@ -32,6 +32,21 @@ public class CommandFactory
     /// </summary>
     private readonly Dictionary<string, IBaseCommand> _commandMap;
 
+    // Add this new class inside CommandFactory
+    private class StringConverter : JsonConverter<string>
+    {
+        public override string Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            return reader.GetString() ?? string.Empty;
+        }
+
+        public override void Write(Utf8JsonWriter writer, string value, JsonSerializerOptions options)
+        {
+            var cleanValue = value?.Replace("\r\n", " ").Replace("\n", " ").Replace("\r", " ");
+            writer.WriteStringValue(cleanValue);
+        }
+    }
+
     public CommandFactory(IServiceProvider serviceProvider, ILogger<CommandFactory> logger)
     {
         _serviceProvider = serviceProvider;
@@ -46,6 +61,7 @@ public class CommandFactory
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
+        _jsonOptions.Converters.Add(new StringConverter());
     }
 
     public RootCommand RootCommand => _rootCommand;

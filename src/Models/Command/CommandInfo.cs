@@ -21,7 +21,7 @@ public class CommandInfo
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<CommandInfo>? Subcommands { get; set; }
 
-    [JsonPropertyName("args")]
+    [JsonPropertyName("options")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public List<ArgumentInfo>? Arguments { get; set; }
+    public List<ArgumentInfo>? Options { get; set; }
 }
