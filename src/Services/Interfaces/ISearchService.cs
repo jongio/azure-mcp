@@ -27,4 +27,18 @@ public interface ISearchService
         string serviceName,
         string indexName,
         RetryPolicyArguments? retryPolicy = null);
+
+    /// <summary>
+    /// Queries an Azure Search index
+    /// </summary>
+    /// <param name="serviceName">The name of the search service</param>
+    /// <param name="indexName">The name of the search index</param>
+    /// <param name="searchText">The search query text</param>
+    /// <param name="retryPolicy">Optional retry policy for the operation</param>
+    /// <returns>The search results excluding large vector fields</returns>
+    Task<object> QueryIndex(
+        string serviceName,
+        string indexName,
+        string searchText,
+        RetryPolicyArguments? retryPolicy = null);
 }

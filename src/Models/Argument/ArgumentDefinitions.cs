@@ -147,6 +147,7 @@ public static class ArgumentDefinitions
     {
         public const string ServiceName = "service-name";
         public const string IndexName = "index-name";
+        public const string QueryName = "query";
 
         public static readonly ArgumentDefinition<string> Service = new(
             ServiceName,
@@ -157,6 +158,12 @@ public static class ArgumentDefinitions
         public static readonly ArgumentDefinition<string> Index = new(
             IndexName,
             "The name of the search index within the Azure AI Search service.",
+            required: true
+        );
+
+        public static readonly ArgumentDefinition<string> Query = new(
+            QueryName,
+            "The search query to execute against the Azure AI Search index.",
             required: true
         );
     }
