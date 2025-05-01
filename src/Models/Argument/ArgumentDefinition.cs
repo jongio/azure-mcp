@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 
 namespace AzureMcp.Models.Argument;
 
-public class ArgumentDefinition<T>(string name, string description, string? value = "", T? defaultValue = default, List<ArgumentOption>? suggestedValues = null, bool required = false, bool hidden = false)
+public class ArgumentDefinition<T>(string name, string description, string? value = "", T? defaultValue = default, bool required = false, bool hidden = false)
     where T : notnull
 {
     [JsonPropertyName("name")]
@@ -23,10 +23,6 @@ public class ArgumentDefinition<T>(string name, string description, string? valu
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public T? DefaultValue { get; set; } = defaultValue;
 
-    [JsonPropertyName("suggestedValues")]
-    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public List<ArgumentOption>? SuggestedValues { get; set; } = suggestedValues;
-
     [JsonPropertyName("type")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string Type { get; set; } = typeof(T).Name.ToLowerInvariant();
@@ -38,8 +34,6 @@ public class ArgumentDefinition<T>(string name, string description, string? valu
     [JsonPropertyName("hidden")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
     public bool Hidden { get; set; } = hidden;
-
-    public bool ShouldSerializeValues() => SuggestedValues?.Count > 0;
 
     public Option<T> ToOption()
     {
