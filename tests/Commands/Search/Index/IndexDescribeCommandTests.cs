@@ -3,7 +3,6 @@
 
 using AzureMcp.Arguments;
 using AzureMcp.Commands.Search.Index;
-using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;

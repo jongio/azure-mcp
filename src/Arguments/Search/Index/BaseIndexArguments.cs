@@ -6,8 +6,8 @@ using System.Text.Json.Serialization;
 
 namespace AzureMcp.Arguments.Search.Index;
 
-public class IndexQueryArguments : BaseIndexArguments
+public class BaseIndexArguments : BaseSearchArguments
 {
-    [JsonPropertyName(ArgumentDefinitions.Search.QueryName)]
-    public string? Query { get; set; }
+    [JsonPropertyName(ArgumentDefinitions.Search.IndexName)]
+    public string? Index { get; set; }
 }

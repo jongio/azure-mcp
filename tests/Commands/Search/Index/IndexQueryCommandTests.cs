@@ -12,7 +12,6 @@ using NSubstitute.ExceptionExtensions;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 using Xunit;
 
 namespace AzureMcp.Tests.Commands.Search.Index;

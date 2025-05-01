@@ -82,22 +82,15 @@ public sealed class IndexDescribeCommand(ILogger<IndexDescribeCommand> logger) :
         return context.Response;
     }
 
-    private ArgumentBuilder<IndexDescribeArguments> CreateServiceArgument() =>
+    private static ArgumentBuilder<IndexDescribeArguments> CreateServiceArgument() =>
         ArgumentBuilder<IndexDescribeArguments>
             .Create(ArgumentDefinitions.Search.Service.Name, ArgumentDefinitions.Search.Service.Description)
             .WithValueAccessor(args => args.Service ?? string.Empty)
             .WithIsRequired(ArgumentDefinitions.Search.Service.Required);
 
-    private ArgumentBuilder<IndexDescribeArguments> CreateIndexArgument() =>
+    private static ArgumentBuilder<IndexDescribeArguments> CreateIndexArgument() =>
         ArgumentBuilder<IndexDescribeArguments>
             .Create(ArgumentDefinitions.Search.Index.Name, ArgumentDefinitions.Search.Index.Description)
             .WithValueAccessor(args => args.Index ?? string.Empty)
-            .WithSuggestedValuesLoader(async (context, args) =>
-            {
-                if (string.IsNullOrEmpty(args.Service)) return [];
-                var service = context.GetService<ISearchService>();
-                var indexes = await service.ListIndexes(args.Service);
-                return indexes?.Select(i => new ArgumentOption { Name = i, Id = i }).ToList() ?? [];
-            })
             .WithIsRequired(ArgumentDefinitions.Search.Index.Required);
 }

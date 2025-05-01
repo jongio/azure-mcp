@@ -87,26 +87,19 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
         return context.Response;
     }
 
-    private ArgumentBuilder<IndexQueryArguments> CreateServiceArgument() =>
+    private static ArgumentBuilder<IndexQueryArguments> CreateServiceArgument() =>
         ArgumentBuilder<IndexQueryArguments>
             .Create(ArgumentDefinitions.Search.Service.Name, ArgumentDefinitions.Search.Service.Description)
             .WithValueAccessor(args => args.Service ?? string.Empty)
             .WithIsRequired(ArgumentDefinitions.Search.Service.Required);
 
-    private ArgumentBuilder<IndexQueryArguments> CreateIndexArgument() =>
+    private static ArgumentBuilder<IndexQueryArguments> CreateIndexArgument() =>
         ArgumentBuilder<IndexQueryArguments>
             .Create(ArgumentDefinitions.Search.Index.Name, ArgumentDefinitions.Search.Index.Description)
             .WithValueAccessor(args => args.Index ?? string.Empty)
-            .WithSuggestedValuesLoader(async (context, args) =>
-            {
-                if (string.IsNullOrEmpty(args.Service)) return [];
-                var service = context.GetService<ISearchService>();
-                var indexes = await service.ListIndexes(args.Service);
-                return indexes?.Select(i => new ArgumentOption { Name = i, Id = i }).ToList() ?? [];
-            })
             .WithIsRequired(ArgumentDefinitions.Search.Index.Required);
 
-    private ArgumentBuilder<IndexQueryArguments> CreateQueryArgument() =>
+    private static ArgumentBuilder<IndexQueryArguments> CreateQueryArgument() =>
         ArgumentBuilder<IndexQueryArguments>
             .Create(ArgumentDefinitions.Search.Query.Name, ArgumentDefinitions.Search.Query.Description)
             .WithValueAccessor(args => args.Query ?? string.Empty)
