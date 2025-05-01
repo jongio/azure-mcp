@@ -24,8 +24,6 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
     protected override string GetCommandDescription() =>
         """
         Query an Azure AI Search index. Returns search results matching the specified query.
-        If vector fields with vectorizers are defined in the index, the search will include vector similarity.
-        Vector fields are excluded from results to avoid large response payloads.
         
         Required arguments:
         - service-name: The name of the Azure AI Search service

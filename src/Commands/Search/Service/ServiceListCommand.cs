@@ -17,8 +17,12 @@ public sealed class ServiceListCommand(ILogger<ServiceListCommand> logger) : Sub
     protected override string GetCommandName() => "list";
 
     protected override string GetCommandDescription() =>
-        "List all Azure AI Search services in a subscription. Returns an array of search service names.\n\n" +
-        "Required arguments:\n- subscription";
+        """
+        List all Azure AI Search services in a subscription.
+
+        Required arguments:
+        - subscription
+        """;
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)

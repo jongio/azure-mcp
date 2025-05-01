@@ -9,7 +9,6 @@ using Azure.Search.Documents.Indexes.Models;
 using Azure.Search.Documents.Models;
 using AzureMcp.Arguments;
 using AzureMcp.Services.Interfaces;
-using Newtonsoft.Json;
 using System.Text.Json;
 
 namespace AzureMcp.Services.Azure.Search;

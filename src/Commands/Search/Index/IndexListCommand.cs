@@ -20,7 +20,7 @@ public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalC
 
     protected override string GetCommandDescription() =>
         """
-        List all indexes in an Azure AI Search service. Returns an array of index names.
+        List all indexes in an Azure AI Search service.
 
         Required arguments:
         - service-name
