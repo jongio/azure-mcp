@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using AzureMcp.Commands.Cosmos;
-using AzureMcp.Commands.Search.Index;
 using AzureMcp.Commands.Server;
 using AzureMcp.Commands.Storage.Blob;
 using AzureMcp.Commands.Subscription;

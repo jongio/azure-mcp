@@ -74,7 +74,7 @@ public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalC
         return context.Response;
     }
 
-    private ArgumentBuilder<IndexListArguments> CreateIndexListArgument() =>
+    private static ArgumentBuilder<IndexListArguments> CreateIndexListArgument() =>
         ArgumentBuilder<IndexListArguments>
             .Create(ArgumentDefinitions.Search.Service.Name, ArgumentDefinitions.Search.Service.Description)
             .WithValueAccessor(args => args.Service ?? string.Empty)
