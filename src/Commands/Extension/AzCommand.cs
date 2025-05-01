@@ -19,7 +19,7 @@ public sealed class AzCommand(ILogger<AzCommand> logger, int processTimeoutSecon
     private readonly int _processTimeoutSeconds = processTimeoutSeconds;
     private readonly Option<string> _commandOption = ArgumentDefinitions.Extension.Az.Command.ToOption();
     private static string? _cachedAzPath;
-        
+
 
     protected override string GetCommandName() => "az";
 

@@ -64,7 +64,7 @@ public sealed class ToolsListCommand(ILogger<ToolsListCommand> logger) : BaseCom
             Name = command.GetCommand().Name,
             Description = command.GetCommand().Description ?? string.Empty,
             Command = hyphenatedName.Replace('-', ' '),
-            Options = argumentInfos,
+            Arguments = argumentInfos,
         };
     }
 }

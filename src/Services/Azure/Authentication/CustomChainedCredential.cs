@@ -42,7 +42,7 @@ public class CustomChainedCredential(string? tenantId = null) : TokenCredential
     private static bool ShouldUseOnlyBrokerCredential()
     {
         return EnvironmentHelpers.GetEnvironmentVariableAsBool(OnlyUseBrokerCredentialEnvVarName);
-     }
+    }
 
     private static ChainedTokenCredential CreateChainedCredential(string? tenantId)
     {
