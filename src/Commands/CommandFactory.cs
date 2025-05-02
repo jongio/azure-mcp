@@ -25,10 +25,10 @@ public class CommandFactory
     private readonly CommandGroup _rootGroup;
     private readonly JsonSerializerOptions _jsonOptions;
 
-    internal static readonly char Separator = '-';
+    internal static readonly char Separator = '_';
 
     /// <summary>
-    /// Mapping of hyphenated command names to their <see cref="IBaseCommand" />
+    /// Mapping of keyed command names to their <see cref="IBaseCommand" />
     /// </summary>
     private readonly Dictionary<string, IBaseCommand> _commandMap;
 
@@ -355,9 +355,9 @@ public class CommandFactory
         return nextGroup != null ? FindCommandInGroup(nextGroup, nameParts) : null;
     }
 
-    public IBaseCommand? FindCommandByName(string hyphenatedName)
+    public IBaseCommand? FindCommandByName(string keyedName)
     {
-        return _commandMap.GetValueOrDefault(hyphenatedName);
+        return _commandMap.GetValueOrDefault(keyedName);
     }
 
     private static Dictionary<string, IBaseCommand> CreateCommmandDictionary(CommandGroup node, string prefix)
@@ -394,9 +394,8 @@ public class CommandFactory
         return aggregated;
     }
 
-    private static string GetPrefix(string currentPrefix, string additional) => string.IsNullOrEmpty(currentPrefix)
-        ? additional
-        : currentPrefix + Separator + additional;
+    private static string GetPrefix(string currentPrefix, string additional) =>
+        string.IsNullOrEmpty(currentPrefix) ? additional : currentPrefix + Separator + additional;
 
     public static IEnumerable<KeyValuePair<string, IBaseCommand>> GetVisibleCommands(IEnumerable<KeyValuePair<string, IBaseCommand>> commands)
     {
