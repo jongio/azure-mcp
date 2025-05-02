@@ -4,11 +4,16 @@
 
 ### Features Added
 
+- Azure Search Tools https://github.com/Azure/azure-mcp/pull/83
+
 ### Breaking Changes
 
 ### Bugs Fixed
 
 ### Other Changes
+
+- Arguments no longer echoed in response: https://github.com/Azure/azure-mcp/pull/79
+- Editorconfig and gitattributes updated: https://github.com/Azure/azure-mcp/pull/91
 
 ## 0.0.11 (2025-04-29)
 
