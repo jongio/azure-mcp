@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Services.Interfaces;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Services.ProcessExecution;
 

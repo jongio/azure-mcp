@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.CommandLine;
+using System.Text.Json;
 using AzureMcp.Commands;
 using AzureMcp.Extensions;
 using AzureMcp.Models.Command;
@@ -17,8 +19,6 @@ using AzureMcp.Services.Interfaces;
 using AzureMcp.Services.ProcessExecution;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.CommandLine;
-using System.Text.Json;
 
 try
 {

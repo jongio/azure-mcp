@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Text.Json;
 using Azure.ResourceManager.CosmosDB;
 using AzureMcp.Arguments;
 using AzureMcp.Models;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Azure.Cosmos;
-using System.Text.Json;
 
 namespace AzureMcp.Services.Azure.Cosmos;
 

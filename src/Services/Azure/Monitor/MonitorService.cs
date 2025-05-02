@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Text.Json;
 using Azure;
 using Azure.Monitor.Query;
 using Azure.ResourceManager.OperationalInsights;
 using AzureMcp.Arguments;
 using AzureMcp.Models.Monitor;
 using AzureMcp.Services.Interfaces;
-using System.Text.Json;
 
 namespace AzureMcp.Services.Azure.Monitor;
 

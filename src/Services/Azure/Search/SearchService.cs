@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.Text.Json;
 using Azure;
 using Azure.ResourceManager.Search;
 using Azure.Search.Documents;
@@ -9,7 +10,6 @@ using Azure.Search.Documents.Indexes.Models;
 using Azure.Search.Documents.Models;
 using AzureMcp.Arguments;
 using AzureMcp.Services.Interfaces;
-using System.Text.Json;
 
 namespace AzureMcp.Services.Azure.Search;
 

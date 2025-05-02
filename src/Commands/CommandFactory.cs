@@ -1,6 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.CommandLine;
+using System.Reflection;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using AzureMcp.Commands.Cosmos;
 using AzureMcp.Commands.Server;
 using AzureMcp.Commands.Storage.Blob;
@@ -9,11 +14,6 @@ using AzureMcp.Models;
 using AzureMcp.Models.Command;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.CommandLine;
-using System.Reflection;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace AzureMcp.Commands;
 
