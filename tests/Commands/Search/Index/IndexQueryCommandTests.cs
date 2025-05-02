@@ -14,7 +14,7 @@ using System.CommandLine.Parsing;
 using System.Text.Json;
 using Xunit;
 
-namespace AzureMcp.Tests.Commands.Search.Index;
+namespace AzureMcp.Tests.Commands.Search;
 
 public class IndexQueryCommandTests
 {
@@ -121,10 +121,10 @@ public class IndexQueryCommandTests
         // Assert
         Assert.NotNull(response);
         Assert.Equal(400, response.Status);
-        Assert.NotNull(response.Arguments);
-        Assert.Contains(response.Arguments ?? [], a => a.Name == "service-name" && a.Required);
-        Assert.Contains(response.Arguments ?? [], a => a.Name == "index-name" && a.Required);
-        Assert.Contains(response.Arguments ?? [], a => a.Name == "query" && a.Required);
+        Assert.NotNull(response.Message);
+        Assert.Contains("service-name", response.Message);
+        Assert.Contains("index-name", response.Message);
+        Assert.Contains("query", response.Message);
     }
 
     [Fact]

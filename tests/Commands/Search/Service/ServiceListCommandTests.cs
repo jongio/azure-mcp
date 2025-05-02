@@ -15,7 +15,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Xunit;
 
-namespace AzureMcp.Tests.Commands.Search.Service;
+namespace AzureMcp.Tests.Commands.Search;
 
 public class ServiceListCommandTests
 {
