@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
-using AzureMcp.Commands.Monitor.Workspace;
 using AzureMcp.Commands.Monitor.TableType;
+using AzureMcp.Commands.Monitor.Workspace;
 
 namespace AzureMcp.Commands.Monitor;
 
