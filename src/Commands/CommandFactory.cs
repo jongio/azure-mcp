@@ -230,13 +230,15 @@ public class CommandFactory
         var monitorTable = new CommandGroup("table", "Log Analytics workspace table operations - Commands for listing tables in Log Analytics workspaces.");
         monitor.AddSubGroup(monitorTable);
 
+        var monitorTableType = new CommandGroup("table-type", "Log Analytics workspace table type operations - Commands for listing table types in Log Analytics workspaces.");
+        monitor.AddSubGroup(monitorTableType);
+
         // Register Monitor commands
-        logs.AddCommand("query", new Monitor.Log.LogQueryCommand(
-            GetLogger<Monitor.Log.LogQueryCommand>()));
-        workspaces.AddCommand("list", new Monitor.Workspace.WorkspaceListCommand(
-            GetLogger<Monitor.Workspace.WorkspaceListCommand>()));
-        monitorTable.AddCommand("list", new Monitor.Table.TableListCommand(
-            GetLogger<Monitor.Table.TableListCommand>()));
+        logs.AddCommand("query", new Monitor.Log.LogQueryCommand(GetLogger<Monitor.Log.LogQueryCommand>()));
+        workspaces.AddCommand("list", new Monitor.Workspace.WorkspaceListCommand(GetLogger<Monitor.Workspace.WorkspaceListCommand>()));
+        monitorTable.AddCommand("list", new Monitor.Table.TableListCommand(GetLogger<Monitor.Table.TableListCommand>()));
+        
+        monitorTableType.AddCommand("list", new Monitor.TableType.TableTypeListCommand(GetLogger<Monitor.TableType.TableTypeListCommand>()));
     }
 
     private void RegisterAppConfigCommands()
