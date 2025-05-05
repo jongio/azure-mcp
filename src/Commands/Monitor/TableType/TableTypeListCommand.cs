@@ -1,10 +1,10 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
+using AzureMcp.Arguments.Monitor.TableType;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Server;
-using AzureMcp.Arguments.Monitor.TableType;
 
 namespace AzureMcp.Commands.Monitor.TableType;
 

@@ -237,7 +237,7 @@ public class CommandFactory
         logs.AddCommand("query", new Monitor.Log.LogQueryCommand(GetLogger<Monitor.Log.LogQueryCommand>()));
         workspaces.AddCommand("list", new Monitor.Workspace.WorkspaceListCommand(GetLogger<Monitor.Workspace.WorkspaceListCommand>()));
         monitorTable.AddCommand("list", new Monitor.Table.TableListCommand(GetLogger<Monitor.Table.TableListCommand>()));
-        
+
         monitorTableType.AddCommand("list", new Monitor.TableType.TableTypeListCommand(GetLogger<Monitor.TableType.TableTypeListCommand>()));
     }
 
