@@ -72,7 +72,7 @@ public class MonitorCommandTests(McpClientFixture mcpClient, LiveTestSettingsFix
             new()
             {
                 { "subscription", Settings.SubscriptionId },
-                { "workspace", Settings.MonitorWorkspaceName },
+                { "workspace", Settings.ResourceBaseName },
                 { "resource-group", Settings.ResourceGroupName }
             });
 
