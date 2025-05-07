@@ -24,7 +24,7 @@ public class CommandFactory
     private readonly CommandGroup _rootGroup;
     private readonly ModelsJsonContext _srcGenWithOptions;
 
-    internal static readonly char Separator = '_';
+    internal static readonly char Separator = '-';
 
     /// <summary>
     /// Mapping of tokenized command names to their <see cref="IBaseCommand" />
@@ -230,8 +230,8 @@ public class CommandFactory
         var monitorTable = new CommandGroup("table", "Log Analytics workspace table operations - Commands for listing tables in Log Analytics workspaces.");
         monitor.AddSubGroup(monitorTable);
 
-        var monitorTableType = new CommandGroup("table-type", "Log Analytics workspace table type operations - Commands for listing table types in Log Analytics workspaces.");
-        monitor.AddSubGroup(monitorTableType);
+        var monitorTableType = new CommandGroup("type", "Log Analytics workspace table type operations - Commands for listing table types in Log Analytics workspaces.");
+        monitorTable.AddSubGroup(monitorTableType);
 
         // Register Monitor commands
         logs.AddCommand("query", new Monitor.Log.LogQueryCommand(GetLogger<Monitor.Log.LogQueryCommand>()));
