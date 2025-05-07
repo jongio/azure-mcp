@@ -24,10 +24,10 @@ public class CommandFactory
     private readonly CommandGroup _rootGroup;
     private readonly ModelsJsonContext _srcGenWithOptions;
 
-    internal static readonly char Separator = '-';
+    internal static readonly char Separator = '_';
 
     /// <summary>
-    /// Mapping of hyphenated command names to their <see cref="IBaseCommand" />
+    /// Mapping of tokenized command names to their <see cref="IBaseCommand" />
     /// </summary>
     private readonly Dictionary<string, IBaseCommand> _commandMap;
 
@@ -460,9 +460,9 @@ public class CommandFactory
         return nextGroup != null ? FindCommandInGroup(nextGroup, nameParts) : null;
     }
 
-    public IBaseCommand? FindCommandByName(string hyphenatedName)
+    public IBaseCommand? FindCommandByName(string tokenizedName)
     {
-        return _commandMap.GetValueOrDefault(hyphenatedName);
+        return _commandMap.GetValueOrDefault(tokenizedName);
     }
 
     private static Dictionary<string, IBaseCommand> CreateCommmandDictionary(CommandGroup node, string prefix)
