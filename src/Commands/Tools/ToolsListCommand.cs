@@ -44,7 +44,7 @@ public sealed class ToolsListCommand(ILogger<ToolsListCommand> logger) : BaseCom
         }
     }
 
-    private static CommandInfo CreateCommand(string hyphenatedName, IBaseCommand command)
+    private static CommandInfo CreateCommand(string tokenizedName, IBaseCommand command)
     {
         var argumentInfos = command.GetCommand().Options
             ?.Where(arg => !arg.IsHidden)
@@ -61,7 +61,7 @@ public sealed class ToolsListCommand(ILogger<ToolsListCommand> logger) : BaseCom
         {
             Name = command.GetCommand().Name,
             Description = command.GetCommand().Description ?? string.Empty,
-            Command = hyphenatedName.Replace('-', ' '),
+            Command = tokenizedName.Replace(CommandFactory.Separator, ' '),
             Arguments = argumentInfos,
         };
     }
