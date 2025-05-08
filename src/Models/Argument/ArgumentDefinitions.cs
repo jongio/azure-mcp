@@ -409,6 +409,17 @@ public static class ArgumentDefinitions
                 required: true
             );
         }
+
+        public static class Bicep
+        {
+            public const string CommandName = "command";
+
+            public static readonly ArgumentDefinition<string> Command = new(
+                CommandName,
+                "The Bicep CLI command to execute (e.g., build, decompile, what-if).",
+                required: true
+            );
+        }
     }
 
     public static class KeyVault
