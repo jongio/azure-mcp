@@ -291,6 +291,7 @@ public class CommandFactory
 
         extension.AddCommand("az", new Extension.AzCommand(GetLogger<Extension.AzCommand>()));
         extension.AddCommand("azd", new Extension.AzdCommand(GetLogger<Extension.AzdCommand>()));
+        extension.AddCommand("bicep", new Extension.BicepCommand(GetLogger<Extension.BicepCommand>()));
     }
 
     private void RegisterSubscriptionCommands()
