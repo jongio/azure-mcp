@@ -1,37 +1,56 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using AzureMcp.Services.Caching.Providers;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Caching.Memory;
 
 namespace AzureMcp.Services.Caching;
 
-public class CacheService(IMemoryCache memoryCache) : ICacheService
+public class CacheService : ICacheService
 {
-    private readonly IMemoryCache _memoryCache = memoryCache;
+    private readonly ICacheProvider[] _providers;
 
-    public ValueTask<T?> GetAsync<T>(string key, TimeSpan? expiration = null)
+    public CacheService(IEnumerable<ICacheProvider> providers)
     {
-        return _memoryCache.TryGetValue(key, out T? value) ? new ValueTask<T?>(value) : default;
+        _providers = providers as ICacheProvider[] ?? providers.ToArray();
     }
 
-    public ValueTask SetAsync<T>(string key, T data, TimeSpan? expiration = null)
+    public CacheService(IMemoryCache memoryCache)
+        : this(new[] { new MemoryCacheProvider(memoryCache) })
+    {
+    }
+
+    public async ValueTask<T?> GetAsync<T>(string key, TimeSpan? expiration = null)
+    {
+        foreach (var provider in _providers)
+        {
+            var result = await provider.GetAsync<T>(key);
+            if (result != null)
+                return result;
+        }
+        return default;
+    }
+
+    public async ValueTask SetAsync<T>(string key, T data, TimeSpan? expiration = null)
     {
         if (data == null)
-            return default;
+            return;
 
-        var options = new MemoryCacheEntryOptions
+        foreach (var provider in _providers)
         {
-            AbsoluteExpirationRelativeToNow = expiration
-        };
-
-        _memoryCache.Set(key, data, options);
-        return default;
+            await provider.SetAsync(key, data, expiration);
+        }
     }
 
-    public ValueTask DeleteAsync(string key)
+    public async ValueTask DeleteAsync(string key)
     {
-        _memoryCache.Remove(key);
-        return default;
+        foreach (var provider in _providers)
+        {
+            await provider.DeleteAsync(key);
+        }
     }
 }

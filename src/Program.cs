@@ -63,7 +63,7 @@ internal class Program
     internal static void ConfigureServices(IServiceCollection services)
     {
         services.ConfigureOpenTelemetry();
-        services.AddMemoryCache();
+        services.AddDistributedMemoryCache();
         services.AddSingleton<ICacheService, CacheService>();
         services.AddSingleton<IExternalProcessService, ExternalProcessService>();
         services.AddSingleton<ISubscriptionService, SubscriptionService>();
