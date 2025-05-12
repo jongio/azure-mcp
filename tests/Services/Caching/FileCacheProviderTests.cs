@@ -13,7 +13,8 @@ using Xunit;
 namespace AzureMcp.Tests.Services.Caching;
 
 public class FileCacheProviderTests : IDisposable
-{    private readonly FileCacheProvider _sut;
+{
+    private readonly FileCacheProvider _sut;
     private readonly string _testCacheFolder;
     private const string TestKey = "test-key";
     private const string TestValue = "test-value-string";
@@ -22,11 +23,11 @@ public class FileCacheProviderTests : IDisposable
     public FileCacheProviderTests()
     {
         _sut = new FileCacheProvider();
-        
+
         // Get the cache folder path via reflection to ensure we're checking the right location
         var fieldInfo = typeof(FileCacheProvider).GetField("_cacheFolder", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
         _testCacheFolder = (string)fieldInfo!.GetValue(_sut)!;
-        
+
         // Clean the test folder before each test
         CleanTestFolder();
     }
@@ -55,7 +56,8 @@ public class FileCacheProviderTests : IDisposable
                 }
             }
         }
-    }    [Fact]
+    }
+    [Fact]
     public async Task GetAsync_WhenFileDoesNotExist_ReturnsNull()
     {
         // Act
@@ -63,12 +65,13 @@ public class FileCacheProviderTests : IDisposable
 
         // Assert
         Assert.Null(result);
-    }    [Fact]
+    }
+    [Fact]
     public async Task GetAsync_WhenFileExistsButIsEmpty_ReturnsNull()
     {
         // Arrange - We'll use the path but not create a file here
         var filePath = GetFilePath(TestKey);
-        
+
         // Make sure the file doesn't exist at the start
         if (File.Exists(filePath))
         {
@@ -80,7 +83,8 @@ public class FileCacheProviderTests : IDisposable
 
         // Assert
         Assert.Null(result);
-    }[Fact]
+    }
+    [Fact]
     public async Task SetAsync_WithNullData_DoesNotCreateFile()
     {
         // Arrange
@@ -110,17 +114,18 @@ public class FileCacheProviderTests : IDisposable
         // Assert - Data matches
         Assert.NotNull(result);
         Assert.Equal(TestValue, result);
-    }    [Fact]
+    }
+    [Fact]
     public async Task GetAsync_WithExpiredData_ReturnsNullAndDeletesFile()
     {
         // Arrange - Set expired data directly
         var filePath = GetFilePath(TestKey);
         var expiredTime = DateTimeOffset.UtcNow.AddMinutes(-1); // Expired 1 minute ago
-        
+
         // Create cache entry with expired time
         var bytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(TestValue, CacheJsonContext.Default.String));
         var entry = new DistributedCacheEntry(bytes, expiredTime, null);
-        
+
         var serialized = JsonSerializer.Serialize(entry, CacheJsonContext.Default.DistributedCacheEntry);
         File.WriteAllText(filePath, serialized);
 
@@ -130,7 +135,8 @@ public class FileCacheProviderTests : IDisposable
         // Assert
         Assert.Null(result);
         Assert.False(File.Exists(filePath), "File should be deleted when expired");
-    }    [Fact]
+    }
+    [Fact]
     public async Task DeleteAsync_RemovesFile()
     {
         // Arrange - Create a cache file
@@ -155,26 +161,28 @@ public class FileCacheProviderTests : IDisposable
         // Act & Assert - should not throw
         await _sut.DeleteAsync(TestKey);
         Assert.False(File.Exists(filePath));
-    }    [Fact]
+    }
+    [Fact]
     public async Task SetAsync_WithExplicitExpiration_SetsExpirationTime()
     {
         // Act
         await _sut.SetAsync(TestKey, TestValue, TestExpiration);
-        
+
         // Assert - check the file contains the correct expiration
         var filePath = GetFilePath(TestKey);
         var fileContent = File.ReadAllText(filePath);
         var entry = JsonSerializer.Deserialize(fileContent, CacheJsonContext.Default.DistributedCacheEntry);
-        
+
         Assert.NotNull(entry);
         Assert.NotNull(entry!.AbsoluteExpiration);
-        
+
         // The expiration time should be roughly now + TestExpiration (5 minutes)
         var expectedTime = DateTimeOffset.UtcNow.Add(TestExpiration);
         var timeDifference = Math.Abs((entry.AbsoluteExpiration!.Value - expectedTime).TotalSeconds);
-        
+
         Assert.True(timeDifference < 2, "Expiration time should be within 2 seconds of expected time");
-    }    [Fact]
+    }
+    [Fact]
     public async Task GetAsync_WhenTypeNotInJsonContext_ThrowsInvalidOperationException()
     {
         // Arrange - Set data of a type not registered in CacheJsonContext
@@ -200,7 +208,8 @@ public class FileCacheProviderTests : IDisposable
         // Act & Assert
         await Assert.ThrowsAsync<InvalidOperationException>(
             async () => await _sut.SetAsync(TestKey, notRegisteredObject));
-    }    [Fact]
+    }
+    [Fact]
     public async Task SetAsync_WhenFileIsReadOnly_ThrowsUnauthorizedAccessException()
     {
         // Create a file with proper DistributedCacheEntry structure
@@ -246,7 +255,7 @@ public class FileCacheProviderTests : IDisposable
 
         // Create a file lock
         using var fs = new FileStream(filePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None);
-        
+
         // Act & Assert
         await Assert.ThrowsAsync<IOException>(
             async () => await _sut.GetAsync<string>(TestKey));

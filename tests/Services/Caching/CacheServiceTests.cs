@@ -34,7 +34,7 @@ public class CacheServiceTests
         // Arrange
         _mockProvider1.GetAsync<TestModel>(TestKey).Returns(default(TestModel));
         _mockProvider2.GetAsync<TestModel>(TestKey).Returns(TestData);
-        
+
         var sut = new CacheService(new[] { _mockProvider1, _mockProvider2 });
 
         // Act
@@ -52,7 +52,7 @@ public class CacheServiceTests
         // Arrange
         _mockProvider1.GetAsync<TestModel>(TestKey).Returns(default(TestModel));
         _mockProvider2.GetAsync<TestModel>(TestKey).Returns(default(TestModel));
-        
+
         var sut = new CacheService(new[] { _mockProvider1, _mockProvider2 });
 
         // Act
@@ -69,7 +69,7 @@ public class CacheServiceTests
     {
         // Arrange
         _mockProvider1.GetAsync<TestModel>(TestKey).Returns(TestData);
-        
+
         var sut = new CacheService(new[] { _mockProvider1, _mockProvider2 });
 
         // Act
@@ -93,7 +93,8 @@ public class CacheServiceTests
         // Assert
         await _mockProvider1.Received(1).SetAsync(TestKey, TestData, TestExpiration);
         await _mockProvider2.Received(1).SetAsync(TestKey, TestData, TestExpiration);
-    }    [Fact]
+    }
+    [Fact]
     public async Task SetAsync_WithNullData_DoesNotCallSetOnProviders()
     {
         // Arrange
@@ -120,20 +121,22 @@ public class CacheServiceTests
         // Assert
         await _mockProvider1.Received(1).DeleteAsync(TestKey);
         await _mockProvider2.Received(1).DeleteAsync(TestKey);
-    }    [Fact]
+    }
+    [Fact]
     public async Task Constructor_WithMemoryCache_CreatesMemoryCacheProvider()
     {
         // Arrange
         object? outValue = null;
         _mockMemoryCache.TryGetValue(Arg.Any<string>(), out outValue)
-            .Returns(x => {
+            .Returns(x =>
+            {
                 x[1] = TestData;
                 return true;
             });
 
         // Act
         var sut = new CacheService(_mockMemoryCache);
-        
+
         // Assert - we can't directly verify the provider creation, so we test functionality
         var getResult = await sut.GetAsync<TestModel>(TestKey);
         Assert.Equal(TestData, getResult);
@@ -146,7 +149,7 @@ public class CacheServiceTests
         var expiration = TimeSpan.FromMinutes(30);
         _mockProvider1.GetAsync<TestModel>(TestKey).Returns(default(TestModel));
         _mockProvider2.GetAsync<TestModel>(TestKey).Returns(TestData);
-        
+
         var sut = new CacheService(new[] { _mockProvider1, _mockProvider2 });
 
         // Act
