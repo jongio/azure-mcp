@@ -70,12 +70,12 @@ public class SubscriptionListCommandTests
 
         var jsonDoc = JsonDocument.Parse(JsonSerializer.Serialize(result.Results));
         var subscriptionsArray = jsonDoc.RootElement.GetProperty("subscriptions");
-        
+
         Assert.Equal(2, subscriptionsArray.GetArrayLength());
-        
+
         var first = subscriptionsArray[0];
         var second = subscriptionsArray[1];
-        
+
         Assert.Equal("sub1", first.GetProperty("subscriptionId").GetString());
         Assert.Equal("Subscription 1", first.GetProperty("displayName").GetString());
         Assert.Equal("sub2", second.GetProperty("subscriptionId").GetString());
@@ -165,7 +165,8 @@ public class SubscriptionListCommandTests
         await _subscriptionService.Received(1).GetSubscriptions(
             Arg.Any<string>(),
             Arg.Any<RetryPolicyArguments>());
-    }    [Fact]
+    }
+    [Fact]
     public async Task ExecuteAsync_GetBySubscriptionId_ReturnsMatchingSubscription()
     {
         // Arrange
@@ -192,12 +193,13 @@ public class SubscriptionListCommandTests
 
         var jsonDoc = JsonDocument.Parse(JsonSerializer.Serialize(result.Results));
         var subscriptionsArray = jsonDoc.RootElement.GetProperty("subscriptions");
-        
+
         Assert.Equal(1, subscriptionsArray.GetArrayLength());
         var subscription = subscriptionsArray[0];
         Assert.Equal(expectedSubscriptionId, subscription.GetProperty("subscriptionId").GetString());
         Assert.Equal(expectedDisplayName, subscription.GetProperty("displayName").GetString());
-    }    [Fact]
+    }
+    [Fact]
     public async Task ExecuteAsync_GetBySubscriptionName_ReturnsMatchingSubscription()
     {
         // Arrange
@@ -224,7 +226,7 @@ public class SubscriptionListCommandTests
 
         var jsonDoc = JsonDocument.Parse(JsonSerializer.Serialize(result.Results));
         var subscriptionsArray = jsonDoc.RootElement.GetProperty("subscriptions");
-        
+
         Assert.Equal(1, subscriptionsArray.GetArrayLength());
         var subscription = subscriptionsArray[0];
         Assert.Equal(expectedSubscriptionId, subscription.GetProperty("subscriptionId").GetString());
