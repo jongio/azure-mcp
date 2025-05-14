@@ -76,7 +76,7 @@ public static class ArgumentDefinitions
         public static readonly ArgumentDefinition<RetryMode> Mode = new(
             ModeName,
             "Retry strategy to use. 'fixed' uses consistent delays, 'exponential' increases delay between attempts.",
-            defaultValue: Azure.Core.RetryMode.Exponential,
+            defaultValue: RetryMode.Exponential,
             required: false,
             hidden: true
         );
