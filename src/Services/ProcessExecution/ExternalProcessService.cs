@@ -94,7 +94,8 @@ public class ExternalProcessService : IExternalProcessService
     }
 
     public JsonElement ParseJsonOutput(ProcessResult result)
-    {        if (result.ExitCode != 0)
+    {
+        if (result.ExitCode != 0)
         {
             var error = new ParseError(
                 result.ExitCode,

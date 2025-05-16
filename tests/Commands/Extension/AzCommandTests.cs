@@ -172,16 +172,17 @@ public sealed class AzCommandTests
         var context = new CommandContext(_serviceProvider);
 
         var nonJsonOutput = "test-rg1\ntest-rg2";
-        
+
         _processService.ExecuteAsync(
             Arg.Any<string>(),
             "group list --query name",
             Arg.Any<int>(),
             Arg.Any<IEnumerable<string>>())
-            .Returns(new ProcessResult(0, nonJsonOutput, string.Empty, "group list --query name"));        var expectedJsonOutput = JsonSerializer.SerializeToElement(
+            .Returns(new ProcessResult(0, nonJsonOutput, string.Empty, "group list --query name"));
+        var expectedJsonOutput = JsonSerializer.SerializeToElement(
             new { output = nonJsonOutput },
             new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
-            
+
         _processService.ParseJsonOutput(Arg.Any<ProcessResult>())
             .Returns(expectedJsonOutput);
 
