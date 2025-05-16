@@ -94,15 +94,13 @@ public class ExternalProcessService : IExternalProcessService
     }
 
     public JsonElement ParseJsonOutput(ProcessResult result)
-    {
-        if (result.ExitCode != 0)
+    {        if (result.ExitCode != 0)
         {
-            var error = new
-            {
+            var error = new ParseError(
                 result.ExitCode,
                 result.Error,
                 result.Command
-            };
+            );
             return JsonSerializer.SerializeToElement(error, ServicesJsonContext.Default.ParseError);
         }
 
