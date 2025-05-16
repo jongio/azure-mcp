@@ -14,9 +14,9 @@ public sealed class KeyValueLockCommand(ILogger<KeyValueLockCommand> logger) : B
 {
     private readonly ILogger<KeyValueLockCommand> _logger = logger;
 
-    protected override string GetCommandName() => "lock";
+    public override string Name => "lock";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Lock a key-value in an App Configuration store. This command sets a key-value to read-only mode,
         preventing any modifications to its value. You must specify an account name and key. Optionally,

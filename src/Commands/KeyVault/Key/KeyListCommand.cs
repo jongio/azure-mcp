@@ -19,9 +19,9 @@ public sealed class KeyListCommand(ILogger<KeyListCommand> logger) : Subscriptio
     private readonly Option<string> _vaultOption = ArgumentDefinitions.KeyVault.VaultName.ToOption();
     private readonly Option<bool> _includeManagedKeysOption = ArgumentDefinitions.KeyVault.IncludeManagedKeys.ToOption();
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         List all keys in an Azure Key Vault. This command retrieves and displays the names of all keys
         stored in the specified vault.

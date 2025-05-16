@@ -28,9 +28,9 @@ public sealed class ServiceStartCommand : BaseCommand
     private readonly Option<string> _transportOption = ArgumentDefinitions.Service.Transport.ToOption();
     private readonly Option<int> _portOption = ArgumentDefinitions.Service.Port.ToOption();
 
-    protected override string GetCommandName() => "start";
+    public override string Name => "start";
 
-    protected override string GetCommandDescription() => "Starts Azure MCP Server.";
+    public override string Description => "Starts Azure MCP Server.";
 
     protected override void RegisterOptions(Command command)
     {

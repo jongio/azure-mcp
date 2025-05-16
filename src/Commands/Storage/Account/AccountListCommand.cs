@@ -15,9 +15,9 @@ public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : Sub
 {
     private readonly ILogger<AccountListCommand> _logger = logger;
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         $"""
         List all Storage accounts in a subscription. This command retrieves all Storage accounts available
         in the specified {ArgumentDefinitions.Common.SubscriptionName}. Results include account names and are

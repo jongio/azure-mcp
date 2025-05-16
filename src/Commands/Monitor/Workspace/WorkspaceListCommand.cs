@@ -15,9 +15,9 @@ public sealed class WorkspaceListCommand(ILogger<WorkspaceListCommand> logger) :
 {
     private readonly ILogger<WorkspaceListCommand> _logger = logger;
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         List Log Analytics workspaces in a subscription. This command retrieves all Log Analytics workspaces
         available in the specified Azure subscription, displaying their names, IDs, and other key properties.

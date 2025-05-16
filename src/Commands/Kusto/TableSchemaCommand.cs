@@ -15,9 +15,9 @@ public sealed class TableSchemaCommand(ILogger<TableSchemaCommand> logger) : Bas
 {
     private readonly ILogger<TableSchemaCommand> _logger = logger;
 
-    protected override string GetCommandName() => "schema";
+    public override string Name => "schema";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         "Get the schema of a specific table in an Kusto database.";
 
     [McpServerTool(Destructive = false, ReadOnly = true)]

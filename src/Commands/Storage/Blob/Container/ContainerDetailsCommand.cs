@@ -18,9 +18,9 @@ public sealed class ContainerDetailsCommand(ILogger<ContainerDetailsCommand> log
 {
     private readonly ILogger<ContainerDetailsCommand> _logger = logger;
 
-    protected override string GetCommandName() => "details";
+    public override string Name => "details";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         $"""
         Get detailed properties of a storage container including metadata, lease status, and access level.
         Requires {ArgumentDefinitions.Storage.AccountName} and {ArgumentDefinitions.Storage.ContainerName}.

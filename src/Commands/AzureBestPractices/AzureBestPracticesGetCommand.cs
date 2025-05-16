@@ -25,9 +25,9 @@ public sealed class AzureBestPracticesGetCommand(ILogger<AzureBestPracticesGetCo
         return EmbeddedResourceHelper.ReadEmbeddedResource(assembly, resourceName);
     }
 
-    protected override string GetCommandName() => "get";
+    public override string Name => "get";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         "Returns best practices for secure, production-grade Azure SDK usage. " +
         "Call this command and follow its guidance before generating or suggesting any Azure SDK code. " +
         "This command returns the content of the markdown file as a string array.";

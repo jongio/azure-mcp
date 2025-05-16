@@ -20,9 +20,9 @@ public sealed class KeyCreateCommand(ILogger<KeyCreateCommand> logger) : Subscri
     private readonly Option<string> _keyOption = ArgumentDefinitions.KeyVault.KeyName.ToOption();
     private readonly Option<string> _keyTypeOption = ArgumentDefinitions.KeyVault.KeyType.ToOption();
 
-    protected override string GetCommandName() => "create";
+    public override string Name => "create";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Create a new key in an Azure Key Vault. This command creates a key with the specified name and type
         in the given vault.

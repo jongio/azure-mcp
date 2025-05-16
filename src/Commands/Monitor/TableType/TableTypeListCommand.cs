@@ -12,9 +12,9 @@ public sealed class TableTypeListCommand(ILogger<TableTypeListCommand> logger) :
 {
     private readonly ILogger<TableTypeListCommand> _logger = logger;
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         "List available table types in a Log Analytics workspace. Returns table type names.";
 
     protected override void RegisterOptions(Command command)

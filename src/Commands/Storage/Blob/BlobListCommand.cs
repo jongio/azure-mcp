@@ -15,9 +15,9 @@ public sealed class BlobListCommand(ILogger<BlobListCommand> logger) : BaseConta
 {
     private readonly ILogger<BlobListCommand> _logger = logger;
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         $"""
         List all blobs in a Storage container. This command retrieves and displays all blobs available
         in the specified container and Storage account. Results include blob names, sizes, and content types,

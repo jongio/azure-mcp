@@ -15,9 +15,9 @@ public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : Sub
 {
     private readonly ILogger<AccountListCommand> _logger = logger;
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         List all App Configuration stores in a subscription. This command retrieves and displays all App Configuration
         stores available in the specified subscription. Results include store names returned as a JSON array.

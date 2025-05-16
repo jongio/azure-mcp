@@ -19,9 +19,9 @@ public sealed class SubscriptionDetailsCommand : SubscriptionCommand<Subscriptio
     private readonly Option<string> _topicOption = ArgumentDefinitions.ServiceBus.Topic.ToOption();
     private readonly Option<string> _subscriptionNameOption = ArgumentDefinitions.ServiceBus.Subscription.ToOption();
 
-    protected override string GetCommandName() => "details";
+    public override string Name => "details";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Get details about a Service Bus subscription. Returns subscription runtime properties including message counts, delivery settings, and other metadata.
 

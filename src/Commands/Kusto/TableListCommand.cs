@@ -14,9 +14,9 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseDat
 {
     private readonly ILogger<TableListCommand> _logger = logger;
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         "List all tables in a specific Kusto database. Required `cluster-uri` (or `subscription` and `cluster-name`) and `database-name` .Returns table names as a JSON array.";
 
     [McpServerTool(Destructive = false, ReadOnly = true)]

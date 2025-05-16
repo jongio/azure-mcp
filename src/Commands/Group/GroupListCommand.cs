@@ -16,9 +16,9 @@ public sealed class GroupListCommand(ILogger<GroupListCommand> logger) : Subscri
 {
     private readonly ILogger<GroupListCommand> _logger = logger;
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         $"""
         List all resource groups in a subscription. This command retrieves all resource groups available
         in the specified {ArgumentDefinitions.Common.SubscriptionName}. Results include resource group names and IDs,

@@ -23,9 +23,9 @@ public sealed class AzCommand(ILogger<AzCommand> logger, int processTimeoutSecon
     private volatile bool _isAuthenticated = false;
     private static readonly SemaphoreSlim _authSemaphore = new(1, 1);
 
-    protected override string GetCommandName() => "az";
+    public override string Name => "az";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
 Your job is to answer questions about an Azure environment by executing Azure CLI commands. You have the following rules:
 

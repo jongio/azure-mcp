@@ -14,9 +14,9 @@ public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : Sub
 {
     private readonly ILogger<AccountListCommand> _logger = logger;
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         List all Cosmos DB accounts in a subscription. This command retrieves and displays all Cosmos DB accounts
         available in the specified subscription. Results include account names and are returned as a JSON array.

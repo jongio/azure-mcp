@@ -21,9 +21,9 @@ public sealed class KeyValueListCommand(ILogger<KeyValueListCommand> logger) : B
     private readonly Option<string> _keyOption = ArgumentDefinitions.AppConfig.KeyValueList.Key.ToOption();
     private readonly Option<string> _labelOption = ArgumentDefinitions.AppConfig.KeyValueList.Label.ToOption();
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         List all key-values in an App Configuration store. This command retrieves and displays all key-value pairs
         from the specified store. Each key-value includes its key, value, label, content type, ETag, last modified

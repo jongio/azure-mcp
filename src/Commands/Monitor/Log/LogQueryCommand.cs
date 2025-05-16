@@ -20,9 +20,9 @@ public sealed class LogQueryCommand(ILogger<LogQueryCommand> logger) : BaseMonit
     private readonly Option<int> _hoursOption = ArgumentDefinitions.Monitor.Hours.ToOption();
     private readonly Option<int> _limitOption = ArgumentDefinitions.Monitor.Limit.ToOption();
 
-    protected override string GetCommandName() => "query";
+    public override string Name => "query";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         $"""
         Execute a KQL query against a Log Analytics workspace. Requires {ArgumentDefinitions.Monitor.WorkspaceIdOrName}
         and resource group. Optional {ArgumentDefinitions.Monitor.HoursName}

@@ -13,9 +13,9 @@ namespace AzureMcp.Commands.Postgres.Database;
 public sealed class DatabaseListCommand(ILogger<DatabaseListCommand> logger) : BaseServerCommand<DatabaseListArguments>(logger)
 {
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() => "Lists all databases in the PostgreSQL server.";
+    public override string Description => "Lists all databases in the PostgreSQL server.";
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)

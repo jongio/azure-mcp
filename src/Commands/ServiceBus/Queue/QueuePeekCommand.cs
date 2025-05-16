@@ -18,9 +18,9 @@ public sealed class QueuePeekCommand : SubscriptionCommand<QueuePeekArguments>
     private readonly Option<int> _maxMessagesOption = ArgumentDefinitions.ServiceBus.MaxMessages.ToOption();
     private readonly Option<string> _namespaceOption = ArgumentDefinitions.ServiceBus.Namespace.ToOption();
 
-    protected override string GetCommandName() => "peek";
+    public override string Name => "peek";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Peek messages from a Service Bus queue without removing them.  Message browsing, or peeking, enables a
         Service Bus client to enumerate all messages in a queue, for diagnostic and debugging purposes.

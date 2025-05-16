@@ -16,9 +16,9 @@ public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalC
 {
     private readonly ILogger<IndexListCommand> _logger = logger;
     private readonly Option<string> _serviceOption = ArgumentDefinitions.Search.Service.ToOption();
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         List all indexes in an Azure AI Search service.
 

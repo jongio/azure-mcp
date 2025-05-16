@@ -19,9 +19,9 @@ public sealed class KeyGetCommand(ILogger<KeyGetCommand> logger) : SubscriptionC
     private readonly Option<string> _vaultOption = ArgumentDefinitions.KeyVault.VaultName.ToOption();
     private readonly Option<string> _keyOption = ArgumentDefinitions.KeyVault.KeyName.ToOption();
 
-    protected override string GetCommandName() => "get";
+    public override string Name => "get";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Get a key from an Azure Key Vault. This command retrieves and displays details
         about a specific key in the specified vault.

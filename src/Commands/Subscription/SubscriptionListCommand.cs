@@ -17,9 +17,9 @@ public sealed class SubscriptionListCommand(ILogger<SubscriptionListCommand> log
 {
     private readonly ILogger<SubscriptionListCommand> _logger = logger;
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         $"""
         List all Azure subscriptions accessible to your account. Optionally specify {ArgumentDefinitions.Common.TenantName}
         and {ArgumentDefinitions.Common.AuthMethodName}. Results include subscription names and IDs, returned as a JSON array.

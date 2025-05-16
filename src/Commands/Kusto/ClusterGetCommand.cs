@@ -19,9 +19,9 @@ public sealed class ClusterGetCommand : BaseClusterCommand<ClusterGetArguments>
         _logger = logger;
     }
 
-    protected override string GetCommandName() => "get";
+    public override string Name => "get";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Get details for a specific Kusto cluster. Requires `subscription` and `cluster-name`.
         The response includes the `clusterUri` property for use in subsequent commands.

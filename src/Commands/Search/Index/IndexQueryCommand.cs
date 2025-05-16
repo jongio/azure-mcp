@@ -19,9 +19,9 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
     private readonly Option<string> _indexOption = ArgumentDefinitions.Search.Index.ToOption();
     private readonly Option<string> _queryOption = ArgumentDefinitions.Search.Query.ToOption();
 
-    protected override string GetCommandName() => "query";
+    public override string Name => "query";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Query an Azure AI Search index. Returns search results matching the specified query.
 

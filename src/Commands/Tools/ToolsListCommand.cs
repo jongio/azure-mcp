@@ -13,9 +13,9 @@ namespace AzureMcp.Commands.Tools;
 [HiddenCommand]
 public sealed class ToolsListCommand(ILogger<ToolsListCommand> logger) : BaseCommand()
 {
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         List all available commands and their tools in a hierarchical structure. This command returns detailed information
         about each command, including its name, description, full command path, available subcommands, and all supported

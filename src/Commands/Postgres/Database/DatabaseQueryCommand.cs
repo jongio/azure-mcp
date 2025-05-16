@@ -15,9 +15,9 @@ namespace AzureMcp.Commands.Postgres.Database;
 public sealed class DatabaseQueryCommand(ILogger<DatabaseQueryCommand> logger) : BaseDatabaseCommand<DatabaseQueryArguments>(logger)
 {
     private readonly Option<string> _queryOption = ArgumentDefinitions.Postgres.Query.ToOption();
-    protected override string GetCommandName() => "query";
+    public override string Name => "query";
 
-    protected override string GetCommandDescription() => "Executes a query on the PostgreSQL database.";
+    public override string Description => "Executes a query on the PostgreSQL database.";
 
     protected override void RegisterOptions(Command command)
     {

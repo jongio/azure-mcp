@@ -51,9 +51,9 @@ public sealed class AzdCommand(ILogger<AzdCommand> logger, int processTimeoutSec
         Path.Combine("usr", "local", "bin"),
     ];
 
-    protected override string GetCommandName() => "azd";
+    public override string Name => "azd";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Runs Azure Developer CLI (azd) commands.
         Agents and LLM's must always run this tool with the 'learn' parameter and empty 'command' on first use to learn more about 'azd' best practices and usage patterns.

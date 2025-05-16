@@ -14,9 +14,9 @@ public sealed class KeyValueDeleteCommand(ILogger<KeyValueDeleteCommand> logger)
 {
     private readonly ILogger<KeyValueDeleteCommand> _logger = logger;
 
-    protected override string GetCommandName() => "delete";
+    public override string Name => "delete";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Delete a key-value pair from an App Configuration store. This command removes the specified key-value pair from the store.
         If a label is specified, only the labeled version is deleted. If no label is specified, the key-value with the matching

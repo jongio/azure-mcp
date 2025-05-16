@@ -168,9 +168,9 @@ public sealed class {Resource}{Operation}Command : Base{Service}Command<{Resourc
 {
     private readonly Option<string> _resourceOption = ArgumentDefinitions.{Service}.Resource.ToOption();
 
-    protected override string GetCommandName() => "{operation}";
+    public override string Name => "{operation}";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         $"""
         {Detailed description of what the command does}.
         Returns {description of return format}.

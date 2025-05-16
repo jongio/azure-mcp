@@ -15,9 +15,9 @@ namespace AzureMcp.Commands.Postgres.Table;
 public sealed class GetSchemaCommand(ILogger<GetSchemaCommand> logger) : BaseDatabaseCommand<GetSchemaArguments>(logger)
 {
     private readonly Option<string> _tableOption = ArgumentDefinitions.Postgres.Table.ToOption();
-    protected override string GetCommandName() => "schema";
+    public override string Name => "schema";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         "Retrieves the schema of a specified table in a PostgreSQL database.";
 
     protected override void RegisterOptions(Command command)

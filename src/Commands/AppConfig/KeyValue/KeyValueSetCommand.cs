@@ -17,9 +17,9 @@ public sealed class KeyValueSetCommand(ILogger<KeyValueSetCommand> logger) : Bas
     private readonly Option<string> _valueOption = ArgumentDefinitions.AppConfig.Value.ToOption();
     private readonly ILogger<KeyValueSetCommand> _logger = logger;
 
-    protected override string GetCommandName() => "set";
+    public override string Name => "set";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Set a key-value setting in an App Configuration store. This command creates or updates a key-value setting
         with the specified value. You must specify an account name, key, and value. Optionally, you can specify a

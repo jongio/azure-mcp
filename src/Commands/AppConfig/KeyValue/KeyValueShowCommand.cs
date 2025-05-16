@@ -14,9 +14,9 @@ public sealed class KeyValueShowCommand(ILogger<KeyValueShowCommand> logger) : B
 {
     private readonly ILogger<KeyValueShowCommand> _logger = logger;
 
-    protected override string GetCommandName() => "show";
+    public override string Name => "show";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Show a specific key-value setting in an App Configuration store. This command retrieves and displays the value,
         label, content type, ETag, last modified time, and lock status for a specific setting. You must specify an

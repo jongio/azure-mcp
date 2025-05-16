@@ -20,9 +20,9 @@ public sealed class IndexDescribeCommand(ILogger<IndexDescribeCommand> logger) :
     private readonly Option<string> _serviceOption = ArgumentDefinitions.Search.Service.ToOption();
     private readonly Option<string> _indexOption = ArgumentDefinitions.Search.Index.ToOption();
 
-    protected override string GetCommandName() => "describe";
+    public override string Name => "describe";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Get the full definition of an Azure AI Search index. Returns the complete index configuration including
         fields, analyzers, suggesters, scoring profiles, and other settings.

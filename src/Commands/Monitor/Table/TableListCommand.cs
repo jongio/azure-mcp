@@ -17,9 +17,9 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseMon
     private readonly ILogger<TableListCommand> _logger = logger;
     private readonly Option<string> _tableTypeOption = ArgumentDefinitions.Monitor.TableType.ToOption();
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         $"""
         List all tables in a Log Analytics workspace. Requires {ArgumentDefinitions.Monitor.WorkspaceIdOrName}.
         Returns table names and schemas that can be used for constructing KQL queries.

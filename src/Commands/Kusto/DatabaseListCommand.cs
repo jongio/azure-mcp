@@ -19,9 +19,9 @@ public sealed class DatabaseListCommand : BaseClusterCommand<DatabaseListArgumen
         _logger = logger;
     }
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         List all databases in a Kusto cluster. Requires `cluster-uri` ( or `subscription` and `cluster-name`). Result is a list of database names, returned as a JSON array.
         """;

@@ -15,9 +15,9 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseSto
 {
     private readonly ILogger<TableListCommand> _logger = logger;
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         List all tables in a Storage account. This command retrieves and displays all tables available in the specified Storage account.
         Results include table names and are returned as a JSON array. You must specify an account name and subscription ID.

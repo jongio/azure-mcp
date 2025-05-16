@@ -14,9 +14,9 @@ public sealed class KeyValueUnlockCommand(ILogger<KeyValueUnlockCommand> logger)
 {
     private readonly ILogger<KeyValueUnlockCommand> _logger = logger;
 
-    protected override string GetCommandName() => "unlock";
+    public override string Name => "unlock";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Unlock a key-value setting in an App Configuration store. This command removes the read-only mode from a
         key-value setting, allowing modifications to its value. You must specify an account name and key. Optionally,

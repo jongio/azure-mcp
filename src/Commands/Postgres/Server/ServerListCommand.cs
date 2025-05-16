@@ -14,9 +14,9 @@ namespace AzureMcp.Commands.Postgres.Server;
 
 public sealed class ServerListCommand(ILogger<ServerListCommand> logger) : BasePostgresCommand<ServerListArguments>(logger)
 {
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         "Lists all PostgreSQL servers in the specified subscription.";
 
     [McpServerTool(Destructive = false, ReadOnly = true)]

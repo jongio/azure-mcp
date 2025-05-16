@@ -21,9 +21,9 @@ public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseCon
 
     private readonly Option<string> _queryOption = ArgumentDefinitions.Cosmos.Query.ToOption();
 
-    protected override string GetCommandName() => "query";
+    public override string Name => "query";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         $"""
         Execute a SQL query against items in a Cosmos DB container. Requires {ArgumentDefinitions.Cosmos.AccountName},
         {ArgumentDefinitions.Cosmos.DatabaseName}, and {ArgumentDefinitions.Cosmos.ContainerName}.

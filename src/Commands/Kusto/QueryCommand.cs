@@ -49,9 +49,9 @@ public sealed class QueryCommand : BaseDatabaseCommand<QueryArguments>
         return args;
     }
 
-    protected override string GetCommandName() => "query";
+    public override string Name => "query";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Execute a KQL against items in a Kusto cluster.
         Requires `cluster-uri` (or `cluster-name` and `subscription`), `database-name`, and `query`. 

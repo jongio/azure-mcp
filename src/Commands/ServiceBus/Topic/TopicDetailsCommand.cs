@@ -18,9 +18,9 @@ public sealed class TopicDetailsCommand : SubscriptionCommand<BaseTopicArguments
     private readonly Option<string> _topicOption = ArgumentDefinitions.ServiceBus.Topic.ToOption();
     private readonly Option<string> _namespaceOption = ArgumentDefinitions.ServiceBus.Namespace.ToOption();
 
-    protected override string GetCommandName() => "details";
+    public override string Name => "details";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Get details about a Service Bus topic. Returns topic properties and runtime information. Properties returned include
         number of subscriptions, max message size, max topic size, number of scheduled messages, etc.

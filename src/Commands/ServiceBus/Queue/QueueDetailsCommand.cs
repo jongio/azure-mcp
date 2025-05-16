@@ -18,9 +18,9 @@ public sealed class QueueDetailsCommand : SubscriptionCommand<BaseQueueArguments
     private readonly Option<string> _queueOption = ArgumentDefinitions.ServiceBus.Queue.ToOption();
     private readonly Option<string> _namespaceOption = ArgumentDefinitions.ServiceBus.Namespace.ToOption();
 
-    protected override string GetCommandName() => "details";
+    public override string Name => "details";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         Get details about a Service Bus queue. Returns queue properties and runtime information. Properties returned include
         lock duration, max message size, queue size, creation date, status, current message counts, etc.

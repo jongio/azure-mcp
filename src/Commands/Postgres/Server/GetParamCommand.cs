@@ -15,9 +15,9 @@ namespace AzureMcp.Commands.Postgres.Server;
 public sealed class GetParamCommand(ILogger<GetParamCommand> logger) : BaseServerCommand<GetParamArguments>(logger)
 {
     private readonly Option<string> _paramOption = ArgumentDefinitions.Postgres.Param.ToOption();
-    protected override string GetCommandName() => "param";
+    public override string Name => "param";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         "Retrieves a specific parameter of a PostgreSQL server.";
 
     protected override void RegisterOptions(Command command)

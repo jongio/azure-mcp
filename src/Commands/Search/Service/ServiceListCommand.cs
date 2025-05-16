@@ -14,9 +14,9 @@ public sealed class ServiceListCommand(ILogger<ServiceListCommand> logger) : Sub
 {
     private readonly ILogger<ServiceListCommand> _logger = logger;
 
-    protected override string GetCommandName() => "list";
+    public override string Name => "list";
 
-    protected override string GetCommandDescription() =>
+    public override string Description =>
         """
         List all Azure AI Search services in a subscription.
 
