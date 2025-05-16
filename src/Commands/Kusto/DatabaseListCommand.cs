@@ -12,6 +12,7 @@ namespace AzureMcp.Commands.Kusto;
 
 public sealed class DatabaseListCommand : BaseClusterCommand<DatabaseListArguments>
 {
+    private const string _commandTitle = "List Kusto Databases";
     private readonly ILogger<DatabaseListCommand> _logger;
 
     public DatabaseListCommand(ILogger<DatabaseListCommand> logger) : base()
@@ -26,7 +27,9 @@ public sealed class DatabaseListCommand : BaseClusterCommand<DatabaseListArgumen
         List all databases in a Kusto cluster. Requires `cluster-uri` ( or `subscription` and `cluster-name`). Result is a list of database names, returned as a JSON array.
         """;
 
-    [McpServerTool(Destructive = false, ReadOnly = true)]
+    public override string Title => _commandTitle;
+
+    [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);

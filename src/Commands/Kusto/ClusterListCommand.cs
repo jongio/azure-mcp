@@ -12,6 +12,7 @@ namespace AzureMcp.Commands.Kusto;
 
 public sealed class ClusterListCommand : SubscriptionCommand<ClusterListArguments>
 {
+    private const string _commandTitle = "List Kusto Clusters";
     private readonly ILogger<ClusterListCommand> _logger;
 
     public ClusterListCommand(ILogger<ClusterListCommand> logger) : base()
@@ -28,7 +29,9 @@ public sealed class ClusterListCommand : SubscriptionCommand<ClusterListArgument
         Result is a list of cluster names as a JSON array.
         """;
 
-    [McpServerTool(Destructive = true, ReadOnly = false)]
+    public override string Title => _commandTitle;
+
+    [McpServerTool(Destructive = true, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);

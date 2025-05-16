@@ -14,6 +14,7 @@ namespace AzureMcp.Commands.ServiceBus.Queue;
 
 public sealed class QueuePeekCommand : SubscriptionCommand<QueuePeekArguments>
 {
+    private const string _commandTitle = "Peek Messages from Service Bus Queue";
     private readonly Option<string> _queueOption = ArgumentDefinitions.ServiceBus.Queue.ToOption();
     private readonly Option<int> _maxMessagesOption = ArgumentDefinitions.ServiceBus.MaxMessages.ToOption();
     private readonly Option<string> _namespaceOption = ArgumentDefinitions.ServiceBus.Namespace.ToOption();
@@ -32,6 +33,8 @@ public sealed class QueuePeekCommand : SubscriptionCommand<QueuePeekArguments>
         - namespace: The fully qualified Service Bus namespace host name. (This is usually in the form <namespace>.servicebus.windows.net)
         - queue: Queue name to peek messages from
         """;
+
+    public override string Title => _commandTitle;
 
     protected override void RegisterOptions(Command command)
     {

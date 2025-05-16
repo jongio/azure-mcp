@@ -12,6 +12,7 @@ namespace AzureMcp.Commands.AppConfig.KeyValue;
 
 public sealed class KeyValueUnlockCommand(ILogger<KeyValueUnlockCommand> logger) : BaseKeyValueCommand<KeyValueUnlockArguments>()
 {
+    private const string _commandTitle = "Unlock App Configuration Key-Value Setting";
     private readonly ILogger<KeyValueUnlockCommand> _logger = logger;
 
     public override string Name => "unlock";
@@ -24,7 +25,9 @@ public sealed class KeyValueUnlockCommand(ILogger<KeyValueUnlockCommand> logger)
         default label will be unlocked.
         """;
 
-    [McpServerTool(Destructive = false, ReadOnly = false)]
+    public override string Title => _commandTitle;
+
+    [McpServerTool(Destructive = false, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);

@@ -13,6 +13,7 @@ namespace AzureMcp.Commands.Storage.Account;
 
 public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : SubscriptionCommand<AccountListArguments>()
 {
+    private const string _commandTitle = "List Storage Accounts";
     private readonly ILogger<AccountListCommand> _logger = logger;
 
     public override string Name => "list";
@@ -24,7 +25,9 @@ public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : Sub
         returned as a JSON array.
         """;
 
-    [McpServerTool(Destructive = false, ReadOnly = true)]
+    public override string Title => _commandTitle;
+
+    [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);

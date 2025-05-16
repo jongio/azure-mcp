@@ -14,6 +14,7 @@ namespace AzureMcp.Commands.AppConfig.KeyValue;
 
 public sealed class KeyValueSetCommand(ILogger<KeyValueSetCommand> logger) : BaseKeyValueCommand<KeyValueSetArguments>()
 {
+    private const string _commandTitle = "Set App Configuration Key-Value Setting";
     private readonly Option<string> _valueOption = ArgumentDefinitions.AppConfig.Value.ToOption();
     private readonly ILogger<KeyValueSetCommand> _logger = logger;
 
@@ -25,6 +26,8 @@ public sealed class KeyValueSetCommand(ILogger<KeyValueSetCommand> logger) : Bas
         with the specified value. You must specify an account name, key, and value. Optionally, you can specify a
         label otherwise the default label will be used.
         """;
+
+    public override string Title => _commandTitle;
 
     protected override void RegisterOptions(Command command)
     {
@@ -51,7 +54,7 @@ public sealed class KeyValueSetCommand(ILogger<KeyValueSetCommand> logger) : Bas
             .WithValueAccessor(args => args.Value ?? string.Empty)
             .WithIsRequired(ArgumentDefinitions.AppConfig.Value.Required);
 
-    [McpServerTool(Destructive = false, ReadOnly = false)]
+    [McpServerTool(Destructive = false, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);

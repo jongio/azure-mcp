@@ -15,6 +15,7 @@ namespace AzureMcp.Commands.ServiceBus.Topic;
 
 public sealed class TopicDetailsCommand : SubscriptionCommand<BaseTopicArguments>
 {
+    private const string _commandTitle = "Get Service Bus Topic Details";
     private readonly Option<string> _topicOption = ArgumentDefinitions.ServiceBus.Topic.ToOption();
     private readonly Option<string> _namespaceOption = ArgumentDefinitions.ServiceBus.Namespace.ToOption();
 
@@ -29,6 +30,8 @@ public sealed class TopicDetailsCommand : SubscriptionCommand<BaseTopicArguments
         - namespace: The fully qualified Service Bus namespace host name. (This is usually in the form <namespace>.servicebus.windows.net)
         - topic-name: Topic name to get information about.
         """;
+
+    public override string Title => _commandTitle;
 
     protected override void RegisterOptions(Command command)
     {
@@ -52,7 +55,7 @@ public sealed class TopicDetailsCommand : SubscriptionCommand<BaseTopicArguments
         return args;
     }
 
-    [McpServerTool(Destructive = false, ReadOnly = true)]
+    [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);

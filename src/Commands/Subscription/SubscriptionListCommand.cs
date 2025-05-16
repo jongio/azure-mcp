@@ -15,6 +15,7 @@ namespace AzureMcp.Commands.Subscription;
 
 public sealed class SubscriptionListCommand(ILogger<SubscriptionListCommand> logger) : GlobalCommand<SubscriptionListArguments>()
 {
+    private const string _commandTitle = "List Azure Subscriptions";
     private readonly ILogger<SubscriptionListCommand> _logger = logger;
 
     public override string Name => "list";
@@ -25,7 +26,9 @@ public sealed class SubscriptionListCommand(ILogger<SubscriptionListCommand> log
         and {ArgumentDefinitions.Common.AuthMethodName}. Results include subscription names and IDs, returned as a JSON array.
         """;
 
-    [McpServerTool(Destructive = false, ReadOnly = true)]
+    public override string Title => _commandTitle;
+
+    [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
     {
         var args = BindArguments(commandOptions);

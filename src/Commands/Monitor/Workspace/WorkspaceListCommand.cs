@@ -13,6 +13,7 @@ namespace AzureMcp.Commands.Monitor.Workspace;
 
 public sealed class WorkspaceListCommand(ILogger<WorkspaceListCommand> logger) : SubscriptionCommand<WorkspaceListArguments>()
 {
+    private const string _commandTitle = "List Log Analytics Workspaces";
     private readonly ILogger<WorkspaceListCommand> _logger = logger;
 
     public override string Name => "list";
@@ -24,7 +25,9 @@ public sealed class WorkspaceListCommand(ILogger<WorkspaceListCommand> logger) :
         Use this command to identify workspaces before querying their logs or tables.
         """;
 
-    [McpServerTool(Destructive = false, ReadOnly = true)]
+    public override string Title => _commandTitle;
+
+    [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);

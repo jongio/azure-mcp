@@ -14,10 +14,13 @@ namespace AzureMcp.Commands.Postgres.Table;
 
 public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseDatabaseCommand<TableListArguments>(logger)
 {
+    private const string _commandTitle = "List PostgreSQL Tables";
+
     public override string Name => "list";
     public override string Description => "Lists all tables in the PostgreSQL database.";
+    public override string Title => _commandTitle;
 
-    [McpServerTool(Destructive = false, ReadOnly = true)]
+    [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         try

@@ -13,6 +13,7 @@ namespace AzureMcp.Commands.Cosmos;
 
 public sealed class ContainerListCommand(ILogger<ContainerListCommand> logger) : BaseDatabaseCommand<ContainerListArguments>()
 {
+    private const string _commandTitle = "List Cosmos DB Containers";
     private readonly ILogger<ContainerListCommand> _logger = logger;
 
     public override string Name => "list";
@@ -24,7 +25,9 @@ public sealed class ContainerListCommand(ILogger<ContainerListCommand> logger) :
         JSON array. You must specify both an account name and a database name.
         """;
 
-    [McpServerTool(Destructive = false, ReadOnly = true)]
+    public override string Title => _commandTitle;
+
+    [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);

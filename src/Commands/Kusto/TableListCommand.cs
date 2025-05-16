@@ -12,6 +12,7 @@ namespace AzureMcp.Commands.Kusto;
 
 public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseDatabaseCommand<TableListArguments>
 {
+    private const string _commandTitle = "List Kusto Tables";
     private readonly ILogger<TableListCommand> _logger = logger;
 
     public override string Name => "list";
@@ -19,7 +20,9 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseDat
     public override string Description =>
         "List all tables in a specific Kusto database. Required `cluster-uri` (or `subscription` and `cluster-name`) and `database-name` .Returns table names as a JSON array.";
 
-    [McpServerTool(Destructive = false, ReadOnly = true)]
+    public override string Title => _commandTitle;
+
+    [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);

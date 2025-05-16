@@ -13,6 +13,7 @@ namespace AzureMcp.Commands.Storage.Table;
 
 public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseStorageCommand<TableListArguments>()
 {
+    private const string _commandTitle = "List Storage Tables";
     private readonly ILogger<TableListCommand> _logger = logger;
 
     public override string Name => "list";
@@ -24,7 +25,9 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseSto
         Use this command to explore your Storage resources or to verify table existence before performing operations on specific tables.
         """;
 
-    [McpServerTool(Destructive = false, ReadOnly = true)]
+    public override string Title => _commandTitle;
+
+    [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
     {
         var args = BindArguments(commandOptions);

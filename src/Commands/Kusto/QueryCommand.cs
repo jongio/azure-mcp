@@ -15,6 +15,7 @@ namespace AzureMcp.Commands.Kusto;
 
 public sealed class QueryCommand : BaseDatabaseCommand<QueryArguments>
 {
+    private const string _commandTitle = "Query Kusto Database";
     private readonly ILogger<QueryCommand> _logger;
 
     public QueryCommand(ILogger<QueryCommand> logger) : base()
@@ -58,7 +59,9 @@ public sealed class QueryCommand : BaseDatabaseCommand<QueryArguments>
         Results are returned as a JSON array of documents, for example: `[{'Column1': val1, 'Column2': val2}, ...]`.
         """;
 
-    [McpServerTool(Destructive = false, ReadOnly = true)]
+    public override string Title => _commandTitle;
+
+    [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);

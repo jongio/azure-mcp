@@ -12,6 +12,7 @@ namespace AzureMcp.Commands.AppConfig.KeyValue;
 
 public sealed class KeyValueDeleteCommand(ILogger<KeyValueDeleteCommand> logger) : BaseKeyValueCommand<KeyValueDeleteArguments>()
 {
+    private const string _commandTitle = "Delete App Configuration Key-Value Setting"; 
     private readonly ILogger<KeyValueDeleteCommand> _logger = logger;
 
     public override string Name => "delete";
@@ -23,7 +24,9 @@ public sealed class KeyValueDeleteCommand(ILogger<KeyValueDeleteCommand> logger)
         key and the default label will be deleted.
         """;
 
-    [McpServerTool(Destructive = true, ReadOnly = false)]
+    public override string Title => _commandTitle;
+
+    [McpServerTool(Destructive = true, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);

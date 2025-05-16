@@ -16,6 +16,7 @@ namespace AzureMcp.Commands.Cosmos;
 
 public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseContainerCommand<ItemQueryArguments>()
 {
+    private const string _commandTitle = "Query Cosmos DB Container";
     private readonly ILogger<ItemQueryCommand> _logger = logger;
     private const string DefaultQuery = "SELECT * FROM c";
 
@@ -30,6 +31,8 @@ public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseCon
         The {ArgumentDefinitions.Cosmos.QueryText} parameter accepts SQL query syntax. Results are returned as a
         JSON array of documents.
         """;
+
+    public override string Title => _commandTitle;
 
     protected override void RegisterOptions(Command command)
     {
@@ -57,7 +60,7 @@ public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseCon
         return args;
     }
 
-    [McpServerTool(Destructive = false, ReadOnly = true)]
+    [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);

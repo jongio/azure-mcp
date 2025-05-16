@@ -12,6 +12,7 @@ namespace AzureMcp.Commands.Kusto;
 
 public sealed class ClusterGetCommand : BaseClusterCommand<ClusterGetArguments>
 {
+    private const string _commandTitle = "Get Kusto Cluster Details";
     private readonly ILogger<ClusterGetCommand> _logger;
 
     public ClusterGetCommand(ILogger<ClusterGetCommand> logger)
@@ -26,6 +27,8 @@ public sealed class ClusterGetCommand : BaseClusterCommand<ClusterGetArguments>
         Get details for a specific Kusto cluster. Requires `subscription` and `cluster-name`.
         The response includes the `clusterUri` property for use in subsequent commands.
         """;
+
+    public override string Title => _commandTitle;
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)

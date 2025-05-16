@@ -16,6 +16,7 @@ namespace AzureMcp.Commands.Storage.Blob.Container;
 
 public sealed class ContainerDetailsCommand(ILogger<ContainerDetailsCommand> logger) : BaseContainerCommand<ContainerDetailsArguments>()
 {
+    private const string _commandTitle = "Get Storage Container Details";
     private readonly ILogger<ContainerDetailsCommand> _logger = logger;
 
     public override string Name => "details";
@@ -25,6 +26,8 @@ public sealed class ContainerDetailsCommand(ILogger<ContainerDetailsCommand> log
         Get detailed properties of a storage container including metadata, lease status, and access level.
         Requires {ArgumentDefinitions.Storage.AccountName} and {ArgumentDefinitions.Storage.ContainerName}.
         """;
+
+    public override string Title => _commandTitle;
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)

@@ -14,6 +14,7 @@ namespace AzureMcp.Commands.Search.Index;
 
 public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : GlobalCommand<IndexQueryArguments>()
 {
+    private const string _commandTitle = "Query Azure AI Search Index"; 
     private readonly ILogger<IndexQueryCommand> _logger = logger;
     private readonly Option<string> _serviceOption = ArgumentDefinitions.Search.Service.ToOption();
     private readonly Option<string> _indexOption = ArgumentDefinitions.Search.Index.ToOption();
@@ -30,6 +31,8 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
         - index-name: The name of the search index to query
         - query: The search text to query with
         """;
+
+    public override string Title => _commandTitle;
 
     protected override void RegisterOptions(Command command)
     {
@@ -56,7 +59,7 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
         return args;
     }
 
-    [McpServerTool(Destructive = false, ReadOnly = true)]
+    [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);

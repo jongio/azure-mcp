@@ -15,6 +15,7 @@ namespace AzureMcp.Commands.KeyVault.Key;
 
 public sealed class KeyCreateCommand(ILogger<KeyCreateCommand> logger) : SubscriptionCommand<KeyCreateArguments>
 {
+    private const string _commandTitle = "Create Key Vault Key";
     private readonly ILogger<KeyCreateCommand> _logger = logger;
     private readonly Option<string> _vaultOption = ArgumentDefinitions.KeyVault.VaultName.ToOption();
     private readonly Option<string> _keyOption = ArgumentDefinitions.KeyVault.KeyName.ToOption();
@@ -38,6 +39,8 @@ public sealed class KeyCreateCommand(ILogger<KeyCreateCommand> logger) : Subscri
         - EC: Elliptic Curve key pair
         - OCT: ES cryptographic pair
         """;
+
+    public override string Title => _commandTitle;
 
     protected override void RegisterOptions(Command command)
     {
@@ -82,7 +85,7 @@ public sealed class KeyCreateCommand(ILogger<KeyCreateCommand> logger) : Subscri
         return args;
     }
 
-    [McpServerTool(Destructive = false, ReadOnly = false)]
+    [McpServerTool(Destructive = false, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindArguments(parseResult);
