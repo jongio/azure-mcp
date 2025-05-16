@@ -12,7 +12,7 @@ namespace AzureMcp.Commands.AppConfig.KeyValue;
 
 public sealed class KeyValueDeleteCommand(ILogger<KeyValueDeleteCommand> logger) : BaseKeyValueCommand<KeyValueDeleteArguments>()
 {
-    private const string _commandTitle = "Delete App Configuration Key-Value Setting"; 
+    private const string _commandTitle = "Delete App Configuration Key-Value Setting";
     private readonly ILogger<KeyValueDeleteCommand> _logger = logger;
 
     public override string Name => "delete";

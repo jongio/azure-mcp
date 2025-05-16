@@ -16,7 +16,7 @@ public sealed class GetSchemaCommand(ILogger<GetSchemaCommand> logger) : BaseDat
 {
     private const string _commandTitle = "Get PostgreSQL Table Schema";
     private readonly Option<string> _tableOption = ArgumentDefinitions.Postgres.Table.ToOption();
-    
+
     public override string Name => "schema";
     public override string Description => "Retrieves the schema of a specified table in a PostgreSQL database.";
     public override string Title => _commandTitle;

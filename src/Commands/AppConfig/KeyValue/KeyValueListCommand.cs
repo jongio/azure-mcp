@@ -15,7 +15,7 @@ namespace AzureMcp.Commands.AppConfig.KeyValue;
 
 public sealed class KeyValueListCommand(ILogger<KeyValueListCommand> logger) : BaseAppConfigCommand<KeyValueListArguments>()
 {
-    private const string _commandTitle = "List App Configuration Key-Value Settings"; 
+    private const string _commandTitle = "List App Configuration Key-Value Settings";
     private readonly ILogger<KeyValueListCommand> _logger = logger;
 
     // KeyValueList has different key and label descriptions, which is why we are defining here instead of using BaseKeyValueCommand
