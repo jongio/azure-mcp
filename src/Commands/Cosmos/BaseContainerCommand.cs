@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Models.Argument;
 
@@ -12,7 +10,7 @@ public abstract class BaseContainerCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
     : BaseDatabaseCommand<TArgs> where TArgs : Arguments.Cosmos.BaseContainerArguments, new()
 {
-    private readonly Option<string> _containerOption = ArgumentDefinitions.Cosmos.Container.ToOption();
+    private readonly Option<string> _containerOption = ArgumentDefinitions.Cosmos.Container;
 
     protected override void RegisterOptions(Command command)
     {
@@ -36,7 +34,7 @@ public abstract class BaseContainerCommand<
 
     private ArgumentBuilder<Arguments.Cosmos.BaseContainerArguments> CreateContainerArgument() =>
         ArgumentBuilder<Arguments.Cosmos.BaseContainerArguments>
-            .Create(ArgumentDefinitions.Cosmos.Container.Name, ArgumentDefinitions.Cosmos.Container.Description)
+            .Create(ArgumentDefinitions.Cosmos.Container.Name, ArgumentDefinitions.Cosmos.Container.Description!)
             .WithValueAccessor(args => args.Container ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Cosmos.Container.Required);
+            .WithIsRequired(ArgumentDefinitions.Cosmos.Container.IsRequired);
 }

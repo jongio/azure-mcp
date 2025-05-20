@@ -1,15 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
-using Azure.Security.KeyVault.Keys;
 using AzureMcp.Arguments.KeyVault.Key;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.KeyVault.Key;
 
@@ -17,8 +12,8 @@ public sealed class KeyGetCommand(ILogger<KeyGetCommand> logger) : SubscriptionC
 {
     private const string _commandTitle = "Get Key Vault Key";
     private readonly ILogger<KeyGetCommand> _logger = logger;
-    private readonly Option<string> _vaultOption = ArgumentDefinitions.KeyVault.VaultName.ToOption();
-    private readonly Option<string> _keyOption = ArgumentDefinitions.KeyVault.KeyName.ToOption();
+    private readonly Option<string> _vaultOption = ArgumentDefinitions.KeyVault.VaultName;
+    private readonly Option<string> _keyOption = ArgumentDefinitions.KeyVault.KeyName;
 
     public override string Name => "get";
 
@@ -51,15 +46,15 @@ public sealed class KeyGetCommand(ILogger<KeyGetCommand> logger) : SubscriptionC
 
     private static ArgumentBuilder<KeyGetArguments> CreateVaultArgument() =>
         ArgumentBuilder<KeyGetArguments>
-            .Create(ArgumentDefinitions.KeyVault.VaultName.Name, ArgumentDefinitions.KeyVault.VaultName.Description)
+            .Create(ArgumentDefinitions.KeyVault.VaultName.Name, ArgumentDefinitions.KeyVault.VaultName.Description!)
             .WithValueAccessor(args => args.VaultName ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.KeyVault.VaultName.Required);
+            .WithIsRequired(ArgumentDefinitions.KeyVault.VaultName.IsRequired);
 
     private static ArgumentBuilder<KeyGetArguments> CreateKeyArgument() =>
         ArgumentBuilder<KeyGetArguments>
-            .Create(ArgumentDefinitions.KeyVault.KeyName.Name, ArgumentDefinitions.KeyVault.KeyName.Description)
+            .Create(ArgumentDefinitions.KeyVault.KeyName.Name, ArgumentDefinitions.KeyVault.KeyName.Description!)
             .WithValueAccessor(args => args.KeyName ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.KeyVault.KeyName.Required);
+            .WithIsRequired(ArgumentDefinitions.KeyVault.KeyName.IsRequired);
 
     protected override KeyGetArguments BindArguments(ParseResult parseResult)
     {
@@ -76,7 +71,8 @@ public sealed class KeyGetCommand(ILogger<KeyGetCommand> logger) : SubscriptionC
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }

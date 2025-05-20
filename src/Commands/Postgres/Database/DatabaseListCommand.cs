@@ -1,12 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.Postgres.Database;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Postgres.Database;
 
@@ -26,7 +23,8 @@ public sealed class DatabaseListCommand(ILogger<DatabaseListCommand> logger) : B
         try
         {
             var args = BindArguments(parseResult);
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }
@@ -46,5 +44,6 @@ public sealed class DatabaseListCommand(ILogger<DatabaseListCommand> logger) : B
         }
         return context.Response;
     }
+
     internal record DatabaseListCommandResult(List<string> Databases);
 }

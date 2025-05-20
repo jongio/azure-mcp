@@ -1,13 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Arguments;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
-using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Commands;
 
@@ -15,7 +11,7 @@ public abstract class SubscriptionCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs> : GlobalCommand<TArgs>
     where TArgs : SubscriptionArguments, new()
 {
-    protected readonly Option<string> _subscriptionOption = ArgumentDefinitions.Common.Subscription.ToOption();
+    protected readonly Option<string> _subscriptionOption = ArgumentDefinitions.Common.Subscription;
 
     protected override void RegisterOptions(Command command)
     {
@@ -32,9 +28,9 @@ public abstract class SubscriptionCommand<
     protected ArgumentBuilder<TArgs> CreateSubscriptionArgument()
     {
         return ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Common.Subscription.Name, ArgumentDefinitions.Common.Subscription.Description)
+            .Create(ArgumentDefinitions.Common.Subscription.Name, ArgumentDefinitions.Common.Subscription.Description!)
             .WithValueAccessor(args => args.Subscription ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Common.Subscription.Required);
+            .WithIsRequired(ArgumentDefinitions.Common.Subscription.IsRequired);
     }
 
     protected override TArgs BindArguments(ParseResult parseResult)

@@ -1,5 +1,3 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Arguments.Postgres;
 using AzureMcp.Models.Argument;
@@ -12,7 +10,7 @@ public abstract class BaseServerCommand<
     : BasePostgresCommand<TArgs>(logger) where TArgs : BasePostgresArguments, new()
 
 {
-    private readonly Option<string> _serverOption = ArgumentDefinitions.Postgres.Server.ToOption();
+    private readonly Option<string> _serverOption = ArgumentDefinitions.Postgres.Server;
 
     public override string Name => "server";
 
@@ -40,7 +38,7 @@ public abstract class BaseServerCommand<
 
     protected ArgumentBuilder<TArgs> CreateServerArgument() =>
         ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Postgres.Server.Name, ArgumentDefinitions.Postgres.Server.Description)
+            .Create(ArgumentDefinitions.Postgres.Server.Name, ArgumentDefinitions.Postgres.Server.Description!)
             .WithValueAccessor(args => args.Server ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Postgres.Server.Required);
+            .WithIsRequired(ArgumentDefinitions.Postgres.Server.IsRequired);
 }

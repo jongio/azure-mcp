@@ -1,10 +1,6 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.Monitor.TableType;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Monitor.TableType;
 
@@ -45,7 +41,8 @@ public sealed class TableTypeListCommand(ILogger<TableTypeListCommand> logger) :
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }

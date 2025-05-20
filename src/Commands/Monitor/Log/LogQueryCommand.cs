@@ -1,14 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.Monitor;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Monitor.Log;
 
@@ -16,10 +12,10 @@ public sealed class LogQueryCommand(ILogger<LogQueryCommand> logger) : BaseMonit
 {
     private const string _commandTitle = "Query Log Analytics Workspace";
     private readonly ILogger<LogQueryCommand> _logger = logger;
-    private readonly Option<string> _tableNameOption = ArgumentDefinitions.Monitor.TableName.ToOption();
-    private readonly Option<string> _queryOption = ArgumentDefinitions.Monitor.Query.ToOption();
-    private readonly Option<int> _hoursOption = ArgumentDefinitions.Monitor.Hours.ToOption();
-    private readonly Option<int> _limitOption = ArgumentDefinitions.Monitor.Limit.ToOption();
+    private readonly Option<string> _tableNameOption = ArgumentDefinitions.Monitor.TableName;
+    private readonly Option<string> _queryOption = ArgumentDefinitions.Monitor.Query;
+    private readonly Option<int> _hoursOption = ArgumentDefinitions.Monitor.Hours;
+    private readonly Option<int> _limitOption = ArgumentDefinitions.Monitor.Limit;
 
     public override string Name => "query";
 
@@ -27,8 +23,8 @@ public sealed class LogQueryCommand(ILogger<LogQueryCommand> logger) : BaseMonit
         $"""
         Execute a KQL query against a Log Analytics workspace. Requires {ArgumentDefinitions.Monitor.WorkspaceIdOrName}
         and resource group. Optional {ArgumentDefinitions.Monitor.HoursName}
-        (default: {ArgumentDefinitions.Monitor.Hours.DefaultValue}) and {ArgumentDefinitions.Monitor.LimitName}
-        (default: {ArgumentDefinitions.Monitor.Limit.DefaultValue}) parameters.
+        (default: {ArgumentDefinitions.Monitor.Hours.GetDefaultValue()}) and {ArgumentDefinitions.Monitor.LimitName}
+        (default: {ArgumentDefinitions.Monitor.Limit.GetDefaultValue()}) parameters.
         The {ArgumentDefinitions.Monitor.QueryTextName} parameter accepts KQL syntax.
         """;
 
@@ -61,7 +57,8 @@ public sealed class LogQueryCommand(ILogger<LogQueryCommand> logger) : BaseMonit
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }
@@ -91,7 +88,7 @@ public sealed class LogQueryCommand(ILogger<LogQueryCommand> logger) : BaseMonit
     private static ArgumentBuilder<LogQueryArguments> CreateTableNameArgument()
     {
         return ArgumentBuilder<LogQueryArguments>
-            .Create(ArgumentDefinitions.Monitor.TableName.Name, ArgumentDefinitions.Monitor.TableName.Description)
+            .Create(ArgumentDefinitions.Monitor.TableName.Name, ArgumentDefinitions.Monitor.TableName.Description!)
             .WithValueAccessor(args =>
             {
                 try
@@ -103,27 +100,25 @@ public sealed class LogQueryCommand(ILogger<LogQueryCommand> logger) : BaseMonit
                     return string.Empty;
                 }
             })
-            .WithIsRequired(ArgumentDefinitions.Monitor.TableName.Required);
+            .WithIsRequired(ArgumentDefinitions.Monitor.TableName.IsRequired);
     }
 
     private static ArgumentBuilder<LogQueryArguments> CreateQueryArgument() =>
         ArgumentBuilder<LogQueryArguments>
-            .Create(ArgumentDefinitions.Monitor.Query.Name, ArgumentDefinitions.Monitor.Query.Description)
+            .Create(ArgumentDefinitions.Monitor.Query.Name, ArgumentDefinitions.Monitor.Query.Description!)
             .WithValueAccessor(args => args.Query ?? string.Empty)
             .WithIsRequired(true);
 
     private static ArgumentBuilder<LogQueryArguments> CreateHoursArgument() =>
         ArgumentBuilder<LogQueryArguments>
-            .Create(ArgumentDefinitions.Monitor.Hours.Name, ArgumentDefinitions.Monitor.Hours.Description)
-            .WithValueAccessor(args => args.Hours?.ToString() ?? ArgumentDefinitions.Monitor.Hours.DefaultValue.ToString())
-            .WithDefaultValue(ArgumentDefinitions.Monitor.Hours.DefaultValue.ToString())
+            .Create(ArgumentDefinitions.Monitor.Hours.Name, ArgumentDefinitions.Monitor.Hours.Description!)
+            .WithValueAccessor(args => args.Hours?.ToString() ?? ArgumentDefinitions.Monitor.Hours.GetDefaultValue().ToString())
             .WithIsRequired(false);
 
     private static ArgumentBuilder<LogQueryArguments> CreateLimitArgument() =>
         ArgumentBuilder<LogQueryArguments>
-            .Create(ArgumentDefinitions.Monitor.Limit.Name, ArgumentDefinitions.Monitor.Limit.Description)
-            .WithValueAccessor(args => args.Limit?.ToString() ?? ArgumentDefinitions.Monitor.Limit.DefaultValue.ToString())
-            .WithDefaultValue(ArgumentDefinitions.Monitor.Limit.DefaultValue.ToString())
+            .Create(ArgumentDefinitions.Monitor.Limit.Name, ArgumentDefinitions.Monitor.Limit.Description!)
+            .WithValueAccessor(args => args.Limit?.ToString() ?? ArgumentDefinitions.Monitor.Limit.GetDefaultValue().ToString())
             .WithIsRequired(false);
 
     protected override LogQueryArguments BindArguments(ParseResult parseResult)

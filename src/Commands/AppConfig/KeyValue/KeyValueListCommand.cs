@@ -1,15 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.AppConfig.KeyValue;
 using AzureMcp.Models.AppConfig;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.AppConfig.KeyValue;
 
@@ -19,8 +15,8 @@ public sealed class KeyValueListCommand(ILogger<KeyValueListCommand> logger) : B
     private readonly ILogger<KeyValueListCommand> _logger = logger;
 
     // KeyValueList has different key and label descriptions, which is why we are defining here instead of using BaseKeyValueCommand
-    private readonly Option<string> _keyOption = ArgumentDefinitions.AppConfig.KeyValueList.Key.ToOption();
-    private readonly Option<string> _labelOption = ArgumentDefinitions.AppConfig.KeyValueList.Label.ToOption();
+    private readonly Option<string> _keyOption = ArgumentDefinitions.AppConfig.KeyValueList.Key;
+    private readonly Option<string> _labelOption = ArgumentDefinitions.AppConfig.KeyValueList.Label;
 
     public override string Name => "list";
 
@@ -49,15 +45,15 @@ public sealed class KeyValueListCommand(ILogger<KeyValueListCommand> logger) : B
 
     private static ArgumentBuilder<KeyValueListArguments> CreateListKeyArgument() =>
         ArgumentBuilder<KeyValueListArguments>
-            .Create(ArgumentDefinitions.AppConfig.KeyValueList.Key.Name, ArgumentDefinitions.AppConfig.KeyValueList.Key.Description)
+            .Create(ArgumentDefinitions.AppConfig.KeyValueList.Key.Name, ArgumentDefinitions.AppConfig.KeyValueList.Key.Description!)
             .WithValueAccessor(args => args.Key ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.KeyValueList.Key.Required);
+            .WithIsRequired(ArgumentDefinitions.AppConfig.KeyValueList.Key.IsRequired);
 
     private static ArgumentBuilder<KeyValueListArguments> CreateListLabelArgument() =>
         ArgumentBuilder<KeyValueListArguments>
-            .Create(ArgumentDefinitions.AppConfig.KeyValueList.Label.Name, ArgumentDefinitions.AppConfig.KeyValueList.Label.Description)
+            .Create(ArgumentDefinitions.AppConfig.KeyValueList.Label.Name, ArgumentDefinitions.AppConfig.KeyValueList.Label.Description!)
             .WithValueAccessor(args => args.Label ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.KeyValueList.Label.Required);
+            .WithIsRequired(ArgumentDefinitions.AppConfig.KeyValueList.Label.IsRequired);
 
     protected override KeyValueListArguments BindArguments(ParseResult parseResult)
     {
@@ -74,7 +70,8 @@ public sealed class KeyValueListCommand(ILogger<KeyValueListCommand> logger) : B
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }

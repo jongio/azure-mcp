@@ -1,23 +1,19 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using Azure.Messaging.ServiceBus;
 using AzureMcp.Arguments.ServiceBus.Subscription;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Models.ServiceBus;
 using AzureMcp.Services.Interfaces;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.ServiceBus.Topic;
 
 public sealed class TopicDetailsCommand : SubscriptionCommand<BaseTopicArguments>
 {
     private const string _commandTitle = "Get Service Bus Topic Details";
-    private readonly Option<string> _topicOption = ArgumentDefinitions.ServiceBus.Topic.ToOption();
-    private readonly Option<string> _namespaceOption = ArgumentDefinitions.ServiceBus.Namespace.ToOption();
+    private readonly Option<string> _topicOption = ArgumentDefinitions.ServiceBus.Topic;
+    private readonly Option<string> _namespaceOption = ArgumentDefinitions.ServiceBus.Namespace;
 
     public override string Name => "details";
 
@@ -62,7 +58,8 @@ public sealed class TopicDetailsCommand : SubscriptionCommand<BaseTopicArguments
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }
@@ -102,7 +99,7 @@ public sealed class TopicDetailsCommand : SubscriptionCommand<BaseTopicArguments
     private static ArgumentBuilder<SubscriptionPeekArguments> CreateTopicNameArgument()
     {
         return ArgumentBuilder<SubscriptionPeekArguments>
-            .Create(ArgumentDefinitions.ServiceBus.Topic.Name, ArgumentDefinitions.ServiceBus.Topic.Description)
+            .Create(ArgumentDefinitions.ServiceBus.Topic.Name, ArgumentDefinitions.ServiceBus.Topic.Description!)
             .WithValueAccessor(args => args.TopicName ?? string.Empty)
             .WithIsRequired(true);
     }
@@ -110,7 +107,7 @@ public sealed class TopicDetailsCommand : SubscriptionCommand<BaseTopicArguments
     private static ArgumentBuilder<SubscriptionPeekArguments> CreateNamespaceArgument()
     {
         return ArgumentBuilder<SubscriptionPeekArguments>
-            .Create(ArgumentDefinitions.ServiceBus.Namespace.Name, ArgumentDefinitions.ServiceBus.Namespace.Description)
+            .Create(ArgumentDefinitions.ServiceBus.Namespace.Name, ArgumentDefinitions.ServiceBus.Namespace.Description!)
             .WithValueAccessor(args => args.Namespace ?? string.Empty)
             .WithIsRequired(true);
     }

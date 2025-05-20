@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Arguments.Postgres;
 using AzureMcp.Models.Argument;
@@ -14,7 +12,7 @@ public abstract class BasePostgresCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
     : SubscriptionCommand<TArgs> where TArgs : BasePostgresArguments, new()
 {
-    protected readonly Option<string> _userOption = ArgumentDefinitions.Postgres.User.ToOption();
+    protected readonly Option<string> _userOption = ArgumentDefinitions.Postgres.User;
 
     protected readonly ILogger<BasePostgresCommand<TArgs>> _logger;
 
@@ -48,7 +46,7 @@ public abstract class BasePostgresCommand<
 
     protected ArgumentBuilder<TArgs> CreateUserArgument() =>
         ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Postgres.User.Name, ArgumentDefinitions.Postgres.User.Description)
+            .Create(ArgumentDefinitions.Postgres.User.Name, ArgumentDefinitions.Postgres.User.Description!)
             .WithValueAccessor(args => args.User ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Postgres.User.Required);
+            .WithIsRequired(ArgumentDefinitions.Postgres.User.IsRequired);
 }

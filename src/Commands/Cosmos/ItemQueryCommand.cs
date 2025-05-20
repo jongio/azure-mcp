@@ -1,16 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Text.Json.Nodes;
 using AzureMcp.Arguments.Cosmos;
-using AzureMcp.Models;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Cosmos;
 
@@ -20,7 +15,7 @@ public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseCon
     private readonly ILogger<ItemQueryCommand> _logger = logger;
     private const string DefaultQuery = "SELECT * FROM c";
 
-    private readonly Option<string> _queryOption = ArgumentDefinitions.Cosmos.Query.ToOption();
+    private readonly Option<string> _queryOption = ArgumentDefinitions.Cosmos.Query;
 
     public override string Name => "query";
 
@@ -48,10 +43,9 @@ public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseCon
 
     private static ArgumentBuilder<ItemQueryArguments> CreateQueryArgument() =>
         ArgumentBuilder<ItemQueryArguments>
-            .Create(ArgumentDefinitions.Cosmos.Query.Name, ArgumentDefinitions.Cosmos.Query.Description)
+            .Create(ArgumentDefinitions.Cosmos.Query.Name, ArgumentDefinitions.Cosmos.Query.Description!)
             .WithValueAccessor(args => args.Query ?? string.Empty)
-            .WithDefaultValue(ArgumentDefinitions.Cosmos.Query.DefaultValue ?? DefaultQuery)
-            .WithIsRequired(ArgumentDefinitions.Cosmos.Query.Required);
+            .WithIsRequired(ArgumentDefinitions.Cosmos.Query.IsRequired);
 
     protected override ItemQueryArguments BindArguments(ParseResult parseResult)
     {
@@ -67,7 +61,8 @@ public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseCon
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }

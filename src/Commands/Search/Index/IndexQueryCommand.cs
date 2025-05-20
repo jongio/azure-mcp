@@ -1,14 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.Search.Index;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Search.Index;
 
@@ -16,9 +12,9 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
 {
     private const string _commandTitle = "Query Azure AI Search Index";
     private readonly ILogger<IndexQueryCommand> _logger = logger;
-    private readonly Option<string> _serviceOption = ArgumentDefinitions.Search.Service.ToOption();
-    private readonly Option<string> _indexOption = ArgumentDefinitions.Search.Index.ToOption();
-    private readonly Option<string> _queryOption = ArgumentDefinitions.Search.Query.ToOption();
+    private readonly Option<string> _serviceOption = ArgumentDefinitions.Search.Service;
+    private readonly Option<string> _indexOption = ArgumentDefinitions.Search.Index;
+    private readonly Option<string> _queryOption = ArgumentDefinitions.Search.Query;
 
     public override string Name => "query";
 
@@ -66,7 +62,8 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }
@@ -92,19 +89,19 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
 
     private static ArgumentBuilder<IndexQueryArguments> CreateServiceArgument() =>
         ArgumentBuilder<IndexQueryArguments>
-            .Create(ArgumentDefinitions.Search.Service.Name, ArgumentDefinitions.Search.Service.Description)
+            .Create(ArgumentDefinitions.Search.Service.Name, ArgumentDefinitions.Search.Service.Description!)
             .WithValueAccessor(args => args.Service ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Search.Service.Required);
+            .WithIsRequired(ArgumentDefinitions.Search.Service.IsRequired);
 
     private static ArgumentBuilder<IndexQueryArguments> CreateIndexArgument() =>
         ArgumentBuilder<IndexQueryArguments>
-            .Create(ArgumentDefinitions.Search.Index.Name, ArgumentDefinitions.Search.Index.Description)
+            .Create(ArgumentDefinitions.Search.Index.Name, ArgumentDefinitions.Search.Index.Description!)
             .WithValueAccessor(args => args.Index ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Search.Index.Required);
+            .WithIsRequired(ArgumentDefinitions.Search.Index.IsRequired);
 
     private static ArgumentBuilder<IndexQueryArguments> CreateQueryArgument() =>
         ArgumentBuilder<IndexQueryArguments>
-            .Create(ArgumentDefinitions.Search.Query.Name, ArgumentDefinitions.Search.Query.Description)
+            .Create(ArgumentDefinitions.Search.Query.Name, ArgumentDefinitions.Search.Query.Description!)
             .WithValueAccessor(args => args.Query ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Search.Query.Required);
+            .WithIsRequired(ArgumentDefinitions.Search.Query.IsRequired);
 }

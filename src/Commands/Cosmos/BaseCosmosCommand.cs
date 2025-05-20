@@ -1,13 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Arguments.Cosmos;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
-using AzureMcp.Services.Interfaces;
 using Microsoft.Azure.Cosmos;
 
 namespace AzureMcp.Commands.Cosmos;
@@ -16,7 +12,7 @@ public abstract class BaseCosmosCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
     : SubscriptionCommand<TArgs> where TArgs : BaseCosmosArguments, new()
 {
-    protected readonly Option<string> _accountOption = ArgumentDefinitions.Cosmos.Account.ToOption();
+    protected readonly Option<string> _accountOption = ArgumentDefinitions.Cosmos.Account;
 
     protected override void RegisterOptions(Command command)
     {
@@ -52,7 +48,7 @@ public abstract class BaseCosmosCommand<
     // Helper methods for creating Cosmos-specific arguments
     protected ArgumentBuilder<TArgs> CreateAccountArgument() =>
         ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Cosmos.Account.Name, ArgumentDefinitions.Cosmos.Account.Description)
+            .Create(ArgumentDefinitions.Cosmos.Account.Name, ArgumentDefinitions.Cosmos.Account.Description!)
             .WithValueAccessor(args => args.Account ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Cosmos.Account.Required);
+            .WithIsRequired(ArgumentDefinitions.Cosmos.Account.IsRequired);
 }

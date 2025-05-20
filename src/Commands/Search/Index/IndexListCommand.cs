@@ -1,14 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.Search.Index;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Search.Index;
 
@@ -16,7 +12,7 @@ public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalC
 {
     private const string _commandTitle = "List Azure AI Search Indexes";
     private readonly ILogger<IndexListCommand> _logger = logger;
-    private readonly Option<string> _serviceOption = ArgumentDefinitions.Search.Service.ToOption();
+    private readonly Option<string> _serviceOption = ArgumentDefinitions.Search.Service;
     public override string Name => "list";
 
     public override string Description =>
@@ -55,7 +51,8 @@ public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalC
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }
@@ -85,7 +82,7 @@ public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalC
 
     private static ArgumentBuilder<IndexListArguments> CreateIndexListArgument() =>
         ArgumentBuilder<IndexListArguments>
-            .Create(ArgumentDefinitions.Search.Service.Name, ArgumentDefinitions.Search.Service.Description)
+            .Create(ArgumentDefinitions.Search.Service.Name, ArgumentDefinitions.Search.Service.Description!)
             .WithValueAccessor(args => args.Service ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Search.Service.Required);
+            .WithIsRequired(ArgumentDefinitions.Search.Service.IsRequired);
 }

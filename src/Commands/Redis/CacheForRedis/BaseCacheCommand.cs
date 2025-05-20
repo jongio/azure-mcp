@@ -13,7 +13,7 @@ public abstract class BaseCacheCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] T>
     : SubscriptionCommand<T> where T : BaseCacheArguments, new()
 {
-    protected readonly Option<string> _cacheOption = ArgumentDefinitions.Redis.Cache.ToOption();
+    protected readonly Option<string> _cacheOption = ArgumentDefinitions.Redis.Cache;
 
     protected override void RegisterOptions(Command command)
     {
@@ -33,13 +33,13 @@ public abstract class BaseCacheCommand<
     {
         var args = base.BindArguments(parseResult);
         args.Cache = parseResult.GetValueForOption(_cacheOption);
-        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? ArgumentDefinitions.Common.ResourceGroup.DefaultValue;
+        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? "";
         return args;
     }
 
     protected ArgumentBuilder<T> CreateCacheArgument() =>
         ArgumentBuilder<T>
-            .Create(ArgumentDefinitions.Redis.Cache.Name, ArgumentDefinitions.Redis.Cache.Description)
+            .Create(ArgumentDefinitions.Redis.Cache.Name, ArgumentDefinitions.Redis.Cache.Description!)
             .WithValueAccessor(args => args.Cache ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Redis.Cache.Required);
+            .WithIsRequired(ArgumentDefinitions.Redis.Cache.IsRequired);
 }
