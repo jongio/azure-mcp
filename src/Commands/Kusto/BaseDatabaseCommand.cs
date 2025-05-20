@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Arguments.Kusto;
 using AzureMcp.Models.Argument;
@@ -13,7 +11,7 @@ public abstract class BaseDatabaseCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
     : BaseClusterCommand<TArgs> where TArgs : BaseDatabaseArguments, new()
 {
-    protected readonly Option<string> _databaseOption = ArgumentDefinitions.Kusto.Database.ToOption();
+    protected readonly Option<string> _databaseOption = ArgumentDefinitions.Kusto.Database;
 
     protected override void RegisterOptions(Command command)
     {
@@ -23,7 +21,7 @@ public abstract class BaseDatabaseCommand<
 
     private static ArgumentBuilder<BaseDatabaseArguments> CreateDatabaseArgument() =>
         ArgumentBuilder<BaseDatabaseArguments>
-            .Create(ArgumentDefinitions.Kusto.Database.Name, ArgumentDefinitions.Kusto.Database.Description)
+            .Create(ArgumentDefinitions.Kusto.Database.Name, ArgumentDefinitions.Kusto.Database.Description!)
             .WithValueAccessor(args => args.Database ?? string.Empty)
             .WithIsRequired(true);
 

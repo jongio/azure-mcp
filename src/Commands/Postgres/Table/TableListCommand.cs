@@ -1,13 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.Postgres.Table;
-using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 
 namespace AzureMcp.Commands.Postgres.Table;
@@ -26,7 +22,8 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseDat
         try
         {
             var args = BindArguments(parseResult);
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }

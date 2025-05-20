@@ -1,16 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
 using System.Reflection;
-using System.Text.Json;
 using System.Text.Json.Nodes;
-using AzureMcp.Models;
-using AzureMcp.Models.Command;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol;
 using ModelContextProtocol.Protocol;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Server;
 

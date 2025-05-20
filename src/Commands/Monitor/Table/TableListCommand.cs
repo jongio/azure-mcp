@@ -1,14 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.Monitor;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Monitor.Table;
 
@@ -16,7 +12,7 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseMon
 {
     private const string _commandTitle = "List Log Analytics Tables";
     private readonly ILogger<TableListCommand> _logger = logger;
-    private readonly Option<string> _tableTypeOption = ArgumentDefinitions.Monitor.TableType.ToOption();
+    private readonly Option<string> _tableTypeOption = ArgumentDefinitions.Monitor.TableType;
 
     public override string Name => "list";
 
@@ -49,7 +45,8 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseMon
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }
@@ -78,19 +75,19 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseMon
 
     private static ArgumentBuilder<TableListArguments> CreateTableTypeArgument()
     {
-        var defaultValue = ArgumentDefinitions.Monitor.TableType.DefaultValue ?? "CustomLog";
+        var defaultValue = ArgumentDefinitions.Monitor.TableType.GetDefaultValue() ?? "CustomLog";
         return ArgumentBuilder<TableListArguments>
-            .Create(ArgumentDefinitions.Monitor.TableType.Name, ArgumentDefinitions.Monitor.TableType.Description)
+            .Create(ArgumentDefinitions.Monitor.TableType.Name, ArgumentDefinitions.Monitor.TableType.Description!)
             .WithValueAccessor(args => args.TableType ?? defaultValue)
             .WithDefaultValue(defaultValue)
-            .WithIsRequired(ArgumentDefinitions.Monitor.TableType.Required);
+            .WithIsRequired(ArgumentDefinitions.Monitor.TableType.IsRequired);
     }
 
     protected override TableListArguments BindArguments(ParseResult parseResult)
     {
         var args = base.BindArguments(parseResult);
-        args.TableType = parseResult.GetValueForOption(_tableTypeOption) ?? ArgumentDefinitions.Monitor.TableType.DefaultValue;
-        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? ArgumentDefinitions.Common.ResourceGroup.DefaultValue;
+        args.TableType = parseResult.GetValueForOption(_tableTypeOption) ?? ArgumentDefinitions.Monitor.TableType.GetDefaultValue();
+        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? ArgumentDefinitions.Common.ResourceGroup.GetDefaultValue();
         return args;
     }
 

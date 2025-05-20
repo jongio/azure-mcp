@@ -7,7 +7,6 @@ using System.Text.Json.Serialization;
 using AzureMcp.Commands.Extension;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
-using AzureMcp.Services.ProcessExecution;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

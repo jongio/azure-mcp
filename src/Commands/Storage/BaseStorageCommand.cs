@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Arguments.Storage;
 using AzureMcp.Models.Argument;
@@ -14,7 +12,7 @@ public abstract class BaseStorageCommand<
     : SubscriptionCommand<T>
     where T : BaseStorageArguments, new()
 {
-    protected readonly Option<string> _accountOption = ArgumentDefinitions.Storage.Account.ToOption();
+    protected readonly Option<string> _accountOption = ArgumentDefinitions.Storage.Account;
 
     protected override void RegisterOptions(Command command)
     {
@@ -38,8 +36,8 @@ public abstract class BaseStorageCommand<
     protected ArgumentBuilder<T> CreateAccountArgument()
     {
         return ArgumentBuilder<T>
-            .Create(ArgumentDefinitions.Storage.Account.Name, ArgumentDefinitions.Storage.Account.Description)
+            .Create(ArgumentDefinitions.Storage.Account.Name, ArgumentDefinitions.Storage.Account.Description!)
             .WithValueAccessor(args => args.Account ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Storage.Account.Required);
+            .WithIsRequired(ArgumentDefinitions.Storage.Account.IsRequired);
     }
 }

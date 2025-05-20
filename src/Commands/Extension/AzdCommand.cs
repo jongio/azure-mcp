@@ -1,17 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Runtime.InteropServices;
 using AzureMcp.Arguments.Extension;
 using AzureMcp.Helpers;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Azure;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Extension;
 
@@ -20,10 +16,10 @@ public sealed class AzdCommand(ILogger<AzdCommand> logger, int processTimeoutSec
     private const string _commandTitle = "Azure Developer CLI Command";
     private readonly ILogger<AzdCommand> _logger = logger;
     private readonly int _processTimeoutSeconds = processTimeoutSeconds;
-    private readonly Option<string> _commandOption = ArgumentDefinitions.Extension.Azd.Command.ToOption();
-    private readonly Option<string> _cwdOption = ArgumentDefinitions.Extension.Azd.Cwd.ToOption();
-    private readonly Option<string> _environmentOption = ArgumentDefinitions.Extension.Azd.Environment.ToOption();
-    private readonly Option<bool> _learnOption = ArgumentDefinitions.Extension.Azd.Learn.ToOption();
+    private readonly Option<string> _commandOption = ArgumentDefinitions.Extension.Azd.Command;
+    private readonly Option<string> _cwdOption = ArgumentDefinitions.Extension.Azd.Cwd;
+    private readonly Option<string> _environmentOption = ArgumentDefinitions.Extension.Azd.Environment;
+    private readonly Option<bool> _learnOption = ArgumentDefinitions.Extension.Azd.Learn;
     private static string? _cachedAzdPath;
 
     private readonly IEnumerable<string> longRunningCommands =
@@ -100,24 +96,24 @@ public sealed class AzdCommand(ILogger<AzdCommand> logger, int processTimeoutSec
     private static ArgumentBuilder<AzdArguments>[] CreateArguments() =>
         [
             ArgumentBuilder<AzdArguments>
-                .Create(ArgumentDefinitions.Extension.Azd.Command.Name, ArgumentDefinitions.Extension.Azd.Command.Description)
+                .Create(ArgumentDefinitions.Extension.Azd.Command.Name, ArgumentDefinitions.Extension.Azd.Command.Description!)
                 .WithValueAccessor(args => args.Command ?? string.Empty)
-                .WithIsRequired(ArgumentDefinitions.Extension.Azd.Command.Required),
+                .WithIsRequired(ArgumentDefinitions.Extension.Azd.Command.IsRequired),
 
             ArgumentBuilder<AzdArguments>
-                .Create(ArgumentDefinitions.Extension.Azd.Cwd.Name, ArgumentDefinitions.Extension.Azd.Cwd.Description)
+                .Create(ArgumentDefinitions.Extension.Azd.Cwd.Name, ArgumentDefinitions.Extension.Azd.Cwd.Description!)
                 .WithValueAccessor(args => args.Cwd ?? string.Empty)
-                .WithIsRequired(ArgumentDefinitions.Extension.Azd.Cwd.Required),
+                .WithIsRequired(ArgumentDefinitions.Extension.Azd.Cwd.IsRequired),
 
             ArgumentBuilder<AzdArguments>
-                .Create(ArgumentDefinitions.Extension.Azd.Environment.Name, ArgumentDefinitions.Extension.Azd.Environment.Description)
+                .Create(ArgumentDefinitions.Extension.Azd.Environment.Name, ArgumentDefinitions.Extension.Azd.Environment.Description!)
                 .WithValueAccessor(args => args.Environment ?? string.Empty)
-                .WithIsRequired(ArgumentDefinitions.Extension.Azd.Environment.Required),
+                .WithIsRequired(ArgumentDefinitions.Extension.Azd.Environment.IsRequired),
 
             ArgumentBuilder<AzdArguments>
-                .Create(ArgumentDefinitions.Extension.Azd.Learn.Name, ArgumentDefinitions.Extension.Azd.Learn.Description)
+                .Create(ArgumentDefinitions.Extension.Azd.Learn.Name, ArgumentDefinitions.Extension.Azd.Learn.Description!)
                 .WithValueAccessor(args => args.Learn.ToString())
-                .WithIsRequired(ArgumentDefinitions.Extension.Azd.Learn.Required),
+                .WithIsRequired(ArgumentDefinitions.Extension.Azd.Learn.IsRequired),
         ];
 
     protected override AzdArguments BindArguments(ParseResult parseResult)
@@ -138,7 +134,8 @@ public sealed class AzdCommand(ILogger<AzdCommand> logger, int processTimeoutSec
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }

@@ -1,13 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.Storage.Table;
-using AzureMcp.Models;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Storage.Table;
 
@@ -28,13 +24,14 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseSto
     public override string Title => _commandTitle;
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
-    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
+    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(commandOptions);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }

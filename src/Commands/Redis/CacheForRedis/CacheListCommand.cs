@@ -31,10 +31,12 @@ public sealed class CacheListCommand(ILogger<CacheListCommand> logger) : Subscri
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
+        var args = BindArguments(parseResult);
+
         try
         {
-            var args = BindArguments(parseResult);
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }

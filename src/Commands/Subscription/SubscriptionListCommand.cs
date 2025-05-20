@@ -1,15 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine.Parsing;
 using Azure.ResourceManager.Resources;
-using AzureMcp.Arguments;
 using AzureMcp.Arguments.Subscription;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Subscription;
 
@@ -29,13 +25,13 @@ public sealed class SubscriptionListCommand(ILogger<SubscriptionListCommand> log
     public override string Title => _commandTitle;
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
-    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
+    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(commandOptions);
+        var args = BindArguments(parseResult);
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
             {
                 return context.Response;
             }

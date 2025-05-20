@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Arguments.Storage.Blob;
 using AzureMcp.Models.Argument;
@@ -13,7 +11,7 @@ public abstract class BaseContainerCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
     : BaseStorageCommand<TArgs> where TArgs : BaseContainerArguments, new()
 {
-    protected readonly Option<string> _containerOption = ArgumentDefinitions.Storage.Container.ToOption();
+    protected readonly Option<string> _containerOption = ArgumentDefinitions.Storage.Container;
 
     protected BaseContainerCommand()
     {
@@ -41,8 +39,8 @@ public abstract class BaseContainerCommand<
     protected ArgumentBuilder<TArgs> CreateContainerArgument()
     {
         return ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Storage.Container.Name, ArgumentDefinitions.Storage.Container.Description)
+            .Create(ArgumentDefinitions.Storage.Container.Name, ArgumentDefinitions.Storage.Container.Description!)
             .WithValueAccessor(args => args.Container ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Storage.Container.Required);
+            .WithIsRequired(ArgumentDefinitions.Storage.Container.IsRequired);
     }
 }

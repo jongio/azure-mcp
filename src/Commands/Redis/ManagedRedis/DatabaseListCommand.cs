@@ -31,11 +31,12 @@ public sealed class DatabaseListCommand(ILogger<DatabaseListCommand> logger) : B
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
+        var args = BindArguments(parseResult);
+
         try
         {
-            var args = BindArguments(parseResult);
+            if (!context.Validate(parseResult))
 
-            if (!await ProcessArguments(context, args))
             {
                 return context.Response;
             }

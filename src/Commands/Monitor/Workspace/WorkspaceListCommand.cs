@@ -1,13 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.Monitor;
-using AzureMcp.Models.Command;
 using AzureMcp.Models.Monitor;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Monitor.Workspace;
 
@@ -34,7 +31,8 @@ public sealed class WorkspaceListCommand(ILogger<WorkspaceListCommand> logger) :
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }

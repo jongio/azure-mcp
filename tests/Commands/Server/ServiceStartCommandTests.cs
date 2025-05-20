@@ -22,7 +22,7 @@ public class ServiceStartCommandTests
 
         // Assert
         Assert.Equal("start", _command.GetCommand().Name);
-        Assert.Equal("Starts Azure MCP Server.", _command.GetCommand().Description);
+        Assert.Equal("Starts Azure MCP Server.", _command.GetCommand().Description!);
     }
 
     [Fact]

@@ -1,10 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 
 namespace AzureMcp.Commands;
 
@@ -38,7 +35,7 @@ public abstract class BaseCommand : IBaseCommand
         // Base implementation is empty, but derived classes must explicitly call base
     }
 
-    public abstract Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions);
+    public abstract Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult);
 
     protected virtual void HandleException(CommandResponse response, Exception ex)
     {

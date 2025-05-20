@@ -1,21 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.Postgres.Database;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Postgres.Database;
 
 public sealed class DatabaseQueryCommand(ILogger<DatabaseQueryCommand> logger) : BaseDatabaseCommand<DatabaseQueryArguments>(logger)
 {
     private const string _commandTitle = "Query PostgreSQL Database";
-    private readonly Option<string> _queryOption = ArgumentDefinitions.Postgres.Query.ToOption();
+    private readonly Option<string> _queryOption = ArgumentDefinitions.Postgres.Query;
     public override string Name => "query";
 
     public override string Description => "Executes a query on the PostgreSQL database.";
@@ -48,7 +44,8 @@ public sealed class DatabaseQueryCommand(ILogger<DatabaseQueryCommand> logger) :
         try
         {
             var args = BindArguments(parseResult);
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }
@@ -72,7 +69,7 @@ public sealed class DatabaseQueryCommand(ILogger<DatabaseQueryCommand> logger) :
 
     private static ArgumentBuilder<DatabaseQueryArguments> CreateQueryArgument() =>
         ArgumentBuilder<DatabaseQueryArguments>
-            .Create(ArgumentDefinitions.Postgres.Query.Name, ArgumentDefinitions.Postgres.Query.Description)
+            .Create(ArgumentDefinitions.Postgres.Query.Name, ArgumentDefinitions.Postgres.Query.Description!)
             .WithValueAccessor(args => args.Query ?? string.Empty)
             .WithIsRequired(true);
 

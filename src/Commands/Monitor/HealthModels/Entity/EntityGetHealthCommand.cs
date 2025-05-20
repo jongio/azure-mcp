@@ -65,7 +65,8 @@ public sealed class EntityGetHealthCommand(ILogger<EntityGetHealthCommand> logge
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }

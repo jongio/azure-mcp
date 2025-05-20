@@ -1,15 +1,10 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.Text.Json;
 using AzureMcp.Arguments.Kusto;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Kusto;
 
@@ -23,7 +18,7 @@ public sealed class QueryCommand : BaseDatabaseCommand<QueryArguments>
         _logger = logger;
     }
 
-    private readonly Option<string> _queryOption = ArgumentDefinitions.Kusto.Query.ToOption();
+    private readonly Option<string> _queryOption = ArgumentDefinitions.Kusto.Query;
 
     protected override void RegisterOptions(Command command)
     {
@@ -39,7 +34,7 @@ public sealed class QueryCommand : BaseDatabaseCommand<QueryArguments>
 
     private static ArgumentBuilder<QueryArguments> CreateQueryArgument() =>
         ArgumentBuilder<QueryArguments>
-            .Create(ArgumentDefinitions.Kusto.Query.Name, ArgumentDefinitions.Kusto.Query.Description)
+            .Create(ArgumentDefinitions.Kusto.Query.Name, ArgumentDefinitions.Kusto.Query.Description!)
             .WithValueAccessor(args => args.Query ?? string.Empty)
             .WithIsRequired(true);
 
@@ -67,7 +62,8 @@ public sealed class QueryCommand : BaseDatabaseCommand<QueryArguments>
         var args = BindArguments(parseResult);
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
                 return context.Response;
 
             List<JsonElement> results = [];

@@ -1,13 +1,9 @@
 ﻿// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Reflection;
 using AzureMcp.Arguments.Server;
-using AzureMcp.Models;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Azure;
@@ -15,7 +11,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using ModelContextProtocol.Protocol;
-using ModelContextProtocol.Server;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Trace;
@@ -26,8 +21,8 @@ namespace AzureMcp.Commands.Server;
 public sealed class ServiceStartCommand : BaseCommand
 {
     private const string _commandTitle = "Start MCP Server";
-    private readonly Option<string> _transportOption = ArgumentDefinitions.Service.Transport.ToOption();
-    private readonly Option<int> _portOption = ArgumentDefinitions.Service.Port.ToOption();
+    private readonly Option<string> _transportOption = ArgumentDefinitions.Service.Transport;
+    private readonly Option<int> _portOption = ArgumentDefinitions.Service.Port;
 
     public override string Name => "start";
     public override string Description => "Starts Azure MCP Server.";
@@ -47,15 +42,15 @@ public sealed class ServiceStartCommand : BaseCommand
         AddArgument(GetPortArgument());
     }
 
-    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions)
+    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var port = commandOptions.GetValueForOption(_portOption) == default
-            ? ArgumentDefinitions.Service.Port.DefaultValue
-            : commandOptions.GetValueForOption(_portOption);
+        var port = parseResult.GetValueForOption(_portOption) == default
+            ? ArgumentDefinitions.Service.Port.GetDefaultValue()
+            : parseResult.GetValueForOption(_portOption);
 
         var serverOptions = new ServiceStartArguments
         {
-            Transport = commandOptions.GetValueForOption(_transportOption) ?? TransportTypes.StdIo,
+            Transport = parseResult.GetValueForOption(_transportOption) ?? TransportTypes.StdIo,
             Port = port
         };
 
@@ -109,8 +104,7 @@ public sealed class ServiceStartCommand : BaseCommand
         var definition = ArgumentDefinitions.Service.Transport;
         return new ArgumentDefinition<string>(
             definition.Name,
-            definition.Description,
-            definition.DefaultValue?.ToString() ?? TransportTypes.StdIo);
+            definition.Description!);
     }
 
     private static ArgumentDefinition<string> GetPortArgument()
@@ -118,8 +112,7 @@ public sealed class ServiceStartCommand : BaseCommand
         var definition = ArgumentDefinitions.Service.Port;
         return new ArgumentDefinition<string>(
             definition.Name,
-            definition.Description,
-            definition.DefaultValue.ToString());
+            definition.Description!);
     }
 
     private static void ConfigureMcpServer(IServiceCollection services, string transport)

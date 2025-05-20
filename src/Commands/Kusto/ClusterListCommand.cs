@@ -1,12 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.Kusto;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Kusto;
 
@@ -37,7 +34,8 @@ public sealed class ClusterListCommand : SubscriptionCommand<ClusterListArgument
         var args = BindArguments(parseResult);
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
                 return context.Response;
 
             var kusto = context.GetService<IKustoService>();

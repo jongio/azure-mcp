@@ -1,5 +1,3 @@
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Arguments.Postgres;
 using AzureMcp.Models.Argument;
@@ -11,7 +9,7 @@ public abstract class BaseDatabaseCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>(ILogger<BasePostgresCommand<TArgs>> logger)
     : BaseServerCommand<TArgs>(logger) where TArgs : BasePostgresArguments, new()
 {
-    private readonly Option<string> _databaseOption = ArgumentDefinitions.Postgres.Database.ToOption();
+    private readonly Option<string> _databaseOption = ArgumentDefinitions.Postgres.Database;
 
     public override string Name => "database";
 
@@ -39,7 +37,7 @@ public abstract class BaseDatabaseCommand<
 
     protected ArgumentBuilder<TArgs> CreateDatabaseArgument() =>
         ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Postgres.Database.Name, ArgumentDefinitions.Postgres.Database.Description)
+            .Create(ArgumentDefinitions.Postgres.Database.Name, ArgumentDefinitions.Postgres.Database.Description!)
             .WithValueAccessor(args => args.Database ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Postgres.Database.Required);
+            .WithIsRequired(ArgumentDefinitions.Postgres.Database.IsRequired);
 }

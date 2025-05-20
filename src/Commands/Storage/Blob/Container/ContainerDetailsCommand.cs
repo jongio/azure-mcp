@@ -1,16 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine.Parsing;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.Storage.Blobs.Models;
 using AzureMcp.Arguments.Storage.Blob.Container;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Storage.Blob.Container;
 
@@ -36,7 +32,8 @@ public sealed class ContainerDetailsCommand(ILogger<ContainerDetailsCommand> log
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }

@@ -1,13 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Arguments.Kusto;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
-using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Commands.Kusto;
 
@@ -15,8 +11,8 @@ public abstract class BaseClusterCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
     : SubscriptionCommand<TArgs> where TArgs : BaseClusterArguments, new()
 {
-    protected readonly Option<string> _clusterNameOption = ArgumentDefinitions.Kusto.Cluster.ToOption();
-    protected readonly Option<string> _clusterUriOption = ArgumentDefinitions.Kusto.ClusterUri.ToOption();
+    protected readonly Option<string> _clusterNameOption = ArgumentDefinitions.Kusto.Cluster;
+    protected readonly Option<string> _clusterUriOption = ArgumentDefinitions.Kusto.ClusterUri;
 
     protected static bool UseClusterUri(BaseClusterArguments args) => !string.IsNullOrEmpty(args.ClusterUri);
 
@@ -73,13 +69,13 @@ public abstract class BaseClusterCommand<
 
     protected ArgumentBuilder<TArgs> CreateClusterUriArgument() =>
         ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Kusto.ClusterUri.Name, ArgumentDefinitions.Kusto.ClusterUri.Description)
+            .Create(ArgumentDefinitions.Kusto.ClusterUri.Name, ArgumentDefinitions.Kusto.ClusterUri.Description!)
             .WithValueAccessor(args => args.ClusterUri ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Kusto.ClusterUri.Required);
+            .WithIsRequired(ArgumentDefinitions.Kusto.ClusterUri.IsRequired);
 
     protected ArgumentBuilder<TArgs> CreateClusterNameArgument() =>
         ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Kusto.Cluster.Name, ArgumentDefinitions.Kusto.Cluster.Description)
+            .Create(ArgumentDefinitions.Kusto.Cluster.Name, ArgumentDefinitions.Kusto.Cluster.Description!)
             .WithValueAccessor(args => args.ClusterName ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Kusto.Cluster.Required);
+            .WithIsRequired(ArgumentDefinitions.Kusto.Cluster.IsRequired);
 }

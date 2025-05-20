@@ -1,11 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 
 namespace AzureMcp.Commands;
 
@@ -38,7 +35,7 @@ public interface IBaseCommand
     /// <summary>
     /// Executes the command
     /// </summary>
-    Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult commandOptions);
+    Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult);
 
     /// <summary>
     /// Gets the current arguments

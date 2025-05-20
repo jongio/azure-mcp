@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Arguments.AppConfig;
 using AzureMcp.Models.Argument;
@@ -13,7 +11,7 @@ public abstract class BaseAppConfigCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] T>
     : SubscriptionCommand<T> where T : BaseAppConfigArguments, new()
 {
-    protected readonly Option<string> _accountOption = ArgumentDefinitions.AppConfig.Account.ToOption();
+    protected readonly Option<string> _accountOption = ArgumentDefinitions.AppConfig.Account;
 
     protected override void RegisterOptions(Command command)
     {
@@ -36,7 +34,7 @@ public abstract class BaseAppConfigCommand<
 
     protected ArgumentBuilder<T> CreateAccountArgument() =>
         ArgumentBuilder<T>
-            .Create(ArgumentDefinitions.AppConfig.Account.Name, ArgumentDefinitions.AppConfig.Account.Description)
+            .Create(ArgumentDefinitions.AppConfig.Account.Name, ArgumentDefinitions.AppConfig.Account.Description!)
             .WithValueAccessor(args => args.Account ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.Account.Required);
+            .WithIsRequired(ArgumentDefinitions.AppConfig.Account.IsRequired);
 }

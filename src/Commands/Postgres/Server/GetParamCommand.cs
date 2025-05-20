@@ -1,21 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.Postgres.Server;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Postgres.Server;
 
 public sealed class GetParamCommand(ILogger<GetParamCommand> logger) : BaseServerCommand<GetParamArguments>(logger)
 {
     private const string _commandTitle = "Get PostgreSQL Server Parameter";
-    private readonly Option<string> _paramOption = ArgumentDefinitions.Postgres.Param.ToOption();
+    private readonly Option<string> _paramOption = ArgumentDefinitions.Postgres.Param;
     public override string Name => "param";
 
     public override string Description =>
@@ -49,7 +45,8 @@ public sealed class GetParamCommand(ILogger<GetParamCommand> logger) : BaseServe
         {
             var args = BindArguments(parseResult);
 
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }
@@ -72,7 +69,7 @@ public sealed class GetParamCommand(ILogger<GetParamCommand> logger) : BaseServe
 
     private static ArgumentBuilder<GetParamArguments> CreateParamArgument() =>
         ArgumentBuilder<GetParamArguments>
-            .Create(ArgumentDefinitions.Postgres.Param.Name, ArgumentDefinitions.Postgres.Param.Description)
+            .Create(ArgumentDefinitions.Postgres.Param.Name, ArgumentDefinitions.Postgres.Param.Description!)
             .WithValueAccessor(args => args.Param ?? string.Empty)
             .WithIsRequired(true);
 

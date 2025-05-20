@@ -13,7 +13,7 @@ public abstract class BaseClusterCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] T>
     : SubscriptionCommand<T> where T : BaseClusterArguments, new()
 {
-    protected readonly Option<string> _clusterOption = ArgumentDefinitions.Redis.Cluster.ToOption();
+    protected readonly Option<string> _clusterOption = ArgumentDefinitions.Redis.Cluster;
 
     protected override void RegisterOptions(Command command)
     {
@@ -33,13 +33,13 @@ public abstract class BaseClusterCommand<
     {
         var args = base.BindArguments(parseResult);
         args.Cluster = parseResult.GetValueForOption(_clusterOption);
-        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? ArgumentDefinitions.Common.ResourceGroup.DefaultValue;
+        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? "";
         return args;
     }
 
     protected ArgumentBuilder<T> CreateClusterArgument() =>
         ArgumentBuilder<T>
-            .Create(ArgumentDefinitions.Redis.Cluster.Name, ArgumentDefinitions.Redis.Cluster.Description)
+            .Create(ArgumentDefinitions.Redis.Cluster.Name, ArgumentDefinitions.Redis.Cluster.Description!)
             .WithValueAccessor(args => args.Cluster ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Redis.Cluster.Required);
+            .WithIsRequired(ArgumentDefinitions.Redis.Cluster.IsRequired);
 }

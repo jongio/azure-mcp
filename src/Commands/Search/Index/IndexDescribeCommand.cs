@@ -1,16 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using Azure.Search.Documents.Indexes.Models;
 using AzureMcp.Arguments.Search.Index;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Search.Index;
 
@@ -18,8 +14,8 @@ public sealed class IndexDescribeCommand(ILogger<IndexDescribeCommand> logger) :
 {
     private const string _commandTitle = "Get Azure AI Search Index Details";
     private readonly ILogger<IndexDescribeCommand> _logger = logger;
-    private readonly Option<string> _serviceOption = ArgumentDefinitions.Search.Service.ToOption();
-    private readonly Option<string> _indexOption = ArgumentDefinitions.Search.Index.ToOption();
+    private readonly Option<string> _serviceOption = ArgumentDefinitions.Search.Service;
+    private readonly Option<string> _indexOption = ArgumentDefinitions.Search.Index;
 
     public override string Name => "describe";
 
@@ -64,7 +60,8 @@ public sealed class IndexDescribeCommand(ILogger<IndexDescribeCommand> logger) :
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }
@@ -128,13 +125,13 @@ public sealed class IndexDescribeCommand(ILogger<IndexDescribeCommand> logger) :
 
     private static ArgumentBuilder<IndexDescribeArguments> CreateServiceArgument() =>
         ArgumentBuilder<IndexDescribeArguments>
-            .Create(ArgumentDefinitions.Search.Service.Name, ArgumentDefinitions.Search.Service.Description)
+            .Create(ArgumentDefinitions.Search.Service.Name, ArgumentDefinitions.Search.Service.Description!)
             .WithValueAccessor(args => args.Service ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Search.Service.Required);
+            .WithIsRequired(ArgumentDefinitions.Search.Service.IsRequired);
 
     private static ArgumentBuilder<IndexDescribeArguments> CreateIndexArgument() =>
         ArgumentBuilder<IndexDescribeArguments>
-            .Create(ArgumentDefinitions.Search.Index.Name, ArgumentDefinitions.Search.Index.Description)
+            .Create(ArgumentDefinitions.Search.Index.Name, ArgumentDefinitions.Search.Index.Description!)
             .WithValueAccessor(args => args.Index ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Search.Index.Required);
+            .WithIsRequired(ArgumentDefinitions.Search.Index.IsRequired);
 }

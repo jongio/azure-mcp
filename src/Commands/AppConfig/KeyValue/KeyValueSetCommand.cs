@@ -1,21 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using AzureMcp.Arguments.AppConfig.KeyValue;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.AppConfig.KeyValue;
 
 public sealed class KeyValueSetCommand(ILogger<KeyValueSetCommand> logger) : BaseKeyValueCommand<KeyValueSetArguments>()
 {
     private const string _commandTitle = "Set App Configuration Key-Value Setting";
-    private readonly Option<string> _valueOption = ArgumentDefinitions.AppConfig.Value.ToOption();
+    private readonly Option<string> _valueOption = ArgumentDefinitions.AppConfig.Value;
     private readonly ILogger<KeyValueSetCommand> _logger = logger;
 
     public override string Name => "set";
@@ -50,9 +46,9 @@ public sealed class KeyValueSetCommand(ILogger<KeyValueSetCommand> logger) : Bas
 
     private static ArgumentBuilder<KeyValueSetArguments> CreateValueArgument() =>
         ArgumentBuilder<KeyValueSetArguments>
-            .Create(ArgumentDefinitions.AppConfig.Value.Name, ArgumentDefinitions.AppConfig.Value.Description)
+            .Create(ArgumentDefinitions.AppConfig.Value.Name, ArgumentDefinitions.AppConfig.Value.Description!)
             .WithValueAccessor(args => args.Value ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.Value.Required);
+            .WithIsRequired(ArgumentDefinitions.AppConfig.Value.IsRequired);
 
     [McpServerTool(Destructive = false, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
@@ -61,7 +57,8 @@ public sealed class KeyValueSetCommand(ILogger<KeyValueSetCommand> logger) : Bas
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }

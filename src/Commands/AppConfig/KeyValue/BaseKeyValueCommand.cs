@@ -1,8 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Arguments.AppConfig.KeyValue;
 using AzureMcp.Models.Argument;
@@ -13,8 +11,8 @@ public abstract class BaseKeyValueCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] T>
     : BaseAppConfigCommand<T> where T : BaseKeyValueArguments, new()
 {
-    protected readonly Option<string> _keyOption = ArgumentDefinitions.AppConfig.Key.ToOption();
-    protected readonly Option<string> _labelOption = ArgumentDefinitions.AppConfig.Label.ToOption();
+    protected readonly Option<string> _keyOption = ArgumentDefinitions.AppConfig.Key;
+    protected readonly Option<string> _labelOption = ArgumentDefinitions.AppConfig.Label;
 
     protected override void RegisterOptions(Command command)
     {
@@ -40,13 +38,13 @@ public abstract class BaseKeyValueCommand<
 
     protected virtual ArgumentBuilder<T> CreateKeyArgument() =>
         ArgumentBuilder<T>
-            .Create(ArgumentDefinitions.AppConfig.Key.Name, ArgumentDefinitions.AppConfig.Key.Description)
+            .Create(ArgumentDefinitions.AppConfig.Key.Name, ArgumentDefinitions.AppConfig.Key.Description!)
             .WithValueAccessor(args => args.Key ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.Key.Required);
+            .WithIsRequired(ArgumentDefinitions.AppConfig.Key.IsRequired);
 
     protected virtual ArgumentBuilder<T> CreateLabelArgument() =>
         ArgumentBuilder<T>
-            .Create(ArgumentDefinitions.AppConfig.Label.Name, ArgumentDefinitions.AppConfig.Label.Description)
+            .Create(ArgumentDefinitions.AppConfig.Label.Name, ArgumentDefinitions.AppConfig.Label.Description!)
             .WithValueAccessor(args => args.Label ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.Label.Required);
+            .WithIsRequired(ArgumentDefinitions.AppConfig.Label.IsRequired);
 }

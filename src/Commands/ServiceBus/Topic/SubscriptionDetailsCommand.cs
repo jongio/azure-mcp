@@ -1,24 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using Azure.Messaging.ServiceBus;
 using AzureMcp.Arguments.ServiceBus.Topic;
 using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
 using AzureMcp.Models.ServiceBus;
 using AzureMcp.Services.Interfaces;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.ServiceBus.Topic;
 
 public sealed class SubscriptionDetailsCommand : SubscriptionCommand<SubscriptionDetailsArguments>
 {
     private const string _commandTitle = "Get Service Bus Topic Subscription Details";
-    private readonly Option<string> _namespaceOption = ArgumentDefinitions.ServiceBus.Namespace.ToOption();
-    private readonly Option<string> _topicOption = ArgumentDefinitions.ServiceBus.Topic.ToOption();
-    private readonly Option<string> _subscriptionNameOption = ArgumentDefinitions.ServiceBus.Subscription.ToOption();
+    private readonly Option<string> _namespaceOption = ArgumentDefinitions.ServiceBus.Namespace;
+    private readonly Option<string> _topicOption = ArgumentDefinitions.ServiceBus.Topic;
+    private readonly Option<string> _subscriptionNameOption = ArgumentDefinitions.ServiceBus.Subscription;
 
     public override string Name => "details";
 
@@ -66,7 +62,8 @@ public sealed class SubscriptionDetailsCommand : SubscriptionCommand<Subscriptio
 
         try
         {
-            if (!await ProcessArguments(context, args))
+            if (!context.Validate(parseResult))
+
             {
                 return context.Response;
             }
@@ -107,7 +104,7 @@ public sealed class SubscriptionDetailsCommand : SubscriptionCommand<Subscriptio
     private static ArgumentBuilder<SubscriptionDetailsArguments> CreateTopicNameArgument()
     {
         return ArgumentBuilder<SubscriptionDetailsArguments>
-            .Create(ArgumentDefinitions.ServiceBus.Topic.Name, ArgumentDefinitions.ServiceBus.Topic.Description)
+            .Create(ArgumentDefinitions.ServiceBus.Topic.Name, ArgumentDefinitions.ServiceBus.Topic.Description!)
             .WithValueAccessor(args => args.TopicName ?? string.Empty)
             .WithIsRequired(true);
     }
@@ -115,7 +112,7 @@ public sealed class SubscriptionDetailsCommand : SubscriptionCommand<Subscriptio
     private static ArgumentBuilder<SubscriptionDetailsArguments> CreateSubscriptionNameArgument()
     {
         return ArgumentBuilder<SubscriptionDetailsArguments>
-            .Create(ArgumentDefinitions.ServiceBus.Subscription.Name, ArgumentDefinitions.ServiceBus.Subscription.Description)
+            .Create(ArgumentDefinitions.ServiceBus.Subscription.Name, ArgumentDefinitions.ServiceBus.Subscription.Description!)
             .WithValueAccessor(args => args.SubscriptionName ?? string.Empty)
             .WithIsRequired(true);
     }
@@ -123,7 +120,7 @@ public sealed class SubscriptionDetailsCommand : SubscriptionCommand<Subscriptio
     private static ArgumentBuilder<SubscriptionDetailsArguments> CreateNamespaceArgument()
     {
         return ArgumentBuilder<SubscriptionDetailsArguments>
-            .Create(ArgumentDefinitions.ServiceBus.Namespace.Name, ArgumentDefinitions.ServiceBus.Namespace.Description)
+            .Create(ArgumentDefinitions.ServiceBus.Namespace.Name, ArgumentDefinitions.ServiceBus.Namespace.Description!)
             .WithValueAccessor(args => args.Namespace ?? string.Empty)
             .WithIsRequired(true);
     }
