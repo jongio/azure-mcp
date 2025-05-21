@@ -21,6 +21,7 @@ public static class SystemCommandLineExtensions
     {
         try
         {
+<<<<<<< HEAD
             var argumentProperty = typeof(T).GetProperty("Argument", BindingFlags.Instance | BindingFlags.NonPublic);
             var argument = argumentProperty?.GetValue(option);
             if (argument != null)
@@ -32,6 +33,21 @@ public static class SystemCommandLineExtensions
                     return (T)(defaultValue ?? default!);
                 }
             }
+=======
+            return default!;
+
+            // var argumentProperty = option.GetType().GetProperty("Argument", BindingFlags.Instance | BindingFlags.NonPublic);
+            // var argument = argumentProperty?.GetValue(option);
+            // if (argument != null)
+            // {
+            //     var getDefaultValueMethod = argument.GetType().GetMethod("GetDefaultValue");
+            //     if (getDefaultValueMethod != null)
+            //     {
+            //         var defaultValue = getDefaultValueMethod.Invoke(argument, null);
+            //         return (T)(defaultValue ?? default!);
+            //     }
+            // }
+>>>>>>> 906209f (Remove unused reflection logic in GetDefaultValue method)
         }
         catch
         {
