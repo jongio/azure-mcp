@@ -35,7 +35,7 @@ public abstract class BaseClusterCommand<
 
     public override ValidationResult Validate(CommandResult parseResult)
     {
-        var result = base.Validate(parseResult);
+        var validationResult = new ValidationResult { IsValid = true };
         var clusterUri = parseResult.GetValueForOption(_clusterUriOption);
         var clusterName = parseResult.GetValueForOption(_clusterNameOption);
 
@@ -51,11 +51,15 @@ public abstract class BaseClusterCommand<
             // clusterUri not provided, require both subscription and clusterName
             if (string.IsNullOrEmpty(subscription) || string.IsNullOrEmpty(clusterName))
             {
-                result.IsValid = false;
-                result.ErrorMessage = $"Either --{_clusterUriOption.Name} must be provided, or both --{_subscriptionOption.Name} and --{_clusterNameOption.Name} must be provided.";
+                validationResult.IsValid = false;
+                validationResult.ErrorMessage = $"Either --{_clusterUriOption.Name} must be provided, or both --{_subscriptionOption.Name} and --{_clusterNameOption.Name} must be provided.";
             }
         }
-        return result;
+        
+        if (validationResult.IsValid)
+            return base.Validate(parseResult);
+
+        return validationResult;
     }
 
     protected override TArgs BindOptions(ParseResult parseResult)

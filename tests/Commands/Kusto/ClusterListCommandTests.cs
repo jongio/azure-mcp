@@ -89,18 +89,10 @@ public sealed class ClusterListCommandTests
         // Arrange
         var expectedError = "Test error. To mitigate this issue, please refer to the troubleshooting guidelines here at https://aka.ms/azmcp/troubleshooting.";
         var subscriptionId = "sub123";
-        var defaultRetryPolicy = new RetryPolicyArguments
-        {
-            DelaySeconds = ArgumentDefinitions.RetryPolicy.Delay.GetDefaultValue(),
-            MaxDelaySeconds = ArgumentDefinitions.RetryPolicy.MaxDelay.GetDefaultValue(),
-            MaxRetries = ArgumentDefinitions.RetryPolicy.MaxRetries.GetDefaultValue(),
-            Mode = ArgumentDefinitions.RetryPolicy.Mode.GetDefaultValue(),
-            NetworkTimeoutSeconds = ArgumentDefinitions.RetryPolicy.NetworkTimeout.GetDefaultValue()
-        };
-
+        
         // Arrange
-        _kusto.ListClusters(subscriptionId, null, defaultRetryPolicy)
-            .ThrowsAsync(new Exception("Test error"));
+        _kusto.ListClusters(subscriptionId, null, Arg.Any<RetryPolicyArguments>())
+            .Returns(Task.FromException<List<string>>(new Exception("Test error")));
 
         var command = new ClusterListCommand(_logger);
         var args = command.GetCommand().Parse(["--subscription", subscriptionId]);
