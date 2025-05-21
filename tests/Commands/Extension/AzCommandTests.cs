@@ -31,15 +31,6 @@ public sealed class AzCommandTests
     }
 
     [Fact]
-    public void Execute_ReturnsArguments()
-    {
-        var command = new AzCommand(_logger);
-        var arguments = command.GetArguments();
-
-        Assert.NotNull(arguments);
-    }
-
-    [Fact]
     public async Task ExecuteAsync_ReturnsSuccessResult_WhenCommandExecutesSuccessfully()
     {
         using (new TestEnvVar(new Dictionary<string, string>

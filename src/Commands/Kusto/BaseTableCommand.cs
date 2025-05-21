@@ -19,22 +19,9 @@ public abstract class BaseTableCommand<
         command.AddOption(_tableOption);
     }
 
-    private static ArgumentBuilder<BaseTableArguments> CreateTableArgument() =>
-        ArgumentBuilder<BaseTableArguments>
-            .Create(ArgumentDefinitions.Kusto.Table.Name, ArgumentDefinitions.Kusto.Table.Description!)
-            .WithValueAccessor(args => args.Table ?? string.Empty)
-            .WithIsRequired(true);
-
-
-    protected override void RegisterArguments()
+    protected override TArgs BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateTableArgument());
-    }
-
-    protected override TArgs BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Table = parseResult.GetValueForOption(_tableOption);
         return args;
     }

@@ -36,28 +36,9 @@ public sealed class KeyListCommand(ILogger<KeyListCommand> logger) : Subscriptio
         command.AddOption(_includeManagedKeysOption);
     }
 
-    protected override void RegisterArguments()
+    protected override KeyListArgument BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateVaultArgument());
-        AddArgument(CreateIncludeManagedArgument());
-    }
-
-    private ArgumentBuilder<KeyListArgument> CreateIncludeManagedArgument() =>
-        ArgumentBuilder<KeyListArgument>
-            .Create(ArgumentDefinitions.KeyVault.IncludeManagedKeys.Name, ArgumentDefinitions.KeyVault.IncludeManagedKeys.Description!)
-            .WithValueAccessor(args => args.IncludeManagedKeys.ToString())
-            .WithIsRequired(ArgumentDefinitions.KeyVault.IncludeManagedKeys.IsRequired);
-
-    private static ArgumentBuilder<KeyListArgument> CreateVaultArgument() =>
-        ArgumentBuilder<KeyListArgument>
-            .Create(ArgumentDefinitions.KeyVault.VaultName.Name, ArgumentDefinitions.KeyVault.VaultName.Description!)
-            .WithValueAccessor(args => args.VaultName ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.KeyVault.VaultName.IsRequired);
-
-    protected override KeyListArgument BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.VaultName = parseResult.GetValueForOption(_vaultOption);
         args.IncludeManagedKeys = parseResult.GetValueForOption(_includeManagedKeysOption);
         return args;
@@ -66,13 +47,16 @@ public sealed class KeyListCommand(ILogger<KeyListCommand> logger) : Subscriptio
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {
-            if (!context.Validate(parseResult))
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 

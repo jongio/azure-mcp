@@ -194,9 +194,9 @@ public sealed class {Resource}{Operation}Command : Base{Service}Command<{Resourc
         AddArgument(Create{Resource}Argument());
     }
 
-    protected override {Resource}{Operation}Arguments BindArguments(ParseResult parseResult)
+    protected override {Resource}{Operation}Arguments BindOptions(ParseResult parseResult)
     {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Resource = parseResult.GetValueForOption(_resourceOption);
         return args;
     }
@@ -204,13 +204,16 @@ public sealed class {Resource}{Operation}Command : Base{Service}Command<{Resourc
     [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {
-            if (!context.Validate(parseResult))
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 
@@ -1156,7 +1159,7 @@ public class ContainersListCommand : BaseStorageCommand<ContainersListArguments>
 
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {

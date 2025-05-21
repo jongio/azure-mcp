@@ -46,75 +46,6 @@ public abstract class GlobalCommand<
         command.AddOption(_retryNetworkTimeoutOption);
     }
 
-    protected override void RegisterArguments()
-    {
-        // Must explicitly call base first
-        base.RegisterArguments();
-
-        // Register global arguments
-        AddArgument(CreateAuthMethodArgument());
-        AddArgument(CreateTenantArgument());
-        foreach (var argument in CreateRetryArguments())
-        {
-            AddArgument(argument);
-        }
-    }
-
-    protected ArgumentBuilder<TArgs>[] CreateRetryArguments()
-    {
-        return
-        [
-            ArgumentBuilder<TArgs>
-                .Create(ArgumentDefinitions.RetryPolicy.MaxRetries.Name, ArgumentDefinitions.RetryPolicy.MaxRetries.Description!)
-                .WithValueAccessor(args => args.RetryPolicy == null ? string.Empty : args.RetryPolicy.MaxRetries.ToString())
-                .WithIsRequired(false),
-
-            ArgumentBuilder<TArgs>
-                .Create(ArgumentDefinitions.RetryPolicy.Delay.Name, ArgumentDefinitions.RetryPolicy.Delay.Description!)
-                .WithValueAccessor(args => args.RetryPolicy == null ? string.Empty : args.RetryPolicy.DelaySeconds.ToString())
-                .WithIsRequired(false),
-
-            ArgumentBuilder<TArgs>
-                .Create(ArgumentDefinitions.RetryPolicy.MaxDelay.Name, ArgumentDefinitions.RetryPolicy.MaxDelay.Description!)
-                .WithValueAccessor(args => args.RetryPolicy == null ? string.Empty : args.RetryPolicy.MaxDelaySeconds.ToString())
-                .WithIsRequired(false),
-
-            ArgumentBuilder<TArgs>
-                .Create(ArgumentDefinitions.RetryPolicy.Mode.Name, ArgumentDefinitions.RetryPolicy.Mode.Description!)
-                .WithValueAccessor(args => args.RetryPolicy == null ? string.Empty : args.RetryPolicy.Mode.ToString())
-                .WithIsRequired(false),
-
-            ArgumentBuilder<TArgs>
-                .Create(ArgumentDefinitions.RetryPolicy.NetworkTimeout.Name, ArgumentDefinitions.RetryPolicy.NetworkTimeout.Description!)
-                .WithValueAccessor(args => args.RetryPolicy == null ? string.Empty : args.RetryPolicy.NetworkTimeoutSeconds.ToString())
-                .WithIsRequired(false)
-        ];
-    }
-
-    // Helper methods to create common arguments
-    protected ArgumentBuilder<TArgs> CreateAuthMethodArgument()
-    {
-        return ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Common.AuthMethod.Name, ArgumentDefinitions.Common.AuthMethod.Description!)
-            .WithValueAccessor(args => args.AuthMethod?.ToString() ?? string.Empty)
-            .WithDefaultValue(AuthMethodArgument.GetDefaultAuthMethod().ToString())
-            .WithIsRequired(false);
-    }
-
-    protected ArgumentBuilder<TArgs> CreateTenantArgument()
-    {
-        return ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Common.Tenant.Name, ArgumentDefinitions.Common.Tenant.Description!)
-            .WithValueAccessor(args => args.Tenant ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Common.Tenant.IsRequired);
-    }
-
-    protected ArgumentBuilder<TArgs> CreateResourceGroupArgument() =>
-        ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Common.ResourceGroup.Name, ArgumentDefinitions.Common.ResourceGroup.Description!)
-            .WithValueAccessor(args => (args as SubscriptionArguments)?.ResourceGroup ?? string.Empty)
-            .WithIsRequired(true);
-
     // Helper to get the command path for examples
     protected virtual string GetCommandPath()
     {
@@ -154,7 +85,7 @@ public abstract class GlobalCommand<
         return commandPath;
     }
 
-    protected virtual TArgs BindArguments(ParseResult parseResult)
+    protected virtual TArgs BindOptions(ParseResult parseResult)
     {
         var args = new TArgs
         {

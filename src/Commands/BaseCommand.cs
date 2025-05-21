@@ -1,22 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Models.Argument;
 
 namespace AzureMcp.Commands;
 
 public abstract class BaseCommand : IBaseCommand
 {
-    protected readonly HashSet<string> _registeredArgumentNames = [];
-    protected readonly List<ArgumentDefinition<string>> _arguments = [];
-
     private readonly Command? _command;
 
     protected BaseCommand()
     {
         _command = new Command(Name, Description);
         RegisterOptions(_command);
-        RegisterArguments();
     }
 
     public Command GetCommand() => _command ?? throw new InvalidOperationException("Command not initialized");
@@ -28,11 +23,6 @@ public abstract class BaseCommand : IBaseCommand
     protected virtual void RegisterOptions(Command command)
     {
         // Base implementation is empty, derived classes will add their options
-    }
-
-    protected virtual void RegisterArguments()
-    {
-        // Base implementation is empty, but derived classes must explicitly call base
     }
 
     public abstract Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult);
@@ -57,15 +47,30 @@ public abstract class BaseCommand : IBaseCommand
 
     protected virtual int GetStatusCode(Exception ex) => 500;
 
-    public IEnumerable<ArgumentDefinition<string>>? GetArguments() => _arguments;
-
-    public void ClearArguments() => _arguments.Clear();
-
-    public virtual void AddArgument(ArgumentDefinition<string> argument)
+    public virtual ValidationResult Validate(CommandResult commandResult)
     {
-        if (argument != null && _registeredArgumentNames.Add(argument.Name))
+        var result = new ValidationResult();
+
+        var missingParameters = commandResult.Command.Options
+            .Where(o => o.IsRequired && commandResult.GetValueForOption(o) == null)
+            .Select(o => $"--{o.Name}")
+            .ToList();
+
+        if (missingParameters.Count > 0)
         {
-            _arguments.Add(argument);
+            result.IsValid = false;
+            result.ErrorMessage = $"Missing required arguments: {string.Join(", ", missingParameters)}";
+            return result;
         }
+
+        if (!string.IsNullOrEmpty(commandResult.ErrorMessage))
+        {
+            result.IsValid = false;
+            result.ErrorMessage = commandResult.ErrorMessage;
+            return result;
+        }
+
+        result.IsValid = true;
+        return result;
     }
 }

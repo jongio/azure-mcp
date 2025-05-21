@@ -20,24 +20,11 @@ public abstract class BaseStorageCommand<
         command.AddOption(_accountOption);
     }
 
-    protected override void RegisterArguments()
-    {
-        base.RegisterArguments();
-        AddArgument(CreateAccountArgument());
-    }
 
-    protected override T BindArguments(ParseResult parseResult)
+    protected override T BindOptions(ParseResult parseResult)
     {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Account = parseResult.GetValueForOption(_accountOption);
         return args;
-    }
-
-    protected ArgumentBuilder<T> CreateAccountArgument()
-    {
-        return ArgumentBuilder<T>
-            .Create(ArgumentDefinitions.Storage.Account.Name, ArgumentDefinitions.Storage.Account.Description!)
-            .WithValueAccessor(args => args.Account ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Storage.Account.IsRequired);
     }
 }

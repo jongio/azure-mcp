@@ -25,15 +25,9 @@ public sealed class GetParamCommand(ILogger<GetParamCommand> logger) : BaseServe
         command.AddOption(_paramOption);
     }
 
-    protected override void RegisterArguments()
+    protected override GetParamArguments BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateParamArgument());
-    }
-
-    protected override GetParamArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Param = parseResult.GetValueForOption(_paramOption);
         return args;
     }
@@ -43,11 +37,14 @@ public sealed class GetParamCommand(ILogger<GetParamCommand> logger) : BaseServe
     {
         try
         {
-            var args = BindArguments(parseResult);
+            var args = BindOptions(parseResult);
 
-            if (!context.Validate(parseResult))
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 
@@ -66,12 +63,6 @@ public sealed class GetParamCommand(ILogger<GetParamCommand> logger) : BaseServe
         }
         return context.Response;
     }
-
-    private static ArgumentBuilder<GetParamArguments> CreateParamArgument() =>
-        ArgumentBuilder<GetParamArguments>
-            .Create(ArgumentDefinitions.Postgres.Param.Name, ArgumentDefinitions.Postgres.Param.Description!)
-            .WithValueAccessor(args => args.Param ?? string.Empty)
-            .WithIsRequired(true);
 
     internal record GetParamCommandResult(string ParameterValue);
 }

@@ -23,24 +23,10 @@ public abstract class BaseContainerCommand<
         command.AddOption(_containerOption);
     }
 
-    protected override void RegisterArguments()
+    protected override TArgs BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateContainerArgument());
-    }
-
-    protected override TArgs BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Container = parseResult.GetValueForOption(_containerOption);
         return args;
-    }
-
-    protected ArgumentBuilder<TArgs> CreateContainerArgument()
-    {
-        return ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Storage.Container.Name, ArgumentDefinitions.Storage.Container.Description!)
-            .WithValueAccessor(args => args.Container ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Storage.Container.IsRequired);
     }
 }

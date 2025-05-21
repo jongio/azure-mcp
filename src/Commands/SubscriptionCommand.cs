@@ -19,23 +19,9 @@ public abstract class SubscriptionCommand<
         command.AddOption(_subscriptionOption);
     }
 
-    protected override void RegisterArguments()
+    protected override TArgs BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateSubscriptionArgument());
-    }
-
-    protected ArgumentBuilder<TArgs> CreateSubscriptionArgument()
-    {
-        return ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Common.Subscription.Name, ArgumentDefinitions.Common.Subscription.Description!)
-            .WithValueAccessor(args => args.Subscription ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Common.Subscription.IsRequired);
-    }
-
-    protected override TArgs BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Subscription = parseResult.GetValueForOption(_subscriptionOption);
         return args;
     }

@@ -21,10 +21,13 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseDat
     {
         try
         {
-            var args = BindArguments(parseResult);
-            if (!context.Validate(parseResult))
+            var args = BindOptions(parseResult);
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 

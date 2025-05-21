@@ -36,28 +36,9 @@ public sealed class KeyValueListCommand(ILogger<KeyValueListCommand> logger) : B
         command.AddOption(_labelOption);
     }
 
-    protected override void RegisterArguments()
+    protected override KeyValueListArguments BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateListKeyArgument());
-        AddArgument(CreateListLabelArgument());
-    }
-
-    private static ArgumentBuilder<KeyValueListArguments> CreateListKeyArgument() =>
-        ArgumentBuilder<KeyValueListArguments>
-            .Create(ArgumentDefinitions.AppConfig.KeyValueList.Key.Name, ArgumentDefinitions.AppConfig.KeyValueList.Key.Description!)
-            .WithValueAccessor(args => args.Key ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.KeyValueList.Key.IsRequired);
-
-    private static ArgumentBuilder<KeyValueListArguments> CreateListLabelArgument() =>
-        ArgumentBuilder<KeyValueListArguments>
-            .Create(ArgumentDefinitions.AppConfig.KeyValueList.Label.Name, ArgumentDefinitions.AppConfig.KeyValueList.Label.Description!)
-            .WithValueAccessor(args => args.Label ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.KeyValueList.Label.IsRequired);
-
-    protected override KeyValueListArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Key = parseResult.GetValueForOption(_keyOption);
         args.Label = parseResult.GetValueForOption(_labelOption);
         return args;
@@ -66,13 +47,16 @@ public sealed class KeyValueListCommand(ILogger<KeyValueListCommand> logger) : B
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {
-            if (!context.Validate(parseResult))
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 

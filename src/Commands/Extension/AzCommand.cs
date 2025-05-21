@@ -44,21 +44,9 @@ Your job is to answer questions about an Azure environment by executing Azure CL
         command.AddOption(_commandOption);
     }
 
-    protected override void RegisterArguments()
+    protected override AzArguments BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateCommandArgument());
-    }
-
-    private static ArgumentBuilder<AzArguments> CreateCommandArgument() =>
-        ArgumentBuilder<AzArguments>
-            .Create(ArgumentDefinitions.Extension.Az.Command.Name, ArgumentDefinitions.Extension.Az.Command.Description!)
-            .WithValueAccessor(args => args.Command ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Extension.Az.Command.IsRequired);
-
-    protected override AzArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Command = parseResult.GetValueForOption(_commandOption);
         return args;
     }
@@ -158,13 +146,16 @@ Your job is to answer questions about an Azure environment by executing Azure CL
     [McpServerTool(Destructive = true, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {
-            if (!context.Validate(parseResult))
+           var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 

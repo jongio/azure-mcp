@@ -35,21 +35,9 @@ public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseCon
         command.AddOption(_queryOption);
     }
 
-    protected override void RegisterArguments()
+    protected override ItemQueryArguments BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateQueryArgument());
-    }
-
-    private static ArgumentBuilder<ItemQueryArguments> CreateQueryArgument() =>
-        ArgumentBuilder<ItemQueryArguments>
-            .Create(ArgumentDefinitions.Cosmos.Query.Name, ArgumentDefinitions.Cosmos.Query.Description!)
-            .WithValueAccessor(args => args.Query ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Cosmos.Query.IsRequired);
-
-    protected override ItemQueryArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Query = parseResult.GetValueForOption(_queryOption);
         return args;
     }
@@ -57,13 +45,16 @@ public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseCon
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {
-            if (!context.Validate(parseResult))
+           var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 

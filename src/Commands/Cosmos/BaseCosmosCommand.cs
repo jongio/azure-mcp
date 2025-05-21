@@ -20,10 +20,11 @@ public abstract class BaseCosmosCommand<
         command.AddOption(_accountOption);
     }
 
-    protected override void RegisterArguments()
+    protected override TArgs BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateAccountArgument());
+        var args = base.BindOptions(parseResult);
+        args.Account = parseResult.GetValueForOption(_accountOption);
+        return args;
     }
 
     protected override string GetErrorMessage(Exception ex) => ex switch
@@ -37,18 +38,4 @@ public abstract class BaseCosmosCommand<
         CosmosException cosmosEx => (int)cosmosEx.StatusCode,
         _ => base.GetStatusCode(ex)
     };
-
-    protected override TArgs BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
-        args.Account = parseResult.GetValueForOption(_accountOption);
-        return args;
-    }
-
-    // Helper methods for creating Cosmos-specific arguments
-    protected ArgumentBuilder<TArgs> CreateAccountArgument() =>
-        ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Cosmos.Account.Name, ArgumentDefinitions.Cosmos.Account.Description!)
-            .WithValueAccessor(args => args.Account ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Cosmos.Account.IsRequired);
 }

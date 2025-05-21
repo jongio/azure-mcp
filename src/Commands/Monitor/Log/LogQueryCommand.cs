@@ -40,26 +40,19 @@ public sealed class LogQueryCommand(ILogger<LogQueryCommand> logger) : BaseMonit
         command.AddOption(_resourceGroupOption);
     }
 
-    protected override void RegisterArguments()
-    {
-        base.RegisterArguments();
-        AddArgument(CreateTableNameArgument());
-        AddArgument(CreateQueryArgument());
-        AddArgument(CreateHoursArgument());
-        AddArgument(CreateLimitArgument());
-        AddArgument(CreateResourceGroupArgument());
-    }
-
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {
-            if (!context.Validate(parseResult))
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 
@@ -85,45 +78,9 @@ public sealed class LogQueryCommand(ILogger<LogQueryCommand> logger) : BaseMonit
         return context.Response;
     }
 
-    private static ArgumentBuilder<LogQueryArguments> CreateTableNameArgument()
+    protected override LogQueryArguments BindOptions(ParseResult parseResult)
     {
-        return ArgumentBuilder<LogQueryArguments>
-            .Create(ArgumentDefinitions.Monitor.TableName.Name, ArgumentDefinitions.Monitor.TableName.Description!)
-            .WithValueAccessor(args =>
-            {
-                try
-                {
-                    return args.TableName ?? string.Empty;
-                }
-                catch
-                {
-                    return string.Empty;
-                }
-            })
-            .WithIsRequired(ArgumentDefinitions.Monitor.TableName.IsRequired);
-    }
-
-    private static ArgumentBuilder<LogQueryArguments> CreateQueryArgument() =>
-        ArgumentBuilder<LogQueryArguments>
-            .Create(ArgumentDefinitions.Monitor.Query.Name, ArgumentDefinitions.Monitor.Query.Description!)
-            .WithValueAccessor(args => args.Query ?? string.Empty)
-            .WithIsRequired(true);
-
-    private static ArgumentBuilder<LogQueryArguments> CreateHoursArgument() =>
-        ArgumentBuilder<LogQueryArguments>
-            .Create(ArgumentDefinitions.Monitor.Hours.Name, ArgumentDefinitions.Monitor.Hours.Description!)
-            .WithValueAccessor(args => args.Hours?.ToString() ?? ArgumentDefinitions.Monitor.Hours.GetDefaultValue().ToString())
-            .WithIsRequired(false);
-
-    private static ArgumentBuilder<LogQueryArguments> CreateLimitArgument() =>
-        ArgumentBuilder<LogQueryArguments>
-            .Create(ArgumentDefinitions.Monitor.Limit.Name, ArgumentDefinitions.Monitor.Limit.Description!)
-            .WithValueAccessor(args => args.Limit?.ToString() ?? ArgumentDefinitions.Monitor.Limit.GetDefaultValue().ToString())
-            .WithIsRequired(false);
-
-    protected override LogQueryArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.TableName = parseResult.GetValueForOption(_tableNameOption);
         args.Query = parseResult.GetValueForOption(_queryOption);
         args.Hours = parseResult.GetValueForOption(_hoursOption);
