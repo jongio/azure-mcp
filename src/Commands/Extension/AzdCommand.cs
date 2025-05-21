@@ -102,7 +102,7 @@ public sealed class AzdCommand(ILogger<AzdCommand> logger, int processTimeoutSec
 
         try
         {
-           var validationResult = Validate(parseResult.CommandResult);
+            var validationResult = Validate(parseResult.CommandResult);
 
             if (!validationResult.IsValid)
             {
