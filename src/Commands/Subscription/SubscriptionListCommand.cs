@@ -28,7 +28,7 @@ public sealed class SubscriptionListCommand(ILogger<SubscriptionListCommand> log
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindOptions(parseResult);
-        
+
         try
         {
 <<<<<<< HEAD

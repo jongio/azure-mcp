@@ -23,7 +23,7 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseDat
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindOptions(parseResult);
-        
+
         try
         {
             var validationResult = Validate(parseResult.CommandResult);

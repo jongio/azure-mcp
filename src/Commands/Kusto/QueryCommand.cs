@@ -47,7 +47,7 @@ public sealed class QueryCommand : BaseDatabaseCommand<QueryArguments>
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindOptions(parseResult);
-        
+
         try
         {
             var validationResult = Validate(parseResult.CommandResult);

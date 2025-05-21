@@ -150,7 +150,7 @@ Your job is to answer questions about an Azure environment by executing Azure CL
 
         try
         {
-           var validationResult = Validate(parseResult.CommandResult);
+            var validationResult = Validate(parseResult.CommandResult);
 
             if (!validationResult.IsValid)
             {

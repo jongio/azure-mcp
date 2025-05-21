@@ -49,7 +49,7 @@ public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseCon
 
         try
         {
-           var validationResult = Validate(parseResult.CommandResult);
+            var validationResult = Validate(parseResult.CommandResult);
 
             if (!validationResult.IsValid)
             {

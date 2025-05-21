@@ -27,7 +27,7 @@ public sealed class KeyValueLockCommand(ILogger<KeyValueLockCommand> logger) : B
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var args = BindOptions(parseResult);
-        
+
         try
         {
             var validationResult = Validate(parseResult.CommandResult);
