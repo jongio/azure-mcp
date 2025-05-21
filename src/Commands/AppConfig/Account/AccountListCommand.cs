@@ -26,12 +26,21 @@ public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : Sub
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {
+<<<<<<< HEAD
             if (!context.Validate(parseResult))
             {
+=======
+            var validationResult = Validate(parseResult.CommandResult);
+
+            if (!validationResult.IsValid)
+            {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
+>>>>>>> fdcb17d (Refactor command argument binding and validation)
                 return context.Response;
             }
 

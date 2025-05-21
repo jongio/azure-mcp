@@ -21,7 +21,6 @@ public abstract class BasePostgresCommand<
         _logger = logger;
     }
 
-
     protected override void RegisterOptions(Command command)
     {
         base.RegisterOptions(command);
@@ -29,24 +28,11 @@ public abstract class BasePostgresCommand<
         command.AddOption(_userOption);
     }
 
-    protected override void RegisterArguments()
+    protected override TArgs BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateResourceGroupArgument());
-        AddArgument(CreateUserArgument());
-    }
-
-    protected override TArgs BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
         args.User = parseResult.GetValueForOption(_userOption);
         return args;
     }
-
-    protected ArgumentBuilder<TArgs> CreateUserArgument() =>
-        ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Postgres.User.Name, ArgumentDefinitions.Postgres.User.Description!)
-            .WithValueAccessor(args => args.User ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Postgres.User.IsRequired);
 }

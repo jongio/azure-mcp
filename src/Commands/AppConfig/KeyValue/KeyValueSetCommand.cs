@@ -31,35 +31,26 @@ public sealed class KeyValueSetCommand(ILogger<KeyValueSetCommand> logger) : Bas
         command.AddOption(_valueOption);
     }
 
-    protected override void RegisterArguments()
+    protected override KeyValueSetArguments BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateValueArgument());
-    }
-
-    protected override KeyValueSetArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Value = parseResult.GetValueForOption(_valueOption);
         return args;
     }
 
-    private static ArgumentBuilder<KeyValueSetArguments> CreateValueArgument() =>
-        ArgumentBuilder<KeyValueSetArguments>
-            .Create(ArgumentDefinitions.AppConfig.Value.Name, ArgumentDefinitions.AppConfig.Value.Description!)
-            .WithValueAccessor(args => args.Value ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.Value.IsRequired);
-
     [McpServerTool(Destructive = false, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {
-            if (!context.Validate(parseResult))
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 

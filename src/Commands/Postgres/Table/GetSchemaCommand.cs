@@ -23,15 +23,9 @@ public sealed class GetSchemaCommand(ILogger<GetSchemaCommand> logger) : BaseDat
         command.AddOption(_tableOption);
     }
 
-    protected override void RegisterArguments()
+    protected override GetSchemaArguments BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateTableArgument());
-    }
-
-    protected override GetSchemaArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Table = parseResult.GetValueForOption(_tableOption);
         return args;
     }
@@ -41,11 +35,14 @@ public sealed class GetSchemaCommand(ILogger<GetSchemaCommand> logger) : BaseDat
     {
         try
         {
-            var args = BindArguments(parseResult);
+            var args = BindOptions(parseResult);
 
-            if (!context.Validate(parseResult))
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 
@@ -65,12 +62,6 @@ public sealed class GetSchemaCommand(ILogger<GetSchemaCommand> logger) : BaseDat
 
         return context.Response;
     }
-
-    private static ArgumentBuilder<GetSchemaArguments> CreateTableArgument() =>
-        ArgumentBuilder<GetSchemaArguments>
-            .Create(ArgumentDefinitions.Postgres.Table.Name, ArgumentDefinitions.Postgres.Table.Description!)
-            .WithValueAccessor(args => args.Table ?? string.Empty)
-            .WithIsRequired(true);
 
     internal record GetSchemaCommandResult(List<string> Schema);
 }

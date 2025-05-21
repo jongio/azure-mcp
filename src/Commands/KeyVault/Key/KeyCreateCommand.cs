@@ -45,35 +45,9 @@ public sealed class KeyCreateCommand(ILogger<KeyCreateCommand> logger) : Subscri
         command.AddOption(_keyTypeOption);
     }
 
-    protected override void RegisterArguments()
+    protected override KeyCreateArguments BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateVaultArgument());
-        AddArgument(CreateKeyArgument());
-        AddArgument(CreateKeyTypeArgument());
-    }
-
-    private static ArgumentBuilder<KeyCreateArguments> CreateVaultArgument() =>
-        ArgumentBuilder<KeyCreateArguments>
-            .Create(ArgumentDefinitions.KeyVault.VaultName.Name, ArgumentDefinitions.KeyVault.VaultName.Description!)
-            .WithValueAccessor(args => args.VaultName ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.KeyVault.VaultName.IsRequired);
-
-    private static ArgumentBuilder<KeyCreateArguments> CreateKeyArgument() =>
-        ArgumentBuilder<KeyCreateArguments>
-            .Create(ArgumentDefinitions.KeyVault.KeyName.Name, ArgumentDefinitions.KeyVault.KeyName.Description!)
-            .WithValueAccessor(args => args.KeyName ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.KeyVault.KeyName.IsRequired);
-
-    private static ArgumentBuilder<KeyCreateArguments> CreateKeyTypeArgument() =>
-        ArgumentBuilder<KeyCreateArguments>
-            .Create(ArgumentDefinitions.KeyVault.KeyType.Name, ArgumentDefinitions.KeyVault.KeyType.Description!)
-            .WithValueAccessor(args => args.KeyType ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.KeyVault.KeyType.IsRequired);
-
-    protected override KeyCreateArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.VaultName = parseResult.GetValueForOption(_vaultOption);
         args.KeyName = parseResult.GetValueForOption(_keyOption);
         args.KeyType = parseResult.GetValueForOption(_keyTypeOption);
@@ -83,13 +57,16 @@ public sealed class KeyCreateCommand(ILogger<KeyCreateCommand> logger) : Subscri
     [McpServerTool(Destructive = false, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {
-            if (!context.Validate(parseResult))
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 

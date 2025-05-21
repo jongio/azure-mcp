@@ -21,30 +21,11 @@ public abstract class BaseKeyValueCommand<
         command.AddOption(_labelOption);
     }
 
-    protected override void RegisterArguments()
+    protected override T BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateKeyArgument());
-        AddArgument(CreateLabelArgument());
-    }
-
-    protected override T BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Key = parseResult.GetValueForOption(_keyOption);
         args.Label = parseResult.GetValueForOption(_labelOption);
         return args;
     }
-
-    protected virtual ArgumentBuilder<T> CreateKeyArgument() =>
-        ArgumentBuilder<T>
-            .Create(ArgumentDefinitions.AppConfig.Key.Name, ArgumentDefinitions.AppConfig.Key.Description!)
-            .WithValueAccessor(args => args.Key ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.Key.IsRequired);
-
-    protected virtual ArgumentBuilder<T> CreateLabelArgument() =>
-        ArgumentBuilder<T>
-            .Create(ArgumentDefinitions.AppConfig.Label.Name, ArgumentDefinitions.AppConfig.Label.Description!)
-            .WithValueAccessor(args => args.Label ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.AppConfig.Label.IsRequired);
 }

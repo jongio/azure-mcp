@@ -31,23 +31,19 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseMon
         command.AddOption(_resourceGroupOption);
     }
 
-    protected override void RegisterArguments()
-    {
-        base.RegisterArguments();
-        AddArgument(CreateTableTypeArgument());
-        AddArgument(CreateResourceGroupArgument());
-    }
-
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {
-            if (!context.Validate(parseResult))
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 
@@ -73,19 +69,9 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseMon
         return context.Response;
     }
 
-    private static ArgumentBuilder<TableListArguments> CreateTableTypeArgument()
+    protected override TableListArguments BindOptions(ParseResult parseResult)
     {
-        var defaultValue = ArgumentDefinitions.Monitor.TableType.GetDefaultValue() ?? "CustomLog";
-        return ArgumentBuilder<TableListArguments>
-            .Create(ArgumentDefinitions.Monitor.TableType.Name, ArgumentDefinitions.Monitor.TableType.Description!)
-            .WithValueAccessor(args => args.TableType ?? defaultValue)
-            .WithDefaultValue(defaultValue)
-            .WithIsRequired(ArgumentDefinitions.Monitor.TableType.IsRequired);
-    }
-
-    protected override TableListArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.TableType = parseResult.GetValueForOption(_tableTypeOption) ?? ArgumentDefinitions.Monitor.TableType.GetDefaultValue();
         args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? ArgumentDefinitions.Common.ResourceGroup.GetDefaultValue();
         return args;

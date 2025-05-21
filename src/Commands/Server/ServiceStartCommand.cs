@@ -35,13 +35,6 @@ public sealed class ServiceStartCommand : BaseCommand
         command.AddOption(_portOption);
     }
 
-    protected override void RegisterArguments()
-    {
-        base.RegisterArguments();
-        AddArgument(GetTransportArgument());
-        AddArgument(GetPortArgument());
-    }
-
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var port = parseResult.GetValueForOption(_portOption) == default
@@ -97,22 +90,6 @@ public sealed class ServiceStartCommand : BaseCommand
                 })
                 .Build();
         }
-    }
-
-    private static ArgumentDefinition<string> GetTransportArgument()
-    {
-        var definition = ArgumentDefinitions.Service.Transport;
-        return new ArgumentDefinition<string>(
-            definition.Name,
-            definition.Description!);
-    }
-
-    private static ArgumentDefinition<string> GetPortArgument()
-    {
-        var definition = ArgumentDefinitions.Service.Port;
-        return new ArgumentDefinition<string>(
-            definition.Name,
-            definition.Description!);
     }
 
     private static void ConfigureMcpServer(IServiceCollection services, string transport)

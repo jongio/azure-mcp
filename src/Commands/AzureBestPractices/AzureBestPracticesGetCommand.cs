@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using AzureMcp.Helpers;
-using AzureMcp.Models.Argument;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.BestPractices;
@@ -40,20 +39,5 @@ public sealed class AzureBestPracticesGetCommand(ILogger<AzureBestPracticesGetCo
         context.Response.Results = ResponseResult.Create(new List<string> { bestPractices }, JsonSourceGenerationContext.Default.ListString);
         context.Response.Message = string.Empty;
         return Task.FromResult(context.Response);
-    }
-
-    // Dummy argument ensures OpenAPI generator emits a non-empty `parameters` schema
-    protected override void RegisterArguments()
-    {
-        base.RegisterArguments();
-
-        AddArgument(new ArgumentDefinition<string>(
-            name: "_dummy",
-            description: "Placeholder argument to ensure OpenAPI schema is valid.",
-            value: "",
-            defaultValue: "",
-            required: false,
-            hidden: true // optional: hide from UI/CLI help
-        ));
     }
 }

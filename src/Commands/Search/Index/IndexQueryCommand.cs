@@ -38,17 +38,9 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
         command.AddOption(_queryOption);
     }
 
-    protected override void RegisterArguments()
+    protected override IndexQueryArguments BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateServiceArgument());
-        AddArgument(CreateIndexArgument());
-        AddArgument(CreateQueryArgument());
-    }
-
-    protected override IndexQueryArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Service = parseResult.GetValueForOption(_serviceOption);
         args.Index = parseResult.GetValueForOption(_indexOption);
         args.Query = parseResult.GetValueForOption(_queryOption);
@@ -58,13 +50,16 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {
-            if (!context.Validate(parseResult))
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 
@@ -86,22 +81,4 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
 
         return context.Response;
     }
-
-    private static ArgumentBuilder<IndexQueryArguments> CreateServiceArgument() =>
-        ArgumentBuilder<IndexQueryArguments>
-            .Create(ArgumentDefinitions.Search.Service.Name, ArgumentDefinitions.Search.Service.Description!)
-            .WithValueAccessor(args => args.Service ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Search.Service.IsRequired);
-
-    private static ArgumentBuilder<IndexQueryArguments> CreateIndexArgument() =>
-        ArgumentBuilder<IndexQueryArguments>
-            .Create(ArgumentDefinitions.Search.Index.Name, ArgumentDefinitions.Search.Index.Description!)
-            .WithValueAccessor(args => args.Index ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Search.Index.IsRequired);
-
-    private static ArgumentBuilder<IndexQueryArguments> CreateQueryArgument() =>
-        ArgumentBuilder<IndexQueryArguments>
-            .Create(ArgumentDefinitions.Search.Query.Name, ArgumentDefinitions.Search.Query.Description!)
-            .WithValueAccessor(args => args.Query ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Search.Query.IsRequired);
 }

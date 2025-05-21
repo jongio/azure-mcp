@@ -24,15 +24,9 @@ public sealed class DatabaseQueryCommand(ILogger<DatabaseQueryCommand> logger) :
         command.AddOption(_queryOption);
     }
 
-    protected override void RegisterArguments()
+    protected override DatabaseQueryArguments BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateQueryArgument());
-    }
-
-    protected override DatabaseQueryArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Query = parseResult.GetValueForOption(_queryOption);
         return args;
     }
@@ -43,10 +37,13 @@ public sealed class DatabaseQueryCommand(ILogger<DatabaseQueryCommand> logger) :
     {
         try
         {
-            var args = BindArguments(parseResult);
-            if (!context.Validate(parseResult))
+            var args = BindOptions(parseResult);
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 
@@ -66,12 +63,6 @@ public sealed class DatabaseQueryCommand(ILogger<DatabaseQueryCommand> logger) :
 
         return context.Response;
     }
-
-    private static ArgumentBuilder<DatabaseQueryArguments> CreateQueryArgument() =>
-        ArgumentBuilder<DatabaseQueryArguments>
-            .Create(ArgumentDefinitions.Postgres.Query.Name, ArgumentDefinitions.Postgres.Query.Description!)
-            .WithValueAccessor(args => args.Query ?? string.Empty)
-            .WithIsRequired(true);
 
     internal record DatabaseQueryCommandResult(List<string> QueryResult);
 }

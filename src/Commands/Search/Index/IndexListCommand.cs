@@ -31,15 +31,9 @@ public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalC
         command.AddOption(_serviceOption);
     }
 
-    protected override void RegisterArguments()
+    protected override IndexListArguments BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateIndexListArgument());
-    }
-
-    protected override IndexListArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Service = parseResult.GetValueForOption(_serviceOption);
         return args;
     }
@@ -47,13 +41,16 @@ public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalC
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {
-            if (!context.Validate(parseResult))
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 
@@ -79,10 +76,4 @@ public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalC
     }
 
     internal record IndexListCommandResult(List<string> Indexes);
-
-    private static ArgumentBuilder<IndexListArguments> CreateIndexListArgument() =>
-        ArgumentBuilder<IndexListArguments>
-            .Create(ArgumentDefinitions.Search.Service.Name, ArgumentDefinitions.Search.Service.Description!)
-            .WithValueAccessor(args => args.Service ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Search.Service.IsRequired);
 }

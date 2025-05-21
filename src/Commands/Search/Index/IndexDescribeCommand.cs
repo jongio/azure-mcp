@@ -38,16 +38,9 @@ public sealed class IndexDescribeCommand(ILogger<IndexDescribeCommand> logger) :
         command.AddOption(_indexOption);
     }
 
-    protected override void RegisterArguments()
+    protected override IndexDescribeArguments BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateServiceArgument());
-        AddArgument(CreateIndexArgument());
-    }
-
-    protected override IndexDescribeArguments BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Service = parseResult.GetValueForOption(_serviceOption);
         args.Index = parseResult.GetValueForOption(_indexOption);
         return args;
@@ -56,13 +49,16 @@ public sealed class IndexDescribeCommand(ILogger<IndexDescribeCommand> logger) :
     [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindArguments(parseResult);
+        var args = BindOptions(parseResult);
 
         try
         {
-            if (!context.Validate(parseResult))
+            var validationResult = Validate(parseResult.CommandResult);
 
+            if (!validationResult.IsValid)
             {
+                context.Response.Status = 400;
+                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 
@@ -122,16 +118,4 @@ public sealed class IndexDescribeCommand(ILogger<IndexDescribeCommand> logger) :
             Fields = index.Fields.Select(field => new SearchFieldProxy(field)).ToList();
         }
     }
-
-    private static ArgumentBuilder<IndexDescribeArguments> CreateServiceArgument() =>
-        ArgumentBuilder<IndexDescribeArguments>
-            .Create(ArgumentDefinitions.Search.Service.Name, ArgumentDefinitions.Search.Service.Description!)
-            .WithValueAccessor(args => args.Service ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Search.Service.IsRequired);
-
-    private static ArgumentBuilder<IndexDescribeArguments> CreateIndexArgument() =>
-        ArgumentBuilder<IndexDescribeArguments>
-            .Create(ArgumentDefinitions.Search.Index.Name, ArgumentDefinitions.Search.Index.Description!)
-            .WithValueAccessor(args => args.Index ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Search.Index.IsRequired);
 }

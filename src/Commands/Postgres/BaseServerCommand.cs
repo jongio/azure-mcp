@@ -23,22 +23,10 @@ public abstract class BaseServerCommand<
         command.AddOption(_serverOption);
     }
 
-    protected override void RegisterArguments()
+    protected override TArgs BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateServerArgument());
-    }
-
-    protected override TArgs BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Server = parseResult.GetValueForOption(_serverOption);
         return args;
     }
-
-    protected ArgumentBuilder<TArgs> CreateServerArgument() =>
-        ArgumentBuilder<TArgs>
-            .Create(ArgumentDefinitions.Postgres.Server.Name, ArgumentDefinitions.Postgres.Server.Description!)
-            .WithValueAccessor(args => args.Server ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Postgres.Server.IsRequired);
 }
