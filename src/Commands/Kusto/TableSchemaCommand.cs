@@ -26,17 +26,12 @@ public sealed class TableSchemaCommand(ILogger<TableSchemaCommand> logger) : Bas
 
         try
         {
-<<<<<<< HEAD
-            if (!context.Validate(parseResult))
-            {
-=======
             var validationResult = Validate(parseResult.CommandResult);
 
             if (!validationResult.IsValid)
             {
                 context.Response.Status = 400;
                 context.Response.Message = validationResult.ErrorMessage!;
->>>>>>> fdcb17d (Refactor command argument binding and validation)
                 return context.Response;
             }
 
