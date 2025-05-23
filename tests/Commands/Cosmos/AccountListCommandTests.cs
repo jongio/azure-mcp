@@ -87,16 +87,8 @@ public class AccountListCommandTests
         // Arrange
         var expectedError = "Test error";
         var subscriptionId = "sub123";
-        var defaultRetryPolicy = new RetryPolicyArguments
-        {
-            DelaySeconds = ArgumentDefinitions.RetryPolicy.Delay.GetDefaultValue(),
-            MaxDelaySeconds = ArgumentDefinitions.RetryPolicy.MaxDelay.GetDefaultValue(),
-            MaxRetries = ArgumentDefinitions.RetryPolicy.MaxRetries.GetDefaultValue(),
-            Mode = ArgumentDefinitions.RetryPolicy.Mode.GetDefaultValue(),
-            NetworkTimeoutSeconds = ArgumentDefinitions.RetryPolicy.NetworkTimeout.GetDefaultValue()
-        };
 
-        _cosmosService.GetCosmosAccounts(subscriptionId, null, defaultRetryPolicy)
+        _cosmosService.GetCosmosAccounts(subscriptionId, null, Arg.Any<RetryPolicyArguments>())
             .ThrowsAsync(new Exception(expectedError));
 
         var command = new AccountListCommand(_logger);
