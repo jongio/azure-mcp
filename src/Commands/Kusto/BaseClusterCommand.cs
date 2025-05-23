@@ -37,8 +37,8 @@ public abstract class BaseClusterCommand<
     {
         var validationResult = new ValidationResult { IsValid = true };
         var clusterUri = parseResult.GetValueForOption(_clusterUriOption);
-        var clusterName = parseResult.GetValueForOption(_clusterNameOption);       
-         if (!string.IsNullOrEmpty(clusterUri))
+        var clusterName = parseResult.GetValueForOption(_clusterNameOption);
+        if (!string.IsNullOrEmpty(clusterUri))
         {
             // If clusterUri is provided, subscription becomes optional
             return validationResult;
@@ -54,7 +54,7 @@ public abstract class BaseClusterCommand<
                 validationResult.ErrorMessage = $"Either --{_clusterUriOption.Name} must be provided, or both --{_subscriptionOption.Name} and --{_clusterNameOption.Name} must be provided.";
             }
         }
-        
+
         if (validationResult.IsValid)
             return base.Validate(parseResult);
 
