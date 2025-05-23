@@ -89,7 +89,7 @@ public sealed class ClusterListCommandTests
         // Arrange
         var expectedError = "Test error. To mitigate this issue, please refer to the troubleshooting guidelines here at https://aka.ms/azmcp/troubleshooting.";
         var subscriptionId = "sub123";
-        
+
         // Arrange
         _kusto.ListClusters(subscriptionId, null, Arg.Any<RetryPolicyArguments>())
             .Returns(Task.FromException<List<string>>(new Exception("Test error")));
