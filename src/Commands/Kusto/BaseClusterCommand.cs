@@ -37,12 +37,11 @@ public abstract class BaseClusterCommand<
     {
         var validationResult = new ValidationResult { IsValid = true };
         var clusterUri = parseResult.GetValueForOption(_clusterUriOption);
-        var clusterName = parseResult.GetValueForOption(_clusterNameOption);
-
-        if (!string.IsNullOrEmpty(clusterUri))
+        var clusterName = parseResult.GetValueForOption(_clusterNameOption);       
+         if (!string.IsNullOrEmpty(clusterUri))
         {
-            // If clusterUri is provided, make subscription optional
-            _subscriptionOption.IsRequired = false;
+            // If clusterUri is provided, subscription becomes optional
+            return validationResult;
         }
         else
         {
