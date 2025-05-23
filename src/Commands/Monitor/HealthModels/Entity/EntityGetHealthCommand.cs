@@ -43,7 +43,7 @@ public sealed class EntityGetHealthCommand(ILogger<EntityGetHealthCommand> logge
 
     protected override EntityGetHealthArguments BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions (parseResult);
+        var args = base.BindOptions(parseResult);
         args.Entity = parseResult.GetValueForOption(_entityOption);
         args.HealthModelName = parseResult.GetValueForOption(_healthModelOption);
         args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
