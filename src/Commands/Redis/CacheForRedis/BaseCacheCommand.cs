@@ -22,24 +22,11 @@ public abstract class BaseCacheCommand<
         command.AddOption(_resourceGroupOption);
     }
 
-    protected override void RegisterArguments()
+    protected override T BindOptions(ParseResult parseResult)
     {
-        base.RegisterArguments();
-        AddArgument(CreateCacheArgument());
-        AddArgument(CreateResourceGroupArgument());
-    }
-
-    protected override T BindArguments(ParseResult parseResult)
-    {
-        var args = base.BindArguments(parseResult);
+        var args = base.BindOptions(parseResult);
         args.Cache = parseResult.GetValueForOption(_cacheOption);
         args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? "";
         return args;
     }
-
-    protected ArgumentBuilder<T> CreateCacheArgument() =>
-        ArgumentBuilder<T>
-            .Create(ArgumentDefinitions.Redis.Cache.Name, ArgumentDefinitions.Redis.Cache.Description!)
-            .WithValueAccessor(args => args.Cache ?? string.Empty)
-            .WithIsRequired(ArgumentDefinitions.Redis.Cache.IsRequired);
 }
