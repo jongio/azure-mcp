@@ -22,6 +22,9 @@ public static class SystemCommandLineExtensions
         try
         {
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 779daf6 (Refactor GetDefaultValue method to utilize reflection for argument retrieval and improve error handling)
             var argumentProperty = typeof(T).GetProperty("Argument", BindingFlags.Instance | BindingFlags.NonPublic);
             var argument = argumentProperty?.GetValue(option);
             if (argument != null)
@@ -33,6 +36,7 @@ public static class SystemCommandLineExtensions
                     return (T)(defaultValue ?? default!);
                 }
             }
+<<<<<<< HEAD
 =======
             return default!;
 
@@ -48,6 +52,8 @@ public static class SystemCommandLineExtensions
             //     }
             // }
 >>>>>>> 906209f (Remove unused reflection logic in GetDefaultValue method)
+=======
+>>>>>>> 779daf6 (Refactor GetDefaultValue method to utilize reflection for argument retrieval and improve error handling)
         }
         catch
         {
