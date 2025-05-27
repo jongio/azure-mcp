@@ -4,7 +4,7 @@
 
 ### Other Changes
 
-- Removed "Arguments" from code base in favor of "Options" to align with System.CommandLine semantics.
+- Removed "Arguments" from code base in favor of "Options" to align with System. CommandLine semantics. https://github.com/Azure/azure-mcp/pull/232
 
 ### Breaking Changes
 
