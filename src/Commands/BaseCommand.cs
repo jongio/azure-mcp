@@ -6,7 +6,7 @@ namespace AzureMcp.Commands;
 
 public abstract class BaseCommand : IBaseCommand
 {
-    private readonly Command? _command;
+    private readonly Command _command;
 
     protected BaseCommand()
     {
@@ -14,7 +14,7 @@ public abstract class BaseCommand : IBaseCommand
         RegisterOptions(_command);
     }
 
-    public Command GetCommand() => _command ?? throw new InvalidOperationException("Command not initialized");
+    public Command GetCommand() => _command;
 
     public abstract string Name { get; }
     public abstract string Description { get; }
@@ -22,19 +22,20 @@ public abstract class BaseCommand : IBaseCommand
 
     protected virtual void RegisterOptions(Command command)
     {
-        // Base implementation is empty, derived classes will add their options
     }
 
     public abstract Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult);
 
     protected virtual void HandleException(CommandResponse response, Exception ex)
     {
+        var result = new ExceptionResult(
+            Message: ex.Message,
+            StackTrace: ex.StackTrace,
+            Type: ex.GetType().Name);
+
         response.Status = GetStatusCode(ex);
         response.Message = GetErrorMessage(ex) + ". To mitigate this issue, please refer to the troubleshooting guidelines here at https://aka.ms/azmcp/troubleshooting.";
-        response.Results = ResponseResult.Create(new ExceptionResult(
-            ex.Message,
-            ex.StackTrace,
-            ex.GetType().Name), JsonSourceGenerationContext.Default.ExceptionResult);
+        response.Results = ResponseResult.Create(result, JsonSourceGenerationContext.Default.ExceptionResult);
     }
 
     internal record ExceptionResult(
@@ -46,30 +47,29 @@ public abstract class BaseCommand : IBaseCommand
 
     protected virtual int GetStatusCode(Exception ex) => 500;
 
-    public virtual ValidationResult Validate(CommandResult commandResult)
+    public virtual ValidationResult Validate(CommandResult commandResult, CommandResponse? commandResponse = null)
     {
-        var result = new ValidationResult();
+        var result = new ValidationResult { IsValid = true };
 
-        var missingParameters = commandResult.Command.Options
+        var missingOptions = commandResult.Command.Options
             .Where(o => o.IsRequired && commandResult.GetValueForOption(o) == null)
             .Select(o => $"--{o.Name}")
             .ToList();
 
-        if (missingParameters.Count > 0)
+        if (missingOptions.Count > 0 || !string.IsNullOrEmpty(commandResult.ErrorMessage))
         {
             result.IsValid = false;
-            result.ErrorMessage = $"Missing Required arguments: {string.Join(", ", missingParameters)}";
-            return result;
+            result.ErrorMessage = missingOptions.Count > 0
+                ? $"Missing Required options: {string.Join(", ", missingOptions)}"
+                : commandResult.ErrorMessage;
+
+            if (commandResponse != null && !result.IsValid)
+            {
+                commandResponse.Status = 400;
+                commandResponse.Message = result.ErrorMessage!;
+            }
         }
 
-        if (!string.IsNullOrEmpty(commandResult.ErrorMessage))
-        {
-            result.IsValid = false;
-            result.ErrorMessage = commandResult.ErrorMessage;
-            return result;
-        }
-
-        result.IsValid = true;
         return result;
     }
 }

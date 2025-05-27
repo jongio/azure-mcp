@@ -40,8 +40,6 @@ public sealed class ClusterListCommand : SubscriptionCommand<ClusterListOptions>
 
             if (!validationResult.IsValid)
             {
-                context.Response.Status = 400;
-                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 

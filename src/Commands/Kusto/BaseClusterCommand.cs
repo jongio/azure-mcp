@@ -34,7 +34,7 @@ public abstract class BaseClusterCommand<
         });
     }
 
-    public override ValidationResult Validate(CommandResult parseResult)
+    public override ValidationResult Validate(CommandResult parseResult, CommandResponse? commandResponse = null)
     {
         var validationResult = new ValidationResult { IsValid = true };
         var clusterUri = parseResult.GetValueForOption(_clusterUriOption);
@@ -57,7 +57,7 @@ public abstract class BaseClusterCommand<
         }
 
         if (validationResult.IsValid)
-            return base.Validate(parseResult);
+            return base.Validate(parseResult, commandResponse);
 
         return validationResult;
     }
