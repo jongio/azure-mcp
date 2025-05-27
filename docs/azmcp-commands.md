@@ -5,11 +5,11 @@
 > The Azure MCP Server has two modes: MCP Server mode and CLI mode.  When you start the MCP Server with `azmcp server start` that will expose an endpoint for MCP Client communication. The `azmcp` CLI also exposes all of the Tools via a command line interface, i.e. `azmcp subscription list`.  Since `azmcp` is built on a CLI infrastructure, you'll see the word "Command" be used interchangeably with "Tool".
 
 
-## Global Args
+## Global Options
 
-The following args are available for all commands:
+The following options are available for all commands:
 
-| Arg | Required | Default | Description |
+| Option | Required | Default | Description |
 |-----------|----------|---------|-------------|
 | `--subscription` | Yes | - | Azure subscription ID for target resources |
 | `--tenant-id` | No | - | Azure tenant ID for authentication |
@@ -273,7 +273,7 @@ All responses follow a consistent JSON format:
 {
   "status": "200|403|500, etc",
   "message": "",
-  "args": [],
+  "options": [],
   "results": [],
   "duration": 123
 }
@@ -282,7 +282,5 @@ All responses follow a consistent JSON format:
 ## Error Handling
 
 The CLI returns structured JSON responses for errors, including:
-- Missing required args
-- Invalid arg values
 - Service availability issues
 - Authentication errors
