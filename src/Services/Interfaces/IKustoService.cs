@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using AzureMcp.Commands.Kusto;
 using AzureMcp.Options;
 

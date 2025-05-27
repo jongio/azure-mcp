@@ -1,3 +1,6 @@
+<!-- Copyright (c) Microsoft Corporation.
+<!-- Licensed under the MIT License. -->
+
 # Implementing a New Command in Azure MCP
 
 This document provides a guide for implementing commands in Azure MCP following established patterns.
