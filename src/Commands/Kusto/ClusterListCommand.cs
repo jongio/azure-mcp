@@ -36,13 +36,10 @@ public sealed class ClusterListCommand : SubscriptionCommand<ClusterListOptions>
 
         try
         {
-            var validationResult = Validate(parseResult.CommandResult);
-
-            if (!validationResult.IsValid)
+            if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
                 return context.Response;
             }
-
 
             var kusto = context.GetService<IKustoService>();
             var clusterNames = await kusto.ListClusters(

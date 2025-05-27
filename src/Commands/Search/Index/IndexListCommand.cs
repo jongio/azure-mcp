@@ -45,12 +45,8 @@ public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalC
 
         try
         {
-            var validationResult = Validate(parseResult.CommandResult);
-
-            if (!validationResult.IsValid)
+            if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
-                context.Response.Status = 400;
-                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 

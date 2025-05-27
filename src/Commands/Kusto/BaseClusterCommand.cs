@@ -53,6 +53,12 @@ public abstract class BaseClusterCommand<
             {
                 validationResult.IsValid = false;
                 validationResult.ErrorMessage = $"Either --{_clusterUriOption.Name} must be provided, or both --{_subscriptionOption.Name} and --{_clusterNameOption.Name} must be provided.";
+                
+                if (commandResponse != null)
+                {
+                    commandResponse.Status = 400;
+                    commandResponse.Message = validationResult.ErrorMessage;
+                }
             }
         }
 

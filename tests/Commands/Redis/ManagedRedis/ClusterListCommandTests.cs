@@ -113,7 +113,7 @@ public class ClusterListCommandTests
 
         Assert.NotNull(response);
         Assert.Equal(400, response.Status);
-        Assert.Equal($"Missing Required arguments: {missingParameter}", response.Message);
+        Assert.Equal($"Missing Required options: {missingParameter}", response.Message);
     }
 
     private record ClusterListResult(IEnumerable<ClusterModel> Clusters);

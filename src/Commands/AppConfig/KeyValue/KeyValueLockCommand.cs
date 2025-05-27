@@ -30,15 +30,10 @@ public sealed class KeyValueLockCommand(ILogger<KeyValueLockCommand> logger) : B
 
         try
         {
-            var validationResult = Validate(parseResult.CommandResult);
-
-            if (!validationResult.IsValid)
+            if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
-                context.Response.Status = 400;
-                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
-
 
             var appConfigService = context.GetService<IAppConfigService>();
             await appConfigService.LockKeyValue(

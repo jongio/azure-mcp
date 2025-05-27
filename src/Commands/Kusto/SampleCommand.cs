@@ -46,15 +46,10 @@ public sealed class SampleCommand(ILogger<SampleCommand> logger) : BaseTableComm
 
         try
         {
-            var validationResult = Validate(parseResult.CommandResult);
-
-            if (!validationResult.IsValid)
+            if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
-                context.Response.Status = 400;
-                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
-
 
             var kusto = context.GetService<IKustoService>();
             List<JsonElement> results;

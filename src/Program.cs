@@ -63,11 +63,16 @@ internal class Program
         builder.AddMiddleware(async (context, next) =>
         {
             var commandContext = new CommandContext(serviceProvider);
-            if (!commandContext.Validate(context.ParseResult))
+            var command = context.ParseResult.CommandResult.Command;
+            if (command.Handler is IBaseCommand baseCommand)
             {
-                WriteResponse(commandContext.Response);
-                context.ExitCode = commandContext.Response.Status;
-                return;
+                var validationResult = baseCommand.Validate(context.ParseResult.CommandResult, commandContext.Response);
+                if (!validationResult.IsValid)
+                {
+                    WriteResponse(commandContext.Response);
+                    context.ExitCode = commandContext.Response.Status;
+                    return;
+                }
             }
             await next(context);
         });

@@ -150,12 +150,8 @@ Your job is to answer questions about an Azure environment by executing Azure CL
 
         try
         {
-            var validationResult = Validate(parseResult.CommandResult);
-
-            if (!validationResult.IsValid)
+            if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
-                context.Response.Status = 400;
-                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 

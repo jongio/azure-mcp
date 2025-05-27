@@ -39,12 +39,8 @@ public sealed class GetParamCommand(ILogger<GetParamCommand> logger) : BaseServe
         {
             var args = BindOptions(parseResult);
 
-            var validationResult = Validate(parseResult.CommandResult);
-
-            if (!validationResult.IsValid)
+            if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
-                context.Response.Status = 400;
-                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 

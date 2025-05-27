@@ -107,7 +107,7 @@ public class ServerListCommandTests
 
         Assert.NotNull(response);
         Assert.Equal(400, response.Status);
-        Assert.Equal($"Missing Required arguments: {missingParameter}", response.Message);
+        Assert.Equal($"Missing Required options: {missingParameter}", response.Message);
     }
 
     private class ServerListResult

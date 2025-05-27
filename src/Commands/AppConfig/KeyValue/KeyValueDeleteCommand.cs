@@ -30,11 +30,8 @@ public sealed class KeyValueDeleteCommand(ILogger<KeyValueDeleteCommand> logger)
 
         try
         {
-            var validationResult = Validate(parseResult.CommandResult, context.Response);
-
-            if (!validationResult.IsValid)
+            if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
-                
                 return context.Response;
             }
 
