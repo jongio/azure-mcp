@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Kusto;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Options.Kusto;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Kusto;
 
-public sealed class ClusterListCommand : SubscriptionCommand<ClusterListArguments>
+public sealed class ClusterListCommand : SubscriptionCommand<ClusterListOptions>
 {
     private const string _commandTitle = "List Kusto Clusters";
     private readonly ILogger<ClusterListCommand> _logger;

@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using Azure.Core;
 using Azure.ResourceManager;
-using AzureMcp.Arguments;
+using AzureMcp.Options;
 using AzureMcp.Services.Azure.Authentication;
 using AzureMcp.Services.Interfaces;
 
@@ -20,7 +20,7 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
     private string? _lastTenantId;
     private ArmClient? _armClient;
     private string? _lastArmClientTenantId;
-    private RetryPolicyArguments? _lastRetryPolicy;
+    private RetryPolicyOptions? _lastRetryPolicy;
     private readonly ITenantService? _tenantService = tenantService;
 
     static BaseAzureService()
@@ -78,14 +78,14 @@ public abstract class BaseAzureService(ITenantService? tenantService = null)
     /// </summary>
     /// <param name="tenant">Optional Azure tenant ID or name</param>
     /// <param name="retryPolicy">Optional retry policy configuration</param>
-    protected async Task<ArmClient> CreateArmClientAsync(string? tenant = null, RetryPolicyArguments? retryPolicy = null)
+    protected async Task<ArmClient> CreateArmClientAsync(string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         var tenantId = await ResolveTenantIdAsync(tenant);
 
         // Return cached client if parameters match
         if (_armClient != null &&
             _lastArmClientTenantId == tenantId &&
-            RetryPolicyArguments.AreEqual(_lastRetryPolicy, retryPolicy))
+            RetryPolicyOptions.AreEqual(_lastRetryPolicy, retryPolicy))
         {
             return _armClient;
         }

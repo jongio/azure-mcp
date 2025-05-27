@@ -8,7 +8,7 @@ using Azure.ResourceManager.Storage;
 using Azure.ResourceManager.Storage.Models;
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
-using AzureMcp.Arguments;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Services.Azure.Storage;
@@ -21,7 +21,7 @@ public class StorageService(ISubscriptionService subscriptionService, ITenantSer
     private const string STORAGE_ACCOUNTS_CACHE_KEY = "accounts";
     private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(1);
 
-    public async Task<List<string>> GetStorageAccounts(string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<List<string>> GetStorageAccounts(string subscriptionId, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscriptionId);
 
@@ -60,7 +60,7 @@ public class StorageService(ISubscriptionService subscriptionService, ITenantSer
         return accounts;
     }
 
-    public async Task<List<string>> ListContainers(string accountName, string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<List<string>> ListContainers(string accountName, string subscriptionId, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(accountName, subscriptionId);
 
@@ -88,7 +88,7 @@ public class StorageService(ISubscriptionService subscriptionService, ITenantSer
         AuthMethod authMethod = AuthMethod.Credential,
         string? connectionString = null,
         string? tenant = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(accountName, subscriptionId);
 
@@ -175,7 +175,7 @@ public class StorageService(ISubscriptionService subscriptionService, ITenantSer
         }
     }
 
-    public async Task<List<string>> ListBlobs(string accountName, string containerName, string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<List<string>> ListBlobs(string accountName, string containerName, string subscriptionId, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(accountName, containerName, subscriptionId);
 
@@ -203,7 +203,7 @@ public class StorageService(ISubscriptionService subscriptionService, ITenantSer
         string containerName,
         string subscriptionId,
         string? tenant = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(accountName, containerName);
 
@@ -272,7 +272,7 @@ public class StorageService(ISubscriptionService subscriptionService, ITenantSer
         AuthMethod authMethod,
         string? connectionString = null,
         string? tenant = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         var options = AddDefaultPolicies(new TableClientOptions());
 
@@ -303,7 +303,7 @@ public class StorageService(ISubscriptionService subscriptionService, ITenantSer
         }
     }
 
-    private async Task<BlobServiceClient> CreateBlobServiceClient(string accountName, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
+    private async Task<BlobServiceClient> CreateBlobServiceClient(string accountName, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         var uri = $"https://{accountName}.blob.core.windows.net";
         var options = AddDefaultPolicies(new BlobClientOptions());

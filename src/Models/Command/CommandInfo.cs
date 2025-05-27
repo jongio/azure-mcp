@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Text.Json.Serialization;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
 
 namespace AzureMcp.Models.Command;
 
@@ -21,7 +21,7 @@ public class CommandInfo
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public List<CommandInfo>? Subcommands { get; set; }
 
-    [JsonPropertyName("args")]
+    [JsonPropertyName("option")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public List<ArgumentInfo>? Arguments { get; set; }
+    public List<OptionInfo>? Options { get; set; }
 }

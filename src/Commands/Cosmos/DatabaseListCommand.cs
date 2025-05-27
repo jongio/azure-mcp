@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Cosmos;
+using AzureMcp.Options.Cosmos;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Cosmos;
 
-public sealed class DatabaseListCommand(ILogger<DatabaseListCommand> logger) : BaseCosmosCommand<DatabaseListArguments>()
+public sealed class DatabaseListCommand(ILogger<DatabaseListCommand> logger) : BaseCosmosCommand<DatabaseListOptions>()
 {
     private const string _commandTitle = "List Cosmos DB Databases";
     private readonly ILogger<DatabaseListCommand> _logger = logger;

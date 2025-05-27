@@ -1,10 +1,10 @@
-using AzureMcp.Arguments.Monitor.TableType;
+using AzureMcp.Options.Monitor.TableType;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Monitor.TableType;
 
-public sealed class TableTypeListCommand(ILogger<TableTypeListCommand> logger) : BaseMonitorCommand<TableTypeListArguments>()
+public sealed class TableTypeListCommand(ILogger<TableTypeListCommand> logger) : BaseMonitorCommand<TableTypeListOptions>()
 {
     private const string _commandTitle = "List Log Analytics Table Types";
     private readonly ILogger<TableTypeListCommand> _logger = logger;
@@ -22,7 +22,7 @@ public sealed class TableTypeListCommand(ILogger<TableTypeListCommand> logger) :
         command.AddOption(_resourceGroupOption); // inherited from base
     }
 
-    protected override TableTypeListArguments BindOptions(ParseResult parseResult)
+    protected override TableTypeListOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);

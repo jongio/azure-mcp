@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.AppConfig.KeyValue;
+using AzureMcp.Options.AppConfig.KeyValue;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.AppConfig.KeyValue;
 
-public sealed class KeyValueDeleteCommand(ILogger<KeyValueDeleteCommand> logger) : BaseKeyValueCommand<KeyValueDeleteArguments>()
+public sealed class KeyValueDeleteCommand(ILogger<KeyValueDeleteCommand> logger) : BaseKeyValueCommand<KeyValueDeleteOptions>()
 {
     private const string _commandTitle = "Delete App Configuration Key-Value Setting";
     private readonly ILogger<KeyValueDeleteCommand> _logger = logger;

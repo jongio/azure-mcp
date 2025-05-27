@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.AppConfig.Account;
+using AzureMcp.Commands.Subscription;
 using AzureMcp.Models.AppConfig;
+using AzureMcp.Options.AppConfig.Account;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.AppConfig.Account;
 
-public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : SubscriptionCommand<AccountListArguments>()
+public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : SubscriptionCommand<AccountListOptions>()
 {
     private const string _commandTitle = "List App Configuration Stores";
     private readonly ILogger<AccountListCommand> _logger = logger;

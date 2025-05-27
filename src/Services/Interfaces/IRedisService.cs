@@ -1,10 +1,9 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments;
-using AzureMcp.Models;
 using AzureMcp.Models.Redis.CacheForRedis;
 using AzureMcp.Models.Redis.ManagedRedis;
+using AzureMcp.Options;
 
 namespace AzureMcp.Services.Interfaces;
 
@@ -23,7 +22,7 @@ public interface IRedisService
         string subscription,
         string? tenant = null,
         AuthMethod? authMethod = null,
-        RetryPolicyArguments? retryPolicy = null);
+        RetryPolicyOptions? retryPolicy = null);
 
 
     /// <summary>
@@ -39,7 +38,7 @@ public interface IRedisService
         string subscription,
         string? tenant = null,
         AuthMethod? authMethod = null,
-        RetryPolicyArguments? retryPolicy = null);
+        RetryPolicyOptions? retryPolicy = null);
 
     /// <summary>
     /// Lists the databases in the specified Redis cluster.
@@ -58,7 +57,7 @@ public interface IRedisService
         string subscriptionId,
         string? tenant = null,
         AuthMethod? authMethod = null,
-        RetryPolicyArguments? retryPolicy = null);
+        RetryPolicyOptions? retryPolicy = null);
 
     /// <summary>
     /// Lists the access policy assignments in the specified Redis cache.
@@ -77,6 +76,6 @@ public interface IRedisService
         string subscriptionId,
         string? tenant = null,
         AuthMethod? authMethod = null,
-        RetryPolicyArguments? retryPolicy = null);
+        RetryPolicyOptions? retryPolicy = null);
 
 }

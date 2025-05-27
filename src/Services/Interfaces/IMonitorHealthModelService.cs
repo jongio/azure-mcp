@@ -2,8 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Text.Json.Nodes;
-using AzureMcp.Arguments;
-using AzureMcp.Models;
+using AzureMcp.Options;
 
 namespace AzureMcp.Services.Interfaces;
 
@@ -29,5 +28,5 @@ public interface IMonitorHealthModelService
         string subscription,
         AuthMethod? authMethod = null,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null);
+        RetryPolicyOptions? retryPolicy = null);
 }

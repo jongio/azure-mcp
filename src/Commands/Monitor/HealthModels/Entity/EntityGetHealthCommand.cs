@@ -1,19 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Text.Json.Nodes;
-using AzureMcp.Arguments.Monitor.HealthModels.Entity;
-using AzureMcp.Models.Argument;
-using AzureMcp.Models.Command;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Monitor.HealthModels.Entity;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Monitor.HealthModels.Entity;
 
-public sealed class EntityGetHealthCommand(ILogger<EntityGetHealthCommand> logger) : BaseMonitorHealthModelsCommand<EntityGetHealthArguments>
+public sealed class EntityGetHealthCommand(ILogger<EntityGetHealthCommand> logger) : BaseMonitorHealthModelsCommand<EntityGetHealthOptions>
 {
     private const string _commandTitle = "Get the health of an entity in a health model";
     private const string _commandName = "gethealth";
@@ -25,8 +21,8 @@ public sealed class EntityGetHealthCommand(ILogger<EntityGetHealthCommand> logge
         Returns entity health information.
         
         Required arguments:
-        - {ArgumentDefinitions.Monitor.Health.Entity.Name}: The entity to get health for
-        - {ArgumentDefinitions.Monitor.Health.HealthModel.Name}: The health model name
+        - {OptionDefinitions.Monitor.Health.Entity.Name}: The entity to get health for
+        - {OptionDefinitions.Monitor.Health.HealthModel.Name}: The health model name
         """;
 
     public override string Title => _commandTitle;
@@ -41,7 +37,7 @@ public sealed class EntityGetHealthCommand(ILogger<EntityGetHealthCommand> logge
         command.AddOption(_resourceGroupOption);
     }
 
-    protected override EntityGetHealthArguments BindOptions(ParseResult parseResult)
+    protected override EntityGetHealthOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.Entity = parseResult.GetValueForOption(_entityOption);

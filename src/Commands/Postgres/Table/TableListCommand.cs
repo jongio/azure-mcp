@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Postgres.Table;
+using AzureMcp.Options.Postgres.Table;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 
 namespace AzureMcp.Commands.Postgres.Table;
 
-public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseDatabaseCommand<TableListArguments>(logger)
+public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseDatabaseCommand<TableListOptions>(logger)
 {
     private const string _commandTitle = "List PostgreSQL Tables";
 

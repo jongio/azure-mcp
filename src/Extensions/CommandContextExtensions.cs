@@ -19,7 +19,7 @@ public static class CommandContextExtensions
         if (missingParameters.Count > 0)
         {
             context.Response.Status = 400;
-            context.Response.Message = $"Missing required arguments: {string.Join(", ", missingParameters)}";
+            context.Response.Message = $"Missing Required arguments: {string.Join(", ", missingParameters)}";
             return false;
         }
 

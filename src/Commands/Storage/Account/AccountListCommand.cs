@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Storage.Account;
-using AzureMcp.Models.Argument;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Storage.Account;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Storage.Account;
 
-public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : SubscriptionCommand<AccountListArguments>()
+public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : SubscriptionCommand<AccountListOptions>()
 {
     private const string _commandTitle = "List Storage Accounts";
     private readonly ILogger<AccountListCommand> _logger = logger;
@@ -18,7 +19,7 @@ public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : Sub
     public override string Description =>
         $"""
         List all Storage accounts in a subscription. This command retrieves all Storage accounts available
-        in the specified {ArgumentDefinitions.Common.SubscriptionName}. Results include account names and are
+        in the specified {OptionDefinitions.Common.SubscriptionName}. Results include account names and are
         returned as a JSON array.
         """;
 

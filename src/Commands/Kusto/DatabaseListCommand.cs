@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Kusto;
+using AzureMcp.Options.Kusto;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Kusto;
 
-public sealed class DatabaseListCommand : BaseClusterCommand<DatabaseListArguments>
+public sealed class DatabaseListCommand : BaseClusterCommand<DatabaseListOptions>
 {
     private const string _commandTitle = "List Kusto Databases";
     private readonly ILogger<DatabaseListCommand> _logger;

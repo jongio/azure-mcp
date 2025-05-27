@@ -4,11 +4,10 @@
 using Azure.ResourceManager.Redis;
 using Azure.ResourceManager.Redis.Models;
 using Azure.ResourceManager.RedisEnterprise;
-using AzureMcp.Arguments;
-using AzureMcp.Models;
 using AzureMcp.Models.Identity;
 using AzureMcp.Models.Redis.CacheForRedis;
 using AzureMcp.Models.Redis.ManagedRedis;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Services.Azure.Redis;
@@ -20,7 +19,7 @@ public class RedisService(ISubscriptionService _subscriptionService, IResourceGr
         string subscriptionId,
         string? tenant = null,
         AuthMethod? authMethod = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscriptionId);
 
@@ -118,7 +117,7 @@ public class RedisService(ISubscriptionService _subscriptionService, IResourceGr
         string subscriptionId,
         string? tenant = null,
         AuthMethod? authMethod = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(cacheName, resourceGroupName, subscriptionId);
 
@@ -158,7 +157,7 @@ public class RedisService(ISubscriptionService _subscriptionService, IResourceGr
         string subscriptionId,
         string? tenant = null,
         AuthMethod? authMethod = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscriptionId);
 
@@ -225,7 +224,7 @@ public class RedisService(ISubscriptionService _subscriptionService, IResourceGr
         string subscriptionId,
         string? tenant = null,
         AuthMethod? authMethod = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(clusterName, resourceGroupName, subscriptionId);
 

@@ -2,17 +2,18 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics.CodeAnalysis;
-using AzureMcp.Arguments.Cosmos;
-using AzureMcp.Models.Argument;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Cosmos;
 using Microsoft.Azure.Cosmos;
 
 namespace AzureMcp.Commands.Cosmos;
 
 public abstract class BaseCosmosCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : SubscriptionCommand<TArgs> where TArgs : BaseCosmosArguments, new()
+    : SubscriptionCommand<TArgs> where TArgs : BaseCosmosOptions, new()
 {
-    protected readonly Option<string> _accountOption = ArgumentDefinitions.Cosmos.Account;
+    protected readonly Option<string> _accountOption = OptionDefinitions.Cosmos.Account;
 
     protected override void RegisterOptions(Command command)
     {

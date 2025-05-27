@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Postgres.Server;
+using AzureMcp.Options.Postgres.Server;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Postgres.Server;
 
-public sealed class ServerListCommand(ILogger<ServerListCommand> logger) : BasePostgresCommand<ServerListArguments>(logger)
+public sealed class ServerListCommand(ILogger<ServerListCommand> logger) : BasePostgresCommand<ServerListOptions>(logger)
 {
     private const string _commandTitle = "List PostgreSQL Servers";
 

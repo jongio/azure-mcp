@@ -1,16 +1,16 @@
 using System.Diagnostics.CodeAnalysis;
-using AzureMcp.Arguments.Postgres;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Postgres;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Postgres;
 
 public abstract class BaseServerCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>(ILogger<BasePostgresCommand<TArgs>> logger)
-    : BasePostgresCommand<TArgs>(logger) where TArgs : BasePostgresArguments, new()
+    : BasePostgresCommand<TArgs>(logger) where TArgs : BasePostgresOptions, new()
 
 {
-    private readonly Option<string> _serverOption = ArgumentDefinitions.Postgres.Server;
+    private readonly Option<string> _serverOption = OptionDefinitions.Postgres.Server;
 
     public override string Name => "server";
 

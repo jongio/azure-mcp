@@ -4,10 +4,10 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json.Nodes;
-using AzureMcp.Arguments;
 using AzureMcp.Commands.Monitor.HealthModels.Entity;
 using AzureMcp.Models;
 using AzureMcp.Models.Command;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -65,7 +65,7 @@ public class EntityGetHealthCommandTests
                 TestSubscription,
                 Arg.Any<AuthMethod?>(),
                 TestTenant,
-                Arg.Any<RetryPolicyArguments?>())
+                Arg.Any<RetryPolicyOptions?>())
             .Returns(mockResponse);
 
         var args = _parser.Parse($"--entity {TestEntity} --model-name {TestHealthModel} --resource-group {TestResourceGroup} --subscription {TestSubscription} --tenant {TestTenant}");
@@ -85,7 +85,7 @@ public class EntityGetHealthCommandTests
             TestSubscription,
             Arg.Any<AuthMethod?>(),
             TestTenant,
-            Arg.Any<RetryPolicyArguments?>());
+            Arg.Any<RetryPolicyOptions?>());
     }
 
     [Fact]
@@ -109,7 +109,7 @@ public class EntityGetHealthCommandTests
             Arg.Any<string>(),
             Arg.Any<AuthMethod?>(),
             Arg.Any<string>(),
-            Arg.Any<RetryPolicyArguments?>());
+            Arg.Any<RetryPolicyOptions?>());
     }
 
     [Fact]
@@ -124,7 +124,7 @@ public class EntityGetHealthCommandTests
                 TestSubscription,
                 Arg.Any<AuthMethod?>(),
                 Arg.Any<string>(),
-                Arg.Any<RetryPolicyArguments?>())
+                Arg.Any<RetryPolicyOptions?>())
             .Returns(Task.FromException<JsonNode>(new KeyNotFoundException("Entity not found")));
 
         var args = _parser.Parse($"--entity {TestEntity} --model-name {TestHealthModel} --resource-group {TestResourceGroup} --subscription {TestSubscription}");
@@ -144,7 +144,7 @@ public class EntityGetHealthCommandTests
             TestSubscription,
             Arg.Any<AuthMethod?>(),
             Arg.Any<string>(),
-            Arg.Any<RetryPolicyArguments?>());
+            Arg.Any<RetryPolicyOptions?>());
     }
 
     [Fact]
@@ -159,7 +159,7 @@ public class EntityGetHealthCommandTests
                 TestSubscription,
                 Arg.Any<AuthMethod?>(),
                 Arg.Any<string>(),
-                Arg.Any<RetryPolicyArguments?>())
+                Arg.Any<RetryPolicyOptions?>())
             .Returns(Task.FromException<JsonNode>(new ArgumentException("Invalid health model format")));
 
         var args = _parser.Parse($"--entity {TestEntity} --model-name {TestHealthModel} --resource-group {TestResourceGroup} --subscription {TestSubscription}");
@@ -179,7 +179,7 @@ public class EntityGetHealthCommandTests
             TestSubscription,
             Arg.Any<AuthMethod?>(),
             Arg.Any<string>(),
-            Arg.Any<RetryPolicyArguments?>());
+            Arg.Any<RetryPolicyOptions?>());
     }
 
     [Fact]
@@ -195,7 +195,7 @@ public class EntityGetHealthCommandTests
                 TestSubscription,
                 Arg.Any<AuthMethod?>(),
                 Arg.Any<string>(),
-                Arg.Any<RetryPolicyArguments?>())
+                Arg.Any<RetryPolicyOptions?>())
             .Returns(Task.FromException<JsonNode>(new Exception(expectedError)));
 
         var args = _parser.Parse($"--entity {TestEntity} --model-name {TestHealthModel} --resource-group {TestResourceGroup} --subscription {TestSubscription}");
@@ -215,7 +215,7 @@ public class EntityGetHealthCommandTests
             TestSubscription,
             Arg.Any<AuthMethod?>(),
             Arg.Any<string>(),
-            Arg.Any<RetryPolicyArguments?>());
+            Arg.Any<RetryPolicyOptions?>());
     }
 
     [Fact]
@@ -233,7 +233,7 @@ public class EntityGetHealthCommandTests
                 TestSubscription,
                 Arg.Is<AuthMethod>(a => a == AuthMethod.Credential),
                 Arg.Any<string>(),
-                Arg.Any<RetryPolicyArguments?>())
+                Arg.Any<RetryPolicyOptions?>())
             .Returns(mockResponse);
 
         var args = _parser.Parse($"--entity {TestEntity} --model-name {TestHealthModel} --resource-group {TestResourceGroup} --subscription {TestSubscription} --auth-method {authMethod}");
@@ -252,7 +252,7 @@ public class EntityGetHealthCommandTests
             TestSubscription,
             Arg.Is<AuthMethod>(a => a == AuthMethod.Credential),
             Arg.Any<string>(),
-            Arg.Any<RetryPolicyArguments?>());
+            Arg.Any<RetryPolicyOptions?>());
     }
 
     [Fact]
@@ -271,7 +271,7 @@ public class EntityGetHealthCommandTests
                 TestSubscription,
                 Arg.Any<AuthMethod?>(),
                 Arg.Any<string>(),
-                Arg.Is<RetryPolicyArguments>(r => r.DelaySeconds == retryDelay && r.MaxRetries == maxRetries))
+                Arg.Is<RetryPolicyOptions>(r => r.DelaySeconds == retryDelay && r.MaxRetries == maxRetries))
             .Returns(mockResponse);
 
         var args = _parser.Parse($"--entity {TestEntity} --model-name {TestHealthModel} --resource-group {TestResourceGroup} --subscription {TestSubscription} --retry-delay {retryDelay} --retry-max-retries {maxRetries}");
@@ -290,6 +290,6 @@ public class EntityGetHealthCommandTests
             TestSubscription,
             Arg.Any<AuthMethod?>(),
             Arg.Any<string>(),
-            Arg.Is<RetryPolicyArguments>(r => r.DelaySeconds == retryDelay && r.MaxRetries == maxRetries));
+            Arg.Is<RetryPolicyOptions>(r => r.DelaySeconds == retryDelay && r.MaxRetries == maxRetries));
     }
 }

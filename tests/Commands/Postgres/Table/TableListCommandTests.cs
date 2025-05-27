@@ -90,7 +90,7 @@ public class TableListCommandTests
 
         Assert.NotNull(response);
         Assert.Equal(400, response.Status);
-        Assert.Equal($"Missing required arguments: {missingParameter}", response.Message);
+        Assert.Equal($"Missing Required arguments: {missingParameter}", response.Message);
     }
 
     private class TableListResult

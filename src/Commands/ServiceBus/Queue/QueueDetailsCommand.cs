@@ -2,18 +2,19 @@
 // Licensed under the MIT License.
 
 using Azure.Messaging.ServiceBus;
-using AzureMcp.Arguments.ServiceBus.Queue;
-using AzureMcp.Models.Argument;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Option;
 using AzureMcp.Models.ServiceBus;
+using AzureMcp.Options.ServiceBus.Queue;
 using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Commands.ServiceBus.Queue;
 
-public sealed class QueueDetailsCommand : SubscriptionCommand<BaseQueueArguments>
+public sealed class QueueDetailsCommand : SubscriptionCommand<BaseQueueOptions>
 {
     private const string _commandTitle = "Get Service Bus Queue Details";
-    private readonly Option<string> _queueOption = ArgumentDefinitions.ServiceBus.Queue;
-    private readonly Option<string> _namespaceOption = ArgumentDefinitions.ServiceBus.Namespace;
+    private readonly Option<string> _queueOption = OptionDefinitions.ServiceBus.Queue;
+    private readonly Option<string> _namespaceOption = OptionDefinitions.ServiceBus.Namespace;
 
     public override string Name => "details";
 
@@ -36,7 +37,7 @@ public sealed class QueueDetailsCommand : SubscriptionCommand<BaseQueueArguments
         command.AddOption(_queueOption);
     }
 
-    protected override BaseQueueArguments BindOptions(ParseResult parseResult)
+    protected override BaseQueueOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.Name = parseResult.GetValueForOption(_queueOption);

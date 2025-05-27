@@ -1,20 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine.Parsing;
-using AzureMcp.Arguments.Redis.CacheForRedis;
-using AzureMcp.Models.Command;
 using AzureMcp.Models.Redis.CacheForRedis;
+using AzureMcp.Options.Redis.CacheForRedis;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Redis.CacheForRedis;
 
 /// <summary>
 /// Lists the access policy assignments in the specified Azure cache.
 /// </summary>
-public sealed class AccessPolicyListCommand(ILogger<AccessPolicyListCommand> logger) : BaseCacheCommand<AccessPolicyListArguments>()
+public sealed class AccessPolicyListCommand(ILogger<AccessPolicyListCommand> logger) : BaseCacheCommand<AccessPolicyListOptions>()
 {
     private const string _commandTitle = "List Redis Cache Access Policy Assignments";
     private readonly ILogger<AccessPolicyListCommand> _logger = logger;

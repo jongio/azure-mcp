@@ -136,7 +136,7 @@ public sealed class AzCommandTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_ReturnsBadRequest_WhenMissingRequiredArguments()
+    public async Task ExecuteAsync_ReturnsBadRequest_WhenMissingRequiredOptions()
     {
         // Arrange
         var command = new AzCommand(_logger);

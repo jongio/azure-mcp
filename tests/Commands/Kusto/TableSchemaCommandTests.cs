@@ -3,10 +3,10 @@
 
 using System.CommandLine.Parsing;
 using System.Text.Json.Serialization;
-using AzureMcp.Arguments;
 using AzureMcp.Commands.Kusto;
 using AzureMcp.Models;
 using AzureMcp.Models.Command;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -49,14 +49,14 @@ public sealed class TableSchemaCommandTests
                 "https://mycluster.kusto.windows.net",
                 "db1",
                 "table1",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(expectedSchema);
         }
         else
         {
             _kusto.GetTableSchema(
                 "sub1", "mycluster", "db1", "table1",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(expectedSchema);
         }
         var command = new TableSchemaCommand(_logger);
@@ -88,14 +88,14 @@ public sealed class TableSchemaCommandTests
                 "https://mycluster.kusto.windows.net",
                 "db1",
                 "table1",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .ThrowsAsync(new Exception("Test error"));
         }
         else
         {
             _kusto.GetTableSchema(
                 "sub1", "mycluster", "db1", "table1",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .ThrowsAsync(new Exception("Test error"));
         }
         var command = new TableSchemaCommand(_logger);
@@ -122,14 +122,14 @@ public sealed class TableSchemaCommandTests
                 "https://mycluster.kusto.windows.net",
                 "db1",
                 "table1",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(Task.FromException<string>(new Exception("Test error")));
         }
         else
         {
             _kusto.GetTableSchema(
                 "sub1", "mycluster", "db1", "table1",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(Task.FromException<string>(new Exception("Test error")));
         }
         var command = new TableSchemaCommand(_logger);
@@ -144,7 +144,7 @@ public sealed class TableSchemaCommandTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_ReturnsBadRequest_WhenMissingRequiredArguments()
+    public async Task ExecuteAsync_ReturnsBadRequest_WhenMissingRequiredOptions()
     {
         var command = new TableSchemaCommand(_logger);
         var parser = new Parser(command.GetCommand());

@@ -1,19 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.KeyVault.Key;
-using AzureMcp.Models.Argument;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.KeyVault.Key;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.KeyVault.Key;
 
-public sealed class KeyGetCommand(ILogger<KeyGetCommand> logger) : SubscriptionCommand<KeyGetArguments>
+public sealed class KeyGetCommand(ILogger<KeyGetCommand> logger) : SubscriptionCommand<KeyGetOptions>
 {
     private const string _commandTitle = "Get Key Vault Key";
     private readonly ILogger<KeyGetCommand> _logger = logger;
-    private readonly Option<string> _vaultOption = ArgumentDefinitions.KeyVault.VaultName;
-    private readonly Option<string> _keyOption = ArgumentDefinitions.KeyVault.KeyName;
+    private readonly Option<string> _vaultOption = OptionDefinitions.KeyVault.VaultName;
+    private readonly Option<string> _keyOption = OptionDefinitions.KeyVault.KeyName;
 
     public override string Name => "get";
 
@@ -37,7 +38,7 @@ public sealed class KeyGetCommand(ILogger<KeyGetCommand> logger) : SubscriptionC
         command.AddOption(_keyOption);
     }
 
-    protected override KeyGetArguments BindOptions(ParseResult parseResult)
+    protected override KeyGetOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.VaultName = parseResult.GetValueForOption(_vaultOption);

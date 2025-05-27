@@ -2,8 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics;
-using System.Reflection;
-using AzureMcp.Services.Azure;
 using AzureMcp.Tests.Client.Helpers;
 using Xunit;
 

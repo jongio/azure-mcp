@@ -4,10 +4,10 @@
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AzureMcp.Arguments;
 using AzureMcp.Commands.Kusto;
 using AzureMcp.Models;
 using AzureMcp.Models.Command;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -47,13 +47,13 @@ public sealed class DatabaseListCommandTests
         {
             _kusto.ListDatabases(
                 "https://mycluster.kusto.windows.net",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(expectedDatabases);
         }
         else
         {
             _kusto.ListDatabases(
-                "sub1", "mycluster", Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                "sub1", "mycluster", Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(expectedDatabases);
         }
         var command = new DatabaseListCommand(_logger);
@@ -82,13 +82,13 @@ public sealed class DatabaseListCommandTests
         {
             _kusto.ListDatabases(
                 "https://mycluster.kusto.windows.net",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns([]);
         }
         else
         {
             _kusto.ListDatabases(
-                "sub1", "mycluster", Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                "sub1", "mycluster", Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns([]);
         }
         var command = new DatabaseListCommand(_logger);
@@ -114,13 +114,13 @@ public sealed class DatabaseListCommandTests
         {
             _kusto.ListDatabases(
                 "https://mycluster.kusto.windows.net",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(Task.FromException<List<string>>(new Exception("Test error")));
         }
         else
         {
             _kusto.ListDatabases(
-                "sub1", "mycluster", Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                "sub1", "mycluster", Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(Task.FromException<List<string>>(new Exception("Test error")));
         }
         var command = new DatabaseListCommand(_logger);
@@ -138,7 +138,7 @@ public sealed class DatabaseListCommandTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_ReturnsBadRequest_WhenMissingRequiredArguments()
+    public async Task ExecuteAsync_ReturnsBadRequest_WhenMissingRequiredOptions()
     {
         var command = new DatabaseListCommand(_logger);
         var parser = new Parser(command.GetCommand());
@@ -153,7 +153,7 @@ public sealed class DatabaseListCommandTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_ReturnsBadRequest_WhenMissingAllRequiredArguments()
+    public async Task ExecuteAsync_ReturnsBadRequest_WhenMissingAllRequiredOptions()
     {
         var command = new DatabaseListCommand(_logger);
         var parser = new Parser(command.GetCommand());

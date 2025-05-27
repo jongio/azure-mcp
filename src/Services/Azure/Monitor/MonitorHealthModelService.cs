@@ -3,8 +3,7 @@
 
 using System.Text.Json.Nodes;
 using Azure.Core;
-using AzureMcp.Arguments;
-using AzureMcp.Models;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Services.Azure.Monitor;
@@ -43,7 +42,7 @@ public class MonitorHealthModelService(ITenantService tenantService)
         string subscription,
         AuthMethod? authMethod = null,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(entity, healthModelName, resourceGroupName, subscription);
 

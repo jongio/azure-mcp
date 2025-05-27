@@ -1,19 +1,19 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Kusto;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Kusto;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Kusto;
 
-public sealed class SampleCommand(ILogger<SampleCommand> logger) : BaseTableCommand<SampleArguments>
+public sealed class SampleCommand(ILogger<SampleCommand> logger) : BaseTableCommand<SampleOptions>
 {
     private const string _commandTitle = "Sample Kusto Table Data";
     private readonly ILogger<SampleCommand> _logger = logger;
 
-    private readonly Option<int> _limitOption = ArgumentDefinitions.Kusto.Limit;
+    private readonly Option<int> _limitOption = OptionDefinitions.Kusto.Limit;
 
     protected override void RegisterOptions(Command command)
     {
@@ -21,7 +21,7 @@ public sealed class SampleCommand(ILogger<SampleCommand> logger) : BaseTableComm
         command.AddOption(_limitOption);
     }
 
-    protected override SampleArguments BindOptions(ParseResult parseResult)
+    protected override SampleOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.Limit = parseResult.GetValueForOption(_limitOption);

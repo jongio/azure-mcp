@@ -2,15 +2,16 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics.CodeAnalysis;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Cosmos;
 
 namespace AzureMcp.Commands.Cosmos;
 
 public abstract class BaseContainerCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : BaseDatabaseCommand<TArgs> where TArgs : Arguments.Cosmos.BaseContainerArguments, new()
+    : BaseDatabaseCommand<TArgs> where TArgs : BaseContainerOptions, new()
 {
-    private readonly Option<string> _containerOption = ArgumentDefinitions.Cosmos.Container;
+    private readonly Option<string> _containerOption = OptionDefinitions.Cosmos.Container;
 
     protected override void RegisterOptions(Command command)
     {

@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Storage.Table;
+using AzureMcp.Options.Storage.Table;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Storage.Table;
 
-public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseStorageCommand<TableListArguments>()
+public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseStorageCommand<TableListOptions>()
 {
     private const string _commandTitle = "List Storage Tables";
     private readonly ILogger<TableListCommand> _logger = logger;

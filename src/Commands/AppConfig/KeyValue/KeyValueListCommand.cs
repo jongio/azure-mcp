@@ -1,22 +1,22 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.AppConfig.KeyValue;
 using AzureMcp.Models.AppConfig;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.AppConfig.KeyValue;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.AppConfig.KeyValue;
 
-public sealed class KeyValueListCommand(ILogger<KeyValueListCommand> logger) : BaseAppConfigCommand<KeyValueListArguments>()
+public sealed class KeyValueListCommand(ILogger<KeyValueListCommand> logger) : BaseAppConfigCommand<KeyValueListOptions>()
 {
     private const string _commandTitle = "List App Configuration Key-Value Settings";
     private readonly ILogger<KeyValueListCommand> _logger = logger;
 
     // KeyValueList has different key and label descriptions, which is why we are defining here instead of using BaseKeyValueCommand
-    private readonly Option<string> _keyOption = ArgumentDefinitions.AppConfig.KeyValueList.Key;
-    private readonly Option<string> _labelOption = ArgumentDefinitions.AppConfig.KeyValueList.Label;
+    private readonly Option<string> _keyOption = OptionDefinitions.AppConfig.KeyValueList.Key;
+    private readonly Option<string> _labelOption = OptionDefinitions.AppConfig.KeyValueList.Label;
 
     public override string Name => "list";
 
@@ -36,7 +36,7 @@ public sealed class KeyValueListCommand(ILogger<KeyValueListCommand> logger) : B
         command.AddOption(_labelOption);
     }
 
-    protected override KeyValueListArguments BindOptions(ParseResult parseResult)
+    protected override KeyValueListOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.Key = parseResult.GetValueForOption(_keyOption);

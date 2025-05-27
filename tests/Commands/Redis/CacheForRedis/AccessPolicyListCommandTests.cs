@@ -48,7 +48,7 @@ public class AccessPolicyListCommandTests
             "sub123",
             Arg.Any<string>(),
             Arg.Any<AzureMcp.Models.AuthMethod>(),
-            Arg.Any<AzureMcp.Arguments.RetryPolicyArguments>())
+            Arg.Any<AzureMcp.Options.RetryPolicyOptions>())
             .Returns(expectedAssignments);
 
         var command = new AccessPolicyListCommand(_logger);
@@ -84,7 +84,7 @@ public class AccessPolicyListCommandTests
             "sub123",
             Arg.Any<string>(),
             Arg.Any<AzureMcp.Models.AuthMethod>(),
-            Arg.Any<AzureMcp.Arguments.RetryPolicyArguments>())
+            Arg.Any<AzureMcp.Options.RetryPolicyOptions>())
             .Returns([]);
 
         var command = new AccessPolicyListCommand(_logger);
@@ -107,7 +107,7 @@ public class AccessPolicyListCommandTests
             subscriptionId: "sub123",
             tenant: Arg.Any<string>(),
             authMethod: Arg.Any<AzureMcp.Models.AuthMethod>(),
-            retryPolicy: Arg.Any<AzureMcp.Arguments.RetryPolicyArguments>())
+            retryPolicy: Arg.Any<AzureMcp.Options.RetryPolicyOptions>())
             .ThrowsAsync(new Exception("Test error"));
 
         var command = new AccessPolicyListCommand(_logger);

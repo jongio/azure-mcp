@@ -5,9 +5,9 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AzureMcp.Arguments;
 using AzureMcp.Commands.Search.Service;
 using AzureMcp.Models.Command;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -39,7 +39,7 @@ public class ServiceListCommandTests
     {
         // Arrange
         var expectedServices = new List<string> { "service1", "service2" };
-        _searchService.ListServices(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
+        _searchService.ListServices(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
             .Returns(expectedServices);
 
         var command = new ServiceListCommand(_logger);
@@ -65,7 +65,7 @@ public class ServiceListCommandTests
     public async Task ExecuteAsync_ReturnsNull_WhenNoServices()
     {
         // Arrange
-        _searchService.ListServices(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
+        _searchService.ListServices(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
             .Returns(new List<string>());
 
         var command = new ServiceListCommand(_logger);
@@ -88,7 +88,7 @@ public class ServiceListCommandTests
         var expectedError = "Test error";
         var subscriptionId = "sub123";
 
-        _searchService.ListServices(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
+        _searchService.ListServices(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
             .ThrowsAsync(new Exception(expectedError));
 
         var command = new ServiceListCommand(_logger);

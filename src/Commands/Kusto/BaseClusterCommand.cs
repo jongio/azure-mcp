@@ -2,19 +2,20 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics.CodeAnalysis;
-using AzureMcp.Arguments.Kusto;
-using AzureMcp.Models.Argument;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Kusto;
 
 namespace AzureMcp.Commands.Kusto;
 
 public abstract class BaseClusterCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : SubscriptionCommand<TArgs> where TArgs : BaseClusterArguments, new()
+    : SubscriptionCommand<TArgs> where TArgs : BaseClusterOptions, new()
 {
-    protected readonly Option<string> _clusterNameOption = ArgumentDefinitions.Kusto.Cluster;
-    protected readonly Option<string> _clusterUriOption = ArgumentDefinitions.Kusto.ClusterUri;
+    protected readonly Option<string> _clusterNameOption = OptionDefinitions.Kusto.Cluster;
+    protected readonly Option<string> _clusterUriOption = OptionDefinitions.Kusto.ClusterUri;
 
-    protected static bool UseClusterUri(BaseClusterArguments args) => !string.IsNullOrEmpty(args.ClusterUri);
+    protected static bool UseClusterUri(BaseClusterOptions args) => !string.IsNullOrEmpty(args.ClusterUri);
 
     protected override void RegisterOptions(Command command)
     {

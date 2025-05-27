@@ -64,7 +64,7 @@ public class DatabaseListCommandTests
             "sub123",
             Arg.Any<string>(),
             Arg.Any<AzureMcp.Models.AuthMethod>(),
-            Arg.Any<AzureMcp.Arguments.RetryPolicyArguments>())
+            Arg.Any<AzureMcp.Options.RetryPolicyOptions>())
             .Returns(expectedDatabases);
 
         var command = new DatabaseListCommand(_logger);
@@ -100,7 +100,7 @@ public class DatabaseListCommandTests
             "sub123",
             Arg.Any<string>(),
             Arg.Any<AzureMcp.Models.AuthMethod>(),
-            Arg.Any<AzureMcp.Arguments.RetryPolicyArguments>())
+            Arg.Any<AzureMcp.Options.RetryPolicyOptions>())
             .Returns([]);
 
         var command = new DatabaseListCommand(_logger);
@@ -123,7 +123,7 @@ public class DatabaseListCommandTests
             "sub123",
             Arg.Any<string>(),
             Arg.Any<AzureMcp.Models.AuthMethod>(),
-            Arg.Any<AzureMcp.Arguments.RetryPolicyArguments>())
+            Arg.Any<AzureMcp.Options.RetryPolicyOptions>())
             .ThrowsAsync(new Exception("Test error"));
 
         var command = new DatabaseListCommand(_logger);

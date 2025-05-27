@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using Azure.ResourceManager.Resources;
-using AzureMcp.Arguments;
 using AzureMcp.Models.ResourceGroup;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Services.Azure.ResourceGroup;
@@ -17,7 +17,7 @@ public class ResourceGroupService(ICacheService cacheService, ISubscriptionServi
     private const string CACHE_KEY = "resourcegroups";
     private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(1);
 
-    public async Task<List<ResourceGroupInfo>> GetResourceGroups(string subscription, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<List<ResourceGroupInfo>> GetResourceGroups(string subscription, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription);
 
@@ -54,7 +54,7 @@ public class ResourceGroupService(ICacheService cacheService, ISubscriptionServi
         }
     }
 
-    public async Task<ResourceGroupInfo?> GetResourceGroup(string subscription, string resourceGroupName, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<ResourceGroupInfo?> GetResourceGroup(string subscription, string resourceGroupName, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, resourceGroupName);
 
@@ -88,7 +88,7 @@ public class ResourceGroupService(ICacheService cacheService, ISubscriptionServi
         }
     }
 
-    public async Task<ResourceGroupResource?> GetResourceGroupResource(string subscription, string resourceGroupName, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<ResourceGroupResource?> GetResourceGroupResource(string subscription, string resourceGroupName, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, resourceGroupName);
 

@@ -2,16 +2,16 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics.CodeAnalysis;
-using AzureMcp.Arguments.Kusto;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Kusto;
 
 namespace AzureMcp.Commands.Kusto;
 
 public abstract class BaseDatabaseCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : BaseClusterCommand<TArgs> where TArgs : BaseDatabaseArguments, new()
+    : BaseClusterCommand<TArgs> where TArgs : BaseDatabaseOptions, new()
 {
-    protected readonly Option<string> _databaseOption = ArgumentDefinitions.Kusto.Database;
+    protected readonly Option<string> _databaseOption = OptionDefinitions.Kusto.Database;
 
     protected override void RegisterOptions(Command command)
     {

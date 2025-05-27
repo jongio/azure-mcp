@@ -5,9 +5,9 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AzureMcp.Arguments;
 using AzureMcp.Commands.Search.Index;
 using AzureMcp.Models.Command;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -45,7 +45,7 @@ public class IndexDescribeCommandTests
             .DescribeIndex(
                 Arg.Is<string>(s => s == serviceName),
                 Arg.Is<string>(i => i == indexName),
-                Arg.Any<RetryPolicyArguments?>())
+                Arg.Any<RetryPolicyOptions?>())
             .Returns(expectedDefinition);
 
         var command = new IndexDescribeCommand(_logger);
@@ -85,7 +85,7 @@ public class IndexDescribeCommandTests
             .DescribeIndex(
                 Arg.Is<string>(s => s == serviceName),
                 Arg.Is<string>(i => i == indexName),
-                Arg.Any<RetryPolicyArguments?>())
+                Arg.Any<RetryPolicyOptions?>())
             .Returns(Task.FromResult((SearchIndexProxy?)null));
 
         var command = new IndexDescribeCommand(_logger);
@@ -113,7 +113,7 @@ public class IndexDescribeCommandTests
             .DescribeIndex(
                 Arg.Is<string>(s => s == serviceName),
                 Arg.Is<string>(i => i == indexName),
-                Arg.Any<RetryPolicyArguments?>())
+                Arg.Any<RetryPolicyOptions?>())
             .ThrowsAsync(new Exception(expectedError));
 
         var command = new IndexDescribeCommand(_logger);
@@ -131,12 +131,12 @@ public class IndexDescribeCommandTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_ValidatesRequiredArguments()
+    public async Task ExecuteAsync_ValidatesRequiredOptions()
     {
         // Arrange
         var command = new IndexDescribeCommand(_logger);
         var parser = new Parser(command.GetCommand());
-        var args = parser.Parse(""); // Missing required arguments
+        var args = parser.Parse(""); // Missing required options
         var context = new CommandContext(_serviceProvider);
 
         // Act

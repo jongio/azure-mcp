@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using Azure.ResourceManager;
-using AzureMcp.Arguments;
+using AzureMcp.Options;
 using AzureMcp.Services.Azure;
 using AzureMcp.Services.Interfaces;
 using NSubstitute;
@@ -33,7 +33,7 @@ public class BaseAzureServiceTests
 
         _tenantService.GetTenantId(tenantName2).Returns(tenantId2);
 
-        var retryPolicyArgs = new RetryPolicyArguments
+        var retryPolicyArgs = new RetryPolicyOptions
         {
             DelaySeconds = 5,
             MaxDelaySeconds = 15,
@@ -64,7 +64,7 @@ public class BaseAzureServiceTests
 
     private sealed class TestAzureService(ITenantService? tenantService = null) : BaseAzureService(tenantService)
     {
-        public Task<ArmClient> GetArmClientAsync(string? tenant = null, RetryPolicyArguments? retryPolicy = null) =>
+        public Task<ArmClient> GetArmClientAsync(string? tenant = null, RetryPolicyOptions? retryPolicy = null) =>
             CreateArmClientAsync(tenant, retryPolicy);
 
         public Task<string?> ResolveTenantId(string? tenant) => ResolveTenantIdAsync(tenant);

@@ -1,14 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Storage.Blob;
 using AzureMcp.Commands.Storage.Blob.Container;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Storage.Blob;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Storage.Blob;
 
-public sealed class BlobListCommand(ILogger<BlobListCommand> logger) : BaseContainerCommand<BlobListArguments>()
+public sealed class BlobListCommand(ILogger<BlobListCommand> logger) : BaseContainerCommand<BlobListOptions>()
 {
     private const string _commandTitle = "List Storage Blobs";
     private readonly ILogger<BlobListCommand> _logger = logger;
@@ -19,8 +20,8 @@ public sealed class BlobListCommand(ILogger<BlobListCommand> logger) : BaseConta
         $"""
         List all blobs in a Storage container. This command retrieves and displays all blobs available
         in the specified container and Storage account. Results include blob names, sizes, and content types,
-        returned as a JSON array. Requires {Models.Argument.ArgumentDefinitions.Storage.AccountName} and
-        {Models.Argument.ArgumentDefinitions.Storage.ContainerName}.
+        returned as a JSON array. Requires {OptionDefinitions.Storage.AccountName} and
+        {OptionDefinitions.Storage.ContainerName}.
         """;
 
     public override string Title => _commandTitle;

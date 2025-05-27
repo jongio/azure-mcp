@@ -1,20 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Search.Index;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Search.Index;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Search.Index;
 
-public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : GlobalCommand<IndexQueryArguments>()
+public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : GlobalCommand<IndexQueryOptions>()
 {
     private const string _commandTitle = "Query Azure AI Search Index";
     private readonly ILogger<IndexQueryCommand> _logger = logger;
-    private readonly Option<string> _serviceOption = ArgumentDefinitions.Search.Service;
-    private readonly Option<string> _indexOption = ArgumentDefinitions.Search.Index;
-    private readonly Option<string> _queryOption = ArgumentDefinitions.Search.Query;
+    private readonly Option<string> _serviceOption = OptionDefinitions.Search.Service;
+    private readonly Option<string> _indexOption = OptionDefinitions.Search.Index;
+    private readonly Option<string> _queryOption = OptionDefinitions.Search.Query;
 
     public override string Name => "query";
 
@@ -38,7 +38,7 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
         command.AddOption(_queryOption);
     }
 
-    protected override IndexQueryArguments BindOptions(ParseResult parseResult)
+    protected override IndexQueryOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.Service = parseResult.GetValueForOption(_serviceOption);

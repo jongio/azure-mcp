@@ -2,17 +2,17 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics.CodeAnalysis;
-using AzureMcp.Arguments.AppConfig.KeyValue;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.AppConfig.KeyValue;
 
 namespace AzureMcp.Commands.AppConfig.KeyValue;
 
 public abstract class BaseKeyValueCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] T>
-    : BaseAppConfigCommand<T> where T : BaseKeyValueArguments, new()
+    : BaseAppConfigCommand<T> where T : BaseKeyValueOptions, new()
 {
-    protected readonly Option<string> _keyOption = ArgumentDefinitions.AppConfig.Key;
-    protected readonly Option<string> _labelOption = ArgumentDefinitions.AppConfig.Label;
+    protected readonly Option<string> _keyOption = OptionDefinitions.AppConfig.Key;
+    protected readonly Option<string> _labelOption = OptionDefinitions.AppConfig.Label;
 
     protected override void RegisterOptions(Command command)
     {

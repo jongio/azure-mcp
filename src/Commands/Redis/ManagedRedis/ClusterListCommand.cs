@@ -1,20 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine.Parsing;
-using AzureMcp.Arguments.Redis.ManagedRedis;
-using AzureMcp.Models.Command;
+using AzureMcp.Commands.Subscription;
 using AzureMcp.Models.Redis.ManagedRedis;
+using AzureMcp.Options.Redis.ManagedRedis;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Redis.ManagedRedis;
 
 /// <summary>
 /// Lists Azure Managed Redis cluster resources (`Balanced`, `MemoryOptimized`, `ComputeOptimized`, and `FlashOptimized` tiers) and Azure Redis Enterprise cluster resources (`Enterprise` and `EnterpriseFlash` tiers) in the specified subscription.
 /// </summary>
-public sealed class ClusterListCommand(ILogger<ClusterListCommand> logger) : SubscriptionCommand<ClusterListArguments>()
+public sealed class ClusterListCommand(ILogger<ClusterListCommand> logger) : SubscriptionCommand<ClusterListOptions>()
 {
     private const string _commandTitle = "List Redis Clusters";
     private readonly ILogger<ClusterListCommand> _logger = logger;

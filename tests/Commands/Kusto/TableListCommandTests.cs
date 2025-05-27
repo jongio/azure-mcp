@@ -4,10 +4,10 @@
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AzureMcp.Arguments;
 using AzureMcp.Commands.Kusto;
 using AzureMcp.Models;
 using AzureMcp.Models.Command;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -47,14 +47,14 @@ public sealed class TableListCommandTests
             _kusto.ListTables(
                 "https://mycluster.kusto.windows.net",
                 "db1",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(expectedTables);
         }
         else
         {
             _kusto.ListTables(
                 "sub1", "mycluster", "db1",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(expectedTables);
         }
         var command = new TableListCommand(_logger);
@@ -83,14 +83,14 @@ public sealed class TableListCommandTests
             _kusto.ListTables(
                 "https://mycluster.kusto.windows.net",
                 "db1",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(new List<string>());
         }
         else
         {
             _kusto.ListTables(
                 "sub1", "mycluster", "db1",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(new List<string>());
         }
         var command = new TableListCommand(_logger);
@@ -113,14 +113,14 @@ public sealed class TableListCommandTests
             _kusto.ListTables(
                 "https://mycluster.kusto.windows.net",
                 "db1",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(Task.FromException<List<string>>(new Exception("Test error")));
         }
         else
         {
             _kusto.ListTables(
                 "sub1", "mycluster", "db1",
-                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyArguments>())
+                Arg.Any<string>(), Arg.Any<AuthMethod?>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(Task.FromException<List<string>>(new Exception("Test error")));
         }
         var command = new TableListCommand(_logger);
@@ -135,7 +135,7 @@ public sealed class TableListCommandTests
     }
 
     [Fact]
-    public async Task ExecuteAsync_ReturnsBadRequest_WhenMissingRequiredArguments()
+    public async Task ExecuteAsync_ReturnsBadRequest_WhenMissingRequiredOptions()
     {
         var command = new TableListCommand(_logger);
         var parser = new Parser(command.GetCommand());

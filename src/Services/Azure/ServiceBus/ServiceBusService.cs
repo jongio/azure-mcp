@@ -3,8 +3,8 @@
 
 using Azure.Messaging.ServiceBus;
 using Azure.Messaging.ServiceBus.Administration;
-using AzureMcp.Arguments;
 using AzureMcp.Models.ServiceBus;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Services.Azure.ServiceBus;
@@ -15,7 +15,7 @@ public class ServiceBusService : BaseAzureService, IServiceBusService
         string namespaceName,
         string queueName,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         var credential = await GetCredential(tenantId);
         var client = new ServiceBusAdministrationClient(namespaceName, credential);
@@ -52,7 +52,7 @@ public class ServiceBusService : BaseAzureService, IServiceBusService
         string topicName,
         string subscriptionName,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         var credential = await GetCredential(tenantId);
         var client = new ServiceBusAdministrationClient(namespaceName, credential);
@@ -82,7 +82,7 @@ public class ServiceBusService : BaseAzureService, IServiceBusService
         string namespaceName,
         string topicName,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         var credential = await GetCredential(tenantId);
         var client = new ServiceBusAdministrationClient(namespaceName, credential);
@@ -109,7 +109,7 @@ public class ServiceBusService : BaseAzureService, IServiceBusService
         string queueName,
         int maxMessages,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         var credential = await GetCredential(tenantId);
 
@@ -128,7 +128,7 @@ public class ServiceBusService : BaseAzureService, IServiceBusService
         string subscriptionName,
         int maxMessages,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         var credential = await GetCredential(tenantId);
 

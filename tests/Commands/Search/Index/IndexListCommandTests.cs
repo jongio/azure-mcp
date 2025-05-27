@@ -5,9 +5,9 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AzureMcp.Arguments;
 using AzureMcp.Commands.Search.Index;
 using AzureMcp.Models.Command;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -39,7 +39,7 @@ public class IndexListCommandTests
     {
         // Arrange
         var expectedIndexes = new List<string> { "index1", "index2" };
-        _searchService.ListIndexes(Arg.Is("service123"), Arg.Any<RetryPolicyArguments>())
+        _searchService.ListIndexes(Arg.Is("service123"), Arg.Any<RetryPolicyOptions>())
             .Returns(expectedIndexes);
 
         var command = new IndexListCommand(_logger);
@@ -65,7 +65,7 @@ public class IndexListCommandTests
     public async Task ExecuteAsync_ReturnsNull_WhenNoIndexes()
     {
         // Arrange
-        _searchService.ListIndexes(Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
+        _searchService.ListIndexes(Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
             .Returns(new List<string>());
 
         var command = new IndexListCommand(_logger);
@@ -88,7 +88,7 @@ public class IndexListCommandTests
         var expectedError = "Test error";
         var serviceName = "service123";
 
-        _searchService.ListIndexes(Arg.Is(serviceName), Arg.Any<RetryPolicyArguments>())
+        _searchService.ListIndexes(Arg.Is(serviceName), Arg.Any<RetryPolicyOptions>())
             .ThrowsAsync(new Exception(expectedError));
 
         var command = new IndexListCommand(_logger);

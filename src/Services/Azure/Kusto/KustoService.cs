@@ -1,6 +1,6 @@
 using Azure.ResourceManager.Kusto;
-using AzureMcp.Arguments;
 using AzureMcp.Commands.Kusto;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Kusto.Cloud.Platform.Data;
 using Kusto.Data;
@@ -39,7 +39,7 @@ public sealed class KustoService(
     public async Task<List<string>> ListClusters(
         string subscriptionId,
         string? tenant = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(subscriptionId, nameof(subscriptionId));
 
@@ -74,7 +74,7 @@ public sealed class KustoService(
             string subscriptionId,
             string clusterName,
             string? tenant = null,
-            RetryPolicyArguments? retryPolicy = null)
+            RetryPolicyOptions? retryPolicy = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(subscriptionId, nameof(subscriptionId));
 
@@ -97,7 +97,7 @@ public sealed class KustoService(
         string? tenant = null,
         AuthMethod? authMethod =
         AuthMethod.Credential,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(subscriptionId, nameof(subscriptionId));
         ArgumentException.ThrowIfNullOrEmpty(clusterName, nameof(clusterName));
@@ -111,7 +111,7 @@ public sealed class KustoService(
         string clusterUri,
         string? tenant = null,
         AuthMethod? authMethod = AuthMethod.Credential,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(clusterUri, nameof(clusterUri));
 
@@ -144,7 +144,7 @@ public sealed class KustoService(
         string databaseName,
         string? tenant = null,
         AuthMethod? authMethod = AuthMethod.Credential,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(subscriptionId, nameof(subscriptionId));
         ArgumentException.ThrowIfNullOrEmpty(clusterName, nameof(clusterName));
@@ -160,7 +160,7 @@ public sealed class KustoService(
         string databaseName,
         string? tenant = null,
         AuthMethod? authMethod = AuthMethod.Credential,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(clusterUri, nameof(clusterUri));
         ArgumentException.ThrowIfNullOrEmpty(databaseName, nameof(databaseName));
@@ -196,7 +196,7 @@ public sealed class KustoService(
         string tableName,
         string? tenant = null,
         AuthMethod? authMethod = AuthMethod.Credential,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         string clusterUri = await GetClusterUri(subscriptionId, clusterName, tenant, retryPolicy);
         return await GetTableSchema(clusterUri, databaseName, tableName, tenant, authMethod, retryPolicy);
@@ -208,7 +208,7 @@ public sealed class KustoService(
         string tableName,
         string? tenant = null,
         AuthMethod? authMethod = AuthMethod.Credential,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(tableName, nameof(tableName));
         ArgumentException.ThrowIfNullOrEmpty(databaseName, nameof(databaseName));
@@ -245,7 +245,7 @@ public sealed class KustoService(
             string query,
             string? tenant = null,
             AuthMethod? authMethod = AuthMethod.Credential,
-            RetryPolicyArguments? retryPolicy = null)
+            RetryPolicyOptions? retryPolicy = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(subscriptionId, nameof(subscriptionId));
         ArgumentException.ThrowIfNullOrEmpty(clusterName, nameof(clusterName));
@@ -265,7 +265,7 @@ public sealed class KustoService(
         string query,
         string? tenant = null,
         AuthMethod? authMethod = AuthMethod.Credential,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ArgumentException.ThrowIfNullOrEmpty(clusterUri, nameof(clusterUri));
         ArgumentException.ThrowIfNullOrEmpty(databaseName, nameof(databaseName));
@@ -354,7 +354,7 @@ public sealed class KustoService(
         string subscriptionId,
         string clusterName,
         string? tenant,
-        RetryPolicyArguments? retryPolicy)
+        RetryPolicyOptions? retryPolicy)
     {
         var cluster = await GetCluster(subscriptionId, clusterName, tenant, retryPolicy);
 

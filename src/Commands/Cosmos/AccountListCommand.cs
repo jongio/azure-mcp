@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Cosmos;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Options.Cosmos;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Cosmos;
 
-public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : SubscriptionCommand<AccountListArguments>()
+public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : SubscriptionCommand<AccountListOptions>()
 {
     private const string _commandTitle = "List Cosmos DB Accounts";
     private readonly ILogger<AccountListCommand> _logger = logger;

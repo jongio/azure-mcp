@@ -1,9 +1,9 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System.Reflection;
-using AzureMcp.Arguments.Server;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Server;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Azure;
@@ -21,8 +21,8 @@ namespace AzureMcp.Commands.Server;
 public sealed class ServiceStartCommand : BaseCommand
 {
     private const string _commandTitle = "Start MCP Server";
-    private readonly Option<string> _transportOption = ArgumentDefinitions.Service.Transport;
-    private readonly Option<int> _portOption = ArgumentDefinitions.Service.Port;
+    private readonly Option<string> _transportOption = OptionDefinitions.Service.Transport;
+    private readonly Option<int> _portOption = OptionDefinitions.Service.Port;
 
     public override string Name => "start";
     public override string Description => "Starts Azure MCP Server.";
@@ -38,10 +38,10 @@ public sealed class ServiceStartCommand : BaseCommand
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         var port = parseResult.GetValueForOption(_portOption) == default
-            ? ArgumentDefinitions.Service.Port.GetDefaultValue()
+            ? OptionDefinitions.Service.Port.GetDefaultValue()
             : parseResult.GetValueForOption(_portOption);
 
-        var serverOptions = new ServiceStartArguments
+        var serverOptions = new ServiceStartOptions
         {
             Transport = parseResult.GetValueForOption(_transportOption) ?? TransportTypes.StdIo,
             Port = port
@@ -54,16 +54,16 @@ public sealed class ServiceStartCommand : BaseCommand
         return context.Response;
     }
 
-    private IHost CreateHost(ServiceStartArguments serverArguments)
+    private IHost CreateHost(ServiceStartOptions serverOptions)
     {
-        if (serverArguments.Transport == TransportTypes.Sse)
+        if (serverOptions.Transport == TransportTypes.Sse)
         {
             var builder = WebApplication.CreateBuilder([]);
             Program.ConfigureServices(builder.Services);
-            ConfigureMcpServer(builder.Services, serverArguments.Transport);
+            ConfigureMcpServer(builder.Services, serverOptions.Transport);
 
             builder.WebHost
-                .ConfigureKestrel(server => server.ListenAnyIP(serverArguments.Port))
+                .ConfigureKestrel(server => server.ListenAnyIP(serverOptions.Port))
                 .ConfigureLogging(logging =>
                 {
                     logging.AddEventSourceLogger();
@@ -86,7 +86,7 @@ public sealed class ServiceStartCommand : BaseCommand
                 .ConfigureServices(services =>
                 {
                     Program.ConfigureServices(services);
-                    ConfigureMcpServer(services, serverArguments.Transport);
+                    ConfigureMcpServer(services, serverOptions.Transport);
                 })
                 .Build();
         }

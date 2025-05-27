@@ -5,11 +5,9 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AzureMcp.Arguments;
 using AzureMcp.Commands.Cosmos;
-using AzureMcp.Extensions;
-using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -41,7 +39,7 @@ public class AccountListCommandTests
     {
         // Arrange
         var expectedAccounts = new List<string> { "account1", "account2" };
-        _cosmosService.GetCosmosAccounts(Arg.Is("sub123"), Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
+        _cosmosService.GetCosmosAccounts(Arg.Is("sub123"), Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
             .Returns(expectedAccounts);
 
         var command = new AccountListCommand(_logger);
@@ -88,7 +86,7 @@ public class AccountListCommandTests
         var expectedError = "Test error";
         var subscriptionId = "sub123";
 
-        _cosmosService.GetCosmosAccounts(subscriptionId, null, Arg.Any<RetryPolicyArguments>())
+        _cosmosService.GetCosmosAccounts(subscriptionId, null, Arg.Any<RetryPolicyOptions>())
             .ThrowsAsync(new Exception(expectedError));
 
         var command = new AccountListCommand(_logger);

@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Azure.Security.KeyVault.Keys;
 using AzureMcp.Tests.Client.Helpers;
 using Xunit;

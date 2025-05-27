@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Search.Index;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Search.Index;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Search.Index;
 
-public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalCommand<IndexListArguments>()
+public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalCommand<IndexListOptions>()
 {
     private const string _commandTitle = "List Azure AI Search Indexes";
     private readonly ILogger<IndexListCommand> _logger = logger;
-    private readonly Option<string> _serviceOption = ArgumentDefinitions.Search.Service;
+    private readonly Option<string> _serviceOption = OptionDefinitions.Search.Service;
     public override string Name => "list";
 
     public override string Description =>
@@ -31,7 +31,7 @@ public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalC
         command.AddOption(_serviceOption);
     }
 
-    protected override IndexListArguments BindOptions(ParseResult parseResult)
+    protected override IndexListOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.Service = parseResult.GetValueForOption(_serviceOption);

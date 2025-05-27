@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using Azure.Security.KeyVault.Keys;
-using AzureMcp.Arguments;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Services.Azure.KeyVault;
@@ -14,7 +14,7 @@ public sealed class KeyVaultService : BaseAzureService, IKeyVaultService
         bool includeManagedKeys,
         string subscriptionId,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(vaultName, subscriptionId);
 
@@ -42,7 +42,7 @@ public sealed class KeyVaultService : BaseAzureService, IKeyVaultService
         string keyName,
         string subscriptionId,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(vaultName, subscriptionId);
 
@@ -70,7 +70,7 @@ public sealed class KeyVaultService : BaseAzureService, IKeyVaultService
         string keyType,
         string subscriptionId,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(vaultName, subscriptionId);
 

@@ -2,17 +2,18 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics.CodeAnalysis;
-using AzureMcp.Arguments.Postgres;
-using AzureMcp.Models.Argument;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Postgres;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Postgres;
 
 public abstract class BasePostgresCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : SubscriptionCommand<TArgs> where TArgs : BasePostgresArguments, new()
+    : SubscriptionCommand<TArgs> where TArgs : BasePostgresOptions, new()
 {
-    protected readonly Option<string> _userOption = ArgumentDefinitions.Postgres.User;
+    protected readonly Option<string> _userOption = OptionDefinitions.Postgres.User;
 
     protected readonly ILogger<BasePostgresCommand<TArgs>> _logger;
 

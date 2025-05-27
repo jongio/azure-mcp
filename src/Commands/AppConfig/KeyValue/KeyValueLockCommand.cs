@@ -1,13 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.AppConfig.KeyValue;
+using AzureMcp.Options.AppConfig.KeyValue;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.AppConfig.KeyValue;
 
-public sealed class KeyValueLockCommand(ILogger<KeyValueLockCommand> logger) : BaseKeyValueCommand<KeyValueLockArguments>()
+public sealed class KeyValueLockCommand(ILogger<KeyValueLockCommand> logger) : BaseKeyValueCommand<KeyValueLockOptions>()
 {
     private const string _commandTitle = "Lock App Configuration Key-Value Setting";
     private readonly ILogger<KeyValueLockCommand> _logger = logger;

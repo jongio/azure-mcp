@@ -1,19 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-using System.CommandLine.Parsing;
 using System.Diagnostics.CodeAnalysis;
-using AzureMcp.Arguments.Redis.ManagedRedis;
-using AzureMcp.Models.Argument;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Redis.ManagedRedis;
 
 namespace AzureMcp.Commands.Redis.ManagedRedis;
 
 public abstract class BaseClusterCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] T>
-    : SubscriptionCommand<T> where T : BaseClusterArguments, new()
+    : SubscriptionCommand<T> where T : BaseClusterOptions, new()
 {
-    protected readonly Option<string> _clusterOption = ArgumentDefinitions.Redis.Cluster;
+    protected readonly Option<string> _clusterOption = OptionDefinitions.Redis.Cluster;
 
     protected override void RegisterOptions(Command command)
     {

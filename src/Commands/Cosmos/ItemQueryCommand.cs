@@ -2,28 +2,28 @@
 // Licensed under the MIT License.
 
 using System.Text.Json.Nodes;
-using AzureMcp.Arguments.Cosmos;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Cosmos;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Cosmos;
 
-public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseContainerCommand<ItemQueryArguments>()
+public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseContainerCommand<ItemQueryOptions>()
 {
     private const string _commandTitle = "Query Cosmos DB Container";
     private readonly ILogger<ItemQueryCommand> _logger = logger;
     private const string DefaultQuery = "SELECT * FROM c";
 
-    private readonly Option<string> _queryOption = ArgumentDefinitions.Cosmos.Query;
+    private readonly Option<string> _queryOption = OptionDefinitions.Cosmos.Query;
 
     public override string Name => "query";
 
     public override string Description =>
         $"""
-        Execute a SQL query against items in a Cosmos DB container. Requires {ArgumentDefinitions.Cosmos.AccountName},
-        {ArgumentDefinitions.Cosmos.DatabaseName}, and {ArgumentDefinitions.Cosmos.ContainerName}.
-        The {ArgumentDefinitions.Cosmos.QueryText} parameter accepts SQL query syntax. Results are returned as a
+        Execute a SQL query against items in a Cosmos DB container. Requires {OptionDefinitions.Cosmos.AccountName},
+        {OptionDefinitions.Cosmos.DatabaseName}, and {OptionDefinitions.Cosmos.ContainerName}.
+        The {OptionDefinitions.Cosmos.QueryText} parameter accepts SQL query syntax. Results are returned as a
         JSON array of documents.
         """;
 
@@ -35,7 +35,7 @@ public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseCon
         command.AddOption(_queryOption);
     }
 
-    protected override ItemQueryArguments BindOptions(ParseResult parseResult)
+    protected override ItemQueryOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.Query = parseResult.GetValueForOption(_queryOption);

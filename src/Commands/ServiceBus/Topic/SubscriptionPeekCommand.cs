@@ -2,19 +2,20 @@
 // Licensed under the MIT License.
 
 using Azure.Messaging.ServiceBus;
-using AzureMcp.Arguments.ServiceBus.Subscription;
-using AzureMcp.Models.Argument;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.ServiceBus.Subscription;
 using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Commands.ServiceBus.Topic;
 
-public sealed class SubscriptionPeekCommand : SubscriptionCommand<SubscriptionPeekArguments>
+public sealed class SubscriptionPeekCommand : SubscriptionCommand<SubscriptionPeekOptions>
 {
     private const string _commandTitle = "Peek Messages from Service Bus Topic Subscription";
-    private readonly Option<string> _topicOption = ArgumentDefinitions.ServiceBus.Topic;
-    private readonly Option<string> _subscriptionNameOption = ArgumentDefinitions.ServiceBus.Subscription;
-    private readonly Option<int> _maxMessagesOption = ArgumentDefinitions.ServiceBus.MaxMessages;
-    private readonly Option<string> _namespaceOption = ArgumentDefinitions.ServiceBus.Namespace;
+    private readonly Option<string> _topicOption = OptionDefinitions.ServiceBus.Topic;
+    private readonly Option<string> _subscriptionNameOption = OptionDefinitions.ServiceBus.Subscription;
+    private readonly Option<int> _maxMessagesOption = OptionDefinitions.ServiceBus.MaxMessages;
+    private readonly Option<string> _namespaceOption = OptionDefinitions.ServiceBus.Namespace;
 
     public override string Name => "peek";
 
@@ -45,7 +46,7 @@ public sealed class SubscriptionPeekCommand : SubscriptionCommand<SubscriptionPe
 
 
 
-    protected override SubscriptionPeekArguments BindOptions(ParseResult parseResult)
+    protected override SubscriptionPeekOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.SubscriptionName = parseResult.GetValueForOption(_subscriptionNameOption);

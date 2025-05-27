@@ -1,31 +1,31 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Monitor;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Monitor;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Monitor.Log;
 
-public sealed class LogQueryCommand(ILogger<LogQueryCommand> logger) : BaseMonitorCommand<LogQueryArguments>()
+public sealed class LogQueryCommand(ILogger<LogQueryCommand> logger) : BaseMonitorCommand<LogQueryOptions>()
 {
     private const string _commandTitle = "Query Log Analytics Workspace";
     private readonly ILogger<LogQueryCommand> _logger = logger;
-    private readonly Option<string> _tableNameOption = ArgumentDefinitions.Monitor.TableName;
-    private readonly Option<string> _queryOption = ArgumentDefinitions.Monitor.Query;
-    private readonly Option<int> _hoursOption = ArgumentDefinitions.Monitor.Hours;
-    private readonly Option<int> _limitOption = ArgumentDefinitions.Monitor.Limit;
+    private readonly Option<string> _tableNameOption = OptionDefinitions.Monitor.TableName;
+    private readonly Option<string> _queryOption = OptionDefinitions.Monitor.Query;
+    private readonly Option<int> _hoursOption = OptionDefinitions.Monitor.Hours;
+    private readonly Option<int> _limitOption = OptionDefinitions.Monitor.Limit;
 
     public override string Name => "query";
 
     public override string Description =>
         $"""
-        Execute a KQL query against a Log Analytics workspace. Requires {ArgumentDefinitions.Monitor.WorkspaceIdOrName}
-        and resource group. Optional {ArgumentDefinitions.Monitor.HoursName}
-        (default: {ArgumentDefinitions.Monitor.Hours.GetDefaultValue()}) and {ArgumentDefinitions.Monitor.LimitName}
-        (default: {ArgumentDefinitions.Monitor.Limit.GetDefaultValue()}) parameters.
-        The {ArgumentDefinitions.Monitor.QueryTextName} parameter accepts KQL syntax.
+        Execute a KQL query against a Log Analytics workspace. Requires {OptionDefinitions.Monitor.WorkspaceIdOrName}
+        and resource group. Optional {OptionDefinitions.Monitor.HoursName}
+        (default: {OptionDefinitions.Monitor.Hours.GetDefaultValue()}) and {OptionDefinitions.Monitor.LimitName}
+        (default: {OptionDefinitions.Monitor.Limit.GetDefaultValue()}) parameters.
+        The {OptionDefinitions.Monitor.QueryTextName} parameter accepts KQL syntax.
         """;
 
     public override string Title => _commandTitle;
@@ -78,7 +78,7 @@ public sealed class LogQueryCommand(ILogger<LogQueryCommand> logger) : BaseMonit
         return context.Response;
     }
 
-    protected override LogQueryArguments BindOptions(ParseResult parseResult)
+    protected override LogQueryOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.TableName = parseResult.GetValueForOption(_tableNameOption);

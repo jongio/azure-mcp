@@ -1,20 +1,21 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.KeyVault.Key;
-using AzureMcp.Models.Argument;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.KeyVault.Key;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.KeyVault.Key;
 
-public sealed class KeyCreateCommand(ILogger<KeyCreateCommand> logger) : SubscriptionCommand<KeyCreateArguments>
+public sealed class KeyCreateCommand(ILogger<KeyCreateCommand> logger) : SubscriptionCommand<KeyCreateOptions>
 {
     private const string _commandTitle = "Create Key Vault Key";
     private readonly ILogger<KeyCreateCommand> _logger = logger;
-    private readonly Option<string> _vaultOption = ArgumentDefinitions.KeyVault.VaultName;
-    private readonly Option<string> _keyOption = ArgumentDefinitions.KeyVault.KeyName;
-    private readonly Option<string> _keyTypeOption = ArgumentDefinitions.KeyVault.KeyType;
+    private readonly Option<string> _vaultOption = OptionDefinitions.KeyVault.VaultName;
+    private readonly Option<string> _keyOption = OptionDefinitions.KeyVault.KeyName;
+    private readonly Option<string> _keyTypeOption = OptionDefinitions.KeyVault.KeyType;
 
     public override string Name => "create";
 
@@ -45,7 +46,7 @@ public sealed class KeyCreateCommand(ILogger<KeyCreateCommand> logger) : Subscri
         command.AddOption(_keyTypeOption);
     }
 
-    protected override KeyCreateArguments BindOptions(ParseResult parseResult)
+    protected override KeyCreateOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.VaultName = parseResult.GetValueForOption(_vaultOption);

@@ -1,9 +1,9 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json;
-using AzureMcp.Arguments;
 using AzureMcp.Commands.Redis.CacheForRedis;
 using AzureMcp.Models.Command;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -35,7 +35,7 @@ public class CacheListCommandTests
     public async Task ExecuteAsync_ReturnsCaches_WhenCachesExist()
     {
         var expectedCaches = new CacheModel[] { new() { Name = "cache1" }, new() { Name = "cache2" } };
-        _redisService.ListCachesAsync("sub123", Arg.Any<string>(), Arg.Any<Models.AuthMethod>(), Arg.Any<RetryPolicyArguments>())
+        _redisService.ListCachesAsync("sub123", Arg.Any<string>(), Arg.Any<Models.AuthMethod>(), Arg.Any<RetryPolicyOptions>())
             .Returns(expectedCaches);
 
         var command = new CacheListCommand(_logger);
@@ -80,7 +80,7 @@ public class CacheListCommandTests
     public async Task ExecuteAsync_HandlesException()
     {
         var expectedError = "Test error. To mitigate this issue, please refer to the troubleshooting guidelines here at https://aka.ms/azmcp/troubleshooting.";
-        _redisService.ListCachesAsync("sub123", Arg.Any<string>(), Arg.Any<Models.AuthMethod>(), Arg.Any<RetryPolicyArguments>())
+        _redisService.ListCachesAsync("sub123", Arg.Any<string>(), Arg.Any<Models.AuthMethod>(), Arg.Any<RetryPolicyOptions>())
             .ThrowsAsync(new Exception("Test error"));
 
         var command = new CacheListCommand(_logger);
@@ -110,7 +110,7 @@ public class CacheListCommandTests
 
         Assert.NotNull(response);
         Assert.Equal(400, response.Status);
-        Assert.Equal($"Missing required arguments: {missingParameter}", response.Message);
+        Assert.Equal($"Missing Required arguments: {missingParameter}", response.Message);
     }
 
     private record CacheListResult(IEnumerable<CacheModel> Caches);

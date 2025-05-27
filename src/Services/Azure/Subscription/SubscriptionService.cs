@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using Azure.ResourceManager.Resources;
-using AzureMcp.Arguments;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Services.Azure.Subscription;
@@ -16,7 +16,7 @@ public class SubscriptionService(ICacheService cacheService, ITenantService tena
     private const string SUBSCRIPTION_CACHE_KEY = "subscription";
     private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(12);
 
-    public async Task<List<SubscriptionData>> GetSubscriptions(string? tenant = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<List<SubscriptionData>> GetSubscriptions(string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         // Try to get from cache first
         var cacheKey = string.IsNullOrEmpty(tenant) ? CACHE_KEY : $"{CACHE_KEY}_{tenant}";
@@ -42,7 +42,7 @@ public class SubscriptionService(ICacheService cacheService, ITenantService tena
         return results;
     }
 
-    public async Task<SubscriptionResource> GetSubscription(string subscription, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<SubscriptionResource> GetSubscription(string subscription, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription);
 
@@ -77,7 +77,7 @@ public class SubscriptionService(ICacheService cacheService, ITenantService tena
         return Guid.TryParse(subscription, out _);
     }
 
-    public async Task<string> GetSubscriptionIdByName(string subscriptionName, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<string> GetSubscriptionIdByName(string subscriptionName, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         var subscriptions = await GetSubscriptions(tenant, retryPolicy);
         var subscription = subscriptions.FirstOrDefault(s => s.DisplayName.Equals(subscriptionName, StringComparison.OrdinalIgnoreCase)) ??
@@ -86,7 +86,7 @@ public class SubscriptionService(ICacheService cacheService, ITenantService tena
         return subscription.SubscriptionId;
     }
 
-    public async Task<string> GetSubscriptionNameById(string subscriptionId, string? tenant = null, RetryPolicyArguments? retryPolicy = null)
+    public async Task<string> GetSubscriptionNameById(string subscriptionId, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         var subscriptions = await GetSubscriptions(tenant, retryPolicy);
         var subscription = subscriptions.FirstOrDefault(s => s.SubscriptionId.Equals(subscriptionId, StringComparison.OrdinalIgnoreCase)) ??
@@ -95,7 +95,7 @@ public class SubscriptionService(ICacheService cacheService, ITenantService tena
         return subscription.DisplayName;
     }
 
-    private async Task<string> GetSubscriptionId(string subscription, string? tenant, RetryPolicyArguments? retryPolicy)
+    private async Task<string> GetSubscriptionId(string subscription, string? tenant, RetryPolicyOptions? retryPolicy)
     {
         if (IsSubscriptionId(subscription))
         {

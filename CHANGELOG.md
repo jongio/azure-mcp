@@ -1,5 +1,15 @@
 # Release History
 
+## 0.0.22
+
+### Other Changes
+
+- Removed "Arguments" from code base in favor of "Options" to align with System.CommandLine semantics.
+
+### Breaking Changes
+
+- `azmcp tool list` "args" changes to "options"
+
 ## 0.0.21 (2025-05-22)
 
 ### Features Added

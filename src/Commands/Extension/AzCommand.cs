@@ -2,20 +2,20 @@
 // Licensed under the MIT License.
 
 using System.Runtime.InteropServices;
-using AzureMcp.Arguments.Extension;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Extension;
 using AzureMcp.Services.Azure.Authentication;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Extension;
 
-public sealed class AzCommand(ILogger<AzCommand> logger, int processTimeoutSeconds = 300) : GlobalCommand<AzArguments>()
+public sealed class AzCommand(ILogger<AzCommand> logger, int processTimeoutSeconds = 300) : GlobalCommand<AzOptions>()
 {
     private const string _commandTitle = "Azure CLI Command";
     private readonly ILogger<AzCommand> _logger = logger;
     private readonly int _processTimeoutSeconds = processTimeoutSeconds;
-    private readonly Option<string> _commandOption = ArgumentDefinitions.Extension.Az.Command;
+    private readonly Option<string> _commandOption = OptionDefinitions.Extension.Az.Command;
     private static string? _cachedAzPath;
     private volatile bool _isAuthenticated = false;
     private static readonly SemaphoreSlim _authSemaphore = new(1, 1);
@@ -44,7 +44,7 @@ Your job is to answer questions about an Azure environment by executing Azure CL
         command.AddOption(_commandOption);
     }
 
-    protected override AzArguments BindOptions(ParseResult parseResult)
+    protected override AzOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.Command = parseResult.GetValueForOption(_commandOption);

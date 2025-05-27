@@ -2,19 +2,20 @@
 // Licensed under the MIT License.
 
 using Azure.Messaging.ServiceBus;
-using AzureMcp.Arguments.ServiceBus.Topic;
-using AzureMcp.Models.Argument;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Option;
 using AzureMcp.Models.ServiceBus;
+using AzureMcp.Options.ServiceBus.Topic;
 using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Commands.ServiceBus.Topic;
 
-public sealed class SubscriptionDetailsCommand : SubscriptionCommand<SubscriptionDetailsArguments>
+public sealed class SubscriptionDetailsCommand : SubscriptionCommand<SubscriptionDetailsOptions>
 {
     private const string _commandTitle = "Get Service Bus Topic Subscription Details";
-    private readonly Option<string> _namespaceOption = ArgumentDefinitions.ServiceBus.Namespace;
-    private readonly Option<string> _topicOption = ArgumentDefinitions.ServiceBus.Topic;
-    private readonly Option<string> _subscriptionNameOption = ArgumentDefinitions.ServiceBus.Subscription;
+    private readonly Option<string> _namespaceOption = OptionDefinitions.ServiceBus.Namespace;
+    private readonly Option<string> _topicOption = OptionDefinitions.ServiceBus.Topic;
+    private readonly Option<string> _subscriptionNameOption = OptionDefinitions.ServiceBus.Subscription;
 
     public override string Name => "details";
 
@@ -40,7 +41,7 @@ public sealed class SubscriptionDetailsCommand : SubscriptionCommand<Subscriptio
 
 
 
-    protected override SubscriptionDetailsArguments BindOptions(ParseResult parseResult)
+    protected override SubscriptionDetailsOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.Namespace = parseResult.GetValueForOption(_namespaceOption);

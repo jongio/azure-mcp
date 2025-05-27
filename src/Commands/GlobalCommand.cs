@@ -5,8 +5,8 @@ using System.Diagnostics.CodeAnalysis;
 using Azure;
 using Azure.Core;
 using Azure.Identity;
-using AzureMcp.Arguments;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options;
 
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
@@ -21,16 +21,16 @@ internal static class TrimAnnotations
 
 public abstract class GlobalCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs> : BaseCommand
-    where TArgs : GlobalArguments, new()
+    where TArgs : GlobalOptions, new()
 {
-    protected readonly Option<string> _tenantOption = ArgumentDefinitions.Common.Tenant;
-    protected readonly Option<AuthMethod> _authMethodOption = ArgumentDefinitions.Common.AuthMethod;
-    protected readonly Option<string> _resourceGroupOption = ArgumentDefinitions.Common.ResourceGroup;
-    protected readonly Option<int> _retryMaxRetries = ArgumentDefinitions.RetryPolicy.MaxRetries;
-    protected readonly Option<double> _retryDelayOption = ArgumentDefinitions.RetryPolicy.Delay;
-    protected readonly Option<double> _retryMaxDelayOption = ArgumentDefinitions.RetryPolicy.MaxDelay;
-    protected readonly Option<RetryMode> _retryModeOption = ArgumentDefinitions.RetryPolicy.Mode;
-    protected readonly Option<double> _retryNetworkTimeoutOption = ArgumentDefinitions.RetryPolicy.NetworkTimeout;
+    protected readonly Option<string> _tenantOption = OptionDefinitions.Common.Tenant;
+    protected readonly Option<AuthMethod> _authMethodOption = OptionDefinitions.Common.AuthMethod;
+    protected readonly Option<string> _resourceGroupOption = OptionDefinitions.Common.ResourceGroup;
+    protected readonly Option<int> _retryMaxRetries = OptionDefinitions.RetryPolicy.MaxRetries;
+    protected readonly Option<double> _retryDelayOption = OptionDefinitions.RetryPolicy.Delay;
+    protected readonly Option<double> _retryMaxDelayOption = OptionDefinitions.RetryPolicy.MaxDelay;
+    protected readonly Option<RetryMode> _retryModeOption = OptionDefinitions.RetryPolicy.Mode;
+    protected readonly Option<double> _retryNetworkTimeoutOption = OptionDefinitions.RetryPolicy.NetworkTimeout;
 
     protected override void RegisterOptions(Command command)
     {
@@ -96,7 +96,7 @@ public abstract class GlobalCommand<
         // Only create RetryPolicy if any retry options are specified
         if (parseResult.HasAnyRetryOptions())
         {
-            args.RetryPolicy = new RetryPolicyArguments
+            args.RetryPolicy = new RetryPolicyOptions
             {
                 MaxRetries = parseResult.GetValueForOption(_retryMaxRetries),
                 DelaySeconds = parseResult.GetValueForOption(_retryDelayOption),

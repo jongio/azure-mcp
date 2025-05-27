@@ -108,7 +108,7 @@ public interface I{Service}Service
         string subscription,
         AuthMethod? authMethod = null,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null);
+        RetryPolicyOptions? retryPolicy = null);
 }
 ```
 
@@ -691,7 +691,7 @@ public interface IStorageService
         string accountName,
         string subscriptionId,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null);
+        RetryPolicyOptions? retryPolicy = null);
 }
 ```
 
@@ -1217,7 +1217,7 @@ public async Task ExecuteAsync_WithMissingArguments_ReturnsBadRequest()
 
     // Assert
     Assert.Equal(400, result.Status);
-    Assert.Contains("Missing required arguments", result.Message);
+    Assert.Contains("Missing required options", result.Message);
 }
 
 [Fact]

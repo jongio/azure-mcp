@@ -4,9 +4,9 @@
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AzureMcp.Arguments;
 using AzureMcp.Commands.Kusto;
 using AzureMcp.Models.Command;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -55,7 +55,7 @@ public sealed class ClusterGetCommandTests
         };
 
         _kusto.GetCluster(
-            "sub123", "clusterA", Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
+            "sub123", "clusterA", Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
             .Returns(expectedCluster);
         var command = new ClusterGetCommand(_logger);
         var parser = new Parser(command.GetCommand());
@@ -85,7 +85,7 @@ public sealed class ClusterGetCommandTests
     public async Task ExecuteAsync_ReturnsNull_WhenClusterDoesNotExist()
     {
         _kusto.GetCluster(
-            "sub123", "clusterA", Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
+            "sub123", "clusterA", Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
             .Returns(Task.FromResult<KustoClusterResourceProxy?>(null));
         var command = new ClusterGetCommand(_logger);
         var parser = new Parser(command.GetCommand());
@@ -104,7 +104,7 @@ public sealed class ClusterGetCommandTests
     {
         var expectedError = "Test error. To mitigate this issue, please refer to the troubleshooting guidelines here at https://aka.ms/azmcp/troubleshooting.";
         _kusto.GetCluster(
-            "sub123", "clusterA", Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
+            "sub123", "clusterA", Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
             .ThrowsAsync(new Exception("Test error"));
         var command = new ClusterGetCommand(_logger);
         var parser = new Parser(command.GetCommand());

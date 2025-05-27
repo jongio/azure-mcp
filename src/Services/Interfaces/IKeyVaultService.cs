@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using Azure.Security.KeyVault.Keys;
-using AzureMcp.Arguments;
+using AzureMcp.Options;
 
 namespace AzureMcp.Services.Interfaces;
 
@@ -21,7 +21,7 @@ public interface IKeyVaultService
         bool includeManagedKeys,
         string subscriptionId,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null);
+        RetryPolicyOptions? retryPolicy = null);
 
     /// <summary>
     /// Gets a key from an Azure Key Vault.
@@ -37,7 +37,7 @@ public interface IKeyVaultService
         string keyName,
         string subscriptionId,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null);
+        RetryPolicyOptions? retryPolicy = null);
 
     /// <summary>
     /// Creates a new key in an Azure Key Vault.
@@ -55,5 +55,5 @@ public interface IKeyVaultService
         string keyType,
         string subscriptionId,
         string? tenantId = null,
-        RetryPolicyArguments? retryPolicy = null);
+        RetryPolicyOptions? retryPolicy = null);
 }

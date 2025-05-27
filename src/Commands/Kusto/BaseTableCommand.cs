@@ -2,16 +2,16 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics.CodeAnalysis;
-using AzureMcp.Arguments.Kusto;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Kusto;
 
 namespace AzureMcp.Commands.Kusto;
 
 public abstract class BaseTableCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : BaseDatabaseCommand<TArgs> where TArgs : BaseTableArguments, new()
+    : BaseDatabaseCommand<TArgs> where TArgs : BaseTableOptions, new()
 {
-    protected readonly Option<string> _tableOption = ArgumentDefinitions.Kusto.Table;
+    protected readonly Option<string> _tableOption = OptionDefinitions.Kusto.Table;
 
     protected override void RegisterOptions(Command command)
     {

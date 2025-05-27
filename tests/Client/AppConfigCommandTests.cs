@@ -20,7 +20,7 @@ public class AppConfigCommandTests : CommandTestsBase,
 
     public AppConfigCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper output) : base(liveTestFixture, output)
     {
-        var memoryCache = new MemoryCache(Options.Create(new MemoryCacheOptions()));
+        var memoryCache = new MemoryCache(Microsoft.Extensions.Options.Options.Create(new MemoryCacheOptions()));
         var cacheService = new CacheService(memoryCache);
         var tenantService = new TenantService(cacheService);
         var subscriptionService = new SubscriptionService(cacheService, tenantService);

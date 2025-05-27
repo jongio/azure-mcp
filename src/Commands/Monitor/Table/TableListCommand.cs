@@ -1,24 +1,24 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Monitor;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Monitor;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Monitor.Table;
 
-public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseMonitorCommand<TableListArguments>()
+public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseMonitorCommand<TableListOptions>()
 {
     private const string _commandTitle = "List Log Analytics Tables";
     private readonly ILogger<TableListCommand> _logger = logger;
-    private readonly Option<string> _tableTypeOption = ArgumentDefinitions.Monitor.TableType;
+    private readonly Option<string> _tableTypeOption = OptionDefinitions.Monitor.TableType;
 
     public override string Name => "list";
 
     public override string Description =>
         $"""
-        List all tables in a Log Analytics workspace. Requires {ArgumentDefinitions.Monitor.WorkspaceIdOrName}.
+        List all tables in a Log Analytics workspace. Requires {OptionDefinitions.Monitor.WorkspaceIdOrName}.
         Returns table names and schemas that can be used for constructing KQL queries.
         """;
 
@@ -69,11 +69,11 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseMon
         return context.Response;
     }
 
-    protected override TableListArguments BindOptions(ParseResult parseResult)
+    protected override TableListOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
-        args.TableType = parseResult.GetValueForOption(_tableTypeOption) ?? ArgumentDefinitions.Monitor.TableType.GetDefaultValue();
-        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? ArgumentDefinitions.Common.ResourceGroup.GetDefaultValue();
+        args.TableType = parseResult.GetValueForOption(_tableTypeOption) ?? OptionDefinitions.Monitor.TableType.GetDefaultValue();
+        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? OptionDefinitions.Common.ResourceGroup.GetDefaultValue();
         return args;
     }
 

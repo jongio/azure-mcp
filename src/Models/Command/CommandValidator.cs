@@ -25,7 +25,7 @@ public static class CommandValidator
         }
 
         response.Status = 400;
-        response.Message = $"Missing required arguments: {string.Join(", ", missingParameters)}";
+        response.Message = $"Missing Required arguments: {string.Join(", ", missingParameters)}";
         return false;
     }
 }

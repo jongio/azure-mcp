@@ -2,24 +2,24 @@
 // Licensed under the MIT License.
 
 using System.Runtime.InteropServices;
-using AzureMcp.Arguments.Extension;
 using AzureMcp.Helpers;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Extension;
 using AzureMcp.Services.Azure;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Extension;
 
-public sealed class AzdCommand(ILogger<AzdCommand> logger, int processTimeoutSeconds = 300) : GlobalCommand<AzdArguments>()
+public sealed class AzdCommand(ILogger<AzdCommand> logger, int processTimeoutSeconds = 300) : GlobalCommand<AzdOptions>()
 {
     private const string _commandTitle = "Azure Developer CLI Command";
     private readonly ILogger<AzdCommand> _logger = logger;
     private readonly int _processTimeoutSeconds = processTimeoutSeconds;
-    private readonly Option<string> _commandOption = ArgumentDefinitions.Extension.Azd.Command;
-    private readonly Option<string> _cwdOption = ArgumentDefinitions.Extension.Azd.Cwd;
-    private readonly Option<string> _environmentOption = ArgumentDefinitions.Extension.Azd.Environment;
-    private readonly Option<bool> _learnOption = ArgumentDefinitions.Extension.Azd.Learn;
+    private readonly Option<string> _commandOption = OptionDefinitions.Extension.Azd.Command;
+    private readonly Option<string> _cwdOption = OptionDefinitions.Extension.Azd.Cwd;
+    private readonly Option<string> _environmentOption = OptionDefinitions.Extension.Azd.Environment;
+    private readonly Option<bool> _learnOption = OptionDefinitions.Extension.Azd.Learn;
     private static string? _cachedAzdPath;
 
     private readonly IEnumerable<string> longRunningCommands =
@@ -84,7 +84,7 @@ public sealed class AzdCommand(ILogger<AzdCommand> logger, int processTimeoutSec
         command.AddOption(_learnOption);
     }
 
-    protected override AzdArguments BindOptions(ParseResult parseResult)
+    protected override AzdOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.Command = parseResult.GetValueForOption(_commandOption);

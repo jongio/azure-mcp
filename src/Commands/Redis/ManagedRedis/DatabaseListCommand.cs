@@ -1,20 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine.Parsing;
-using AzureMcp.Arguments.Redis.ManagedRedis;
-using AzureMcp.Models.Command;
 using AzureMcp.Models.Redis.ManagedRedis;
+using AzureMcp.Options.Redis.ManagedRedis;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Redis.ManagedRedis;
 
 /// <summary>
 /// Lists the databases in the specified Azure Managed Redis or Azure Redis Enterprise cluster.
 /// </summary>
-public sealed class DatabaseListCommand(ILogger<DatabaseListCommand> logger) : BaseClusterCommand<DatabaseListArguments>()
+public sealed class DatabaseListCommand(ILogger<DatabaseListCommand> logger) : BaseClusterCommand<DatabaseListOptions>()
 {
     private const string _commandTitle = "List Redis Cluster Databases";
     private readonly ILogger<DatabaseListCommand> _logger = logger;

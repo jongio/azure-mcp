@@ -29,7 +29,6 @@ public abstract class BaseCommand : IBaseCommand
 
     protected virtual void HandleException(CommandResponse response, Exception ex)
     {
-        // Don't clear arguments when handling exceptions
         response.Status = GetStatusCode(ex);
         response.Message = GetErrorMessage(ex) + ". To mitigate this issue, please refer to the troubleshooting guidelines here at https://aka.ms/azmcp/troubleshooting.";
         response.Results = ResponseResult.Create(new ExceptionResult(
@@ -59,7 +58,7 @@ public abstract class BaseCommand : IBaseCommand
         if (missingParameters.Count > 0)
         {
             result.IsValid = false;
-            result.ErrorMessage = $"Missing required arguments: {string.Join(", ", missingParameters)}";
+            result.ErrorMessage = $"Missing Required arguments: {string.Join(", ", missingParameters)}";
             return result;
         }
 

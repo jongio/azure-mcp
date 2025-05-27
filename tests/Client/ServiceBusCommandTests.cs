@@ -1,4 +1,4 @@
-﻿// Copyright (c) Microsoft Corporation.
+// Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
 using System.Text.Json;
@@ -6,7 +6,7 @@ using Azure.Messaging.ServiceBus;
 using AzureMcp.Services.Azure.Authentication;
 using AzureMcp.Tests.Client.Helpers;
 using Xunit;
-using static AzureMcp.Models.Argument.ArgumentDefinitions;
+using static AzureMcp.Models.Option.OptionDefinitions;
 
 namespace AzureMcp.Tests.Client
 {

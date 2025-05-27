@@ -2,17 +2,18 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics.CodeAnalysis;
-using AzureMcp.Arguments.Storage;
-using AzureMcp.Models.Argument;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Storage;
 
 namespace AzureMcp.Commands.Storage;
 
 public abstract class BaseStorageCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] T>
     : SubscriptionCommand<T>
-    where T : BaseStorageArguments, new()
+    where T : BaseStorageOptions, new()
 {
-    protected readonly Option<string> _accountOption = ArgumentDefinitions.Storage.Account;
+    protected readonly Option<string> _accountOption = OptionDefinitions.Storage.Account;
 
     protected override void RegisterOptions(Command command)
     {

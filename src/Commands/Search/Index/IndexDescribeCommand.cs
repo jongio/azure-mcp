@@ -3,19 +3,19 @@
 
 using System.Diagnostics.CodeAnalysis;
 using Azure.Search.Documents.Indexes.Models;
-using AzureMcp.Arguments.Search.Index;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Search.Index;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Search.Index;
 
-public sealed class IndexDescribeCommand(ILogger<IndexDescribeCommand> logger) : GlobalCommand<IndexDescribeArguments>()
+public sealed class IndexDescribeCommand(ILogger<IndexDescribeCommand> logger) : GlobalCommand<IndexDescribeOptions>()
 {
     private const string _commandTitle = "Get Azure AI Search Index Details";
     private readonly ILogger<IndexDescribeCommand> _logger = logger;
-    private readonly Option<string> _serviceOption = ArgumentDefinitions.Search.Service;
-    private readonly Option<string> _indexOption = ArgumentDefinitions.Search.Index;
+    private readonly Option<string> _serviceOption = OptionDefinitions.Search.Service;
+    private readonly Option<string> _indexOption = OptionDefinitions.Search.Index;
 
     public override string Name => "describe";
 
@@ -38,7 +38,7 @@ public sealed class IndexDescribeCommand(ILogger<IndexDescribeCommand> logger) :
         command.AddOption(_indexOption);
     }
 
-    protected override IndexDescribeArguments BindOptions(ParseResult parseResult)
+    protected override IndexDescribeOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.Service = parseResult.GetValueForOption(_serviceOption);

@@ -5,8 +5,8 @@ using System.Text.Json.Nodes;
 using Azure;
 using Azure.Monitor.Query;
 using Azure.ResourceManager.OperationalInsights;
-using AzureMcp.Arguments;
 using AzureMcp.Models.Monitor;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Services.Azure.Monitor;
@@ -38,7 +38,7 @@ public class MonitorService(ISubscriptionService subscriptionService, ITenantSer
         string query,
         int timeSpanDays = 1,
         string? tenant = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, workspace, query);
 
@@ -98,7 +98,7 @@ public class MonitorService(ISubscriptionService subscriptionService, ITenantSer
         string workspace,
         string? tableType = "CustomLog",
         string? tenant = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, resourceGroup, workspace);
 
@@ -138,7 +138,7 @@ public class MonitorService(ISubscriptionService subscriptionService, ITenantSer
     public async Task<List<WorkspaceInfo>> ListWorkspaces(
         string subscription,
         string? tenant = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription);
 
@@ -172,7 +172,7 @@ public class MonitorService(ISubscriptionService subscriptionService, ITenantSer
         int? hours = 24,
         int? limit = 20,
         string? tenant = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, workspace, table);
 
@@ -232,7 +232,7 @@ public class MonitorService(ISubscriptionService subscriptionService, ITenantSer
         string resourceGroup,
         string workspace,
         string? tenant,
-        RetryPolicyArguments? retryPolicy)
+        RetryPolicyOptions? retryPolicy)
     {
         ValidateRequiredParameters(subscription, resourceGroup, workspace);
         try
@@ -278,7 +278,7 @@ public class MonitorService(ISubscriptionService subscriptionService, ITenantSer
         string workspace,
         string subscription,
         string? tenant = null,
-        RetryPolicyArguments? retryPolicy = null)
+        RetryPolicyOptions? retryPolicy = null)
     {
         // If we're given an ID and need an ID, or given a name and need a name, return as is
         bool isId = IsWorkspaceId(workspace);

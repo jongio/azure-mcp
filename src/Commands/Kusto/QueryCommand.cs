@@ -1,18 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Kusto;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Kusto;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Kusto;
 
-public sealed class QueryCommand : BaseDatabaseCommand<QueryArguments>
+public sealed class QueryCommand : BaseDatabaseCommand<QueryOptions>
 {
     private const string _commandTitle = "Query Kusto Database";
     private readonly ILogger<QueryCommand> _logger;
-    private readonly Option<string> _queryOption = ArgumentDefinitions.Kusto.Query;
+    private readonly Option<string> _queryOption = OptionDefinitions.Kusto.Query;
 
     public QueryCommand(ILogger<QueryCommand> logger) : base()
     {
@@ -25,7 +25,7 @@ public sealed class QueryCommand : BaseDatabaseCommand<QueryArguments>
         command.AddOption(_queryOption);
     }
 
-    protected override QueryArguments BindOptions(ParseResult parseResult)
+    protected override QueryOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.Query = parseResult.GetValueForOption(_queryOption);

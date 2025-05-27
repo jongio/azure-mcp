@@ -1,17 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Postgres.Table;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Postgres.Table;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Postgres.Table;
 
-public sealed class GetSchemaCommand(ILogger<GetSchemaCommand> logger) : BaseDatabaseCommand<GetSchemaArguments>(logger)
+public sealed class GetSchemaCommand(ILogger<GetSchemaCommand> logger) : BaseDatabaseCommand<GetSchemaOptions>(logger)
 {
     private const string _commandTitle = "Get PostgreSQL Table Schema";
-    private readonly Option<string> _tableOption = ArgumentDefinitions.Postgres.Table;
+    private readonly Option<string> _tableOption = OptionDefinitions.Postgres.Table;
 
     public override string Name => "schema";
     public override string Description => "Retrieves the schema of a specified table in a PostgreSQL database.";
@@ -23,7 +23,7 @@ public sealed class GetSchemaCommand(ILogger<GetSchemaCommand> logger) : BaseDat
         command.AddOption(_tableOption);
     }
 
-    protected override GetSchemaArguments BindOptions(ParseResult parseResult)
+    protected override GetSchemaOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.Table = parseResult.GetValueForOption(_tableOption);

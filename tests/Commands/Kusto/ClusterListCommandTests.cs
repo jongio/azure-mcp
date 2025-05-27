@@ -5,16 +5,13 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using AzureMcp.Arguments;
 using AzureMcp.Commands.Kusto;
-using AzureMcp.Extensions;
-using AzureMcp.Models.Argument;
 using AzureMcp.Models.Command;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using Xunit;
 
 namespace AzureMcp.Tests.Commands.Kusto;
@@ -42,7 +39,7 @@ public sealed class ClusterListCommandTests
         // Arrange
         var expectedClusters = new List<string> { "clusterA", "clusterB" };
         _kusto.ListClusters(
-            "sub123", Arg.Any<string>(), Arg.Any<RetryPolicyArguments>())
+            "sub123", Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
             .Returns(expectedClusters);
 
         var command = new ClusterListCommand(_logger);
@@ -91,7 +88,7 @@ public sealed class ClusterListCommandTests
         var subscriptionId = "sub123";
 
         // Arrange
-        _kusto.ListClusters(subscriptionId, null, Arg.Any<RetryPolicyArguments>())
+        _kusto.ListClusters(subscriptionId, null, Arg.Any<RetryPolicyOptions>())
             .Returns(Task.FromException<List<string>>(new Exception("Test error")));
 
         var command = new ClusterListCommand(_logger);

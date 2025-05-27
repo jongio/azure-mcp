@@ -1,19 +1,20 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.KeyVault.Key;
-using AzureMcp.Models.Argument;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.KeyVault.Key;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.KeyVault.Key;
 
-public sealed class KeyListCommand(ILogger<KeyListCommand> logger) : SubscriptionCommand<KeyListArgument>
+public sealed class KeyListCommand(ILogger<KeyListCommand> logger) : SubscriptionCommand<KeyListOptions>
 {
     private const string _commandTitle = "List Key Vault Keys";
     private readonly ILogger<KeyListCommand> _logger = logger;
-    private readonly Option<string> _vaultOption = ArgumentDefinitions.KeyVault.VaultName;
-    private readonly Option<bool> _includeManagedKeysOption = ArgumentDefinitions.KeyVault.IncludeManagedKeys;
+    private readonly Option<string> _vaultOption = OptionDefinitions.KeyVault.VaultName;
+    private readonly Option<bool> _includeManagedKeysOption = OptionDefinitions.KeyVault.IncludeManagedKeys;
 
     public override string Name => "list";
 
@@ -36,7 +37,7 @@ public sealed class KeyListCommand(ILogger<KeyListCommand> logger) : Subscriptio
         command.AddOption(_includeManagedKeysOption);
     }
 
-    protected override KeyListArgument BindOptions(ParseResult parseResult)
+    protected override KeyListOptions BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.VaultName = parseResult.GetValueForOption(_vaultOption);

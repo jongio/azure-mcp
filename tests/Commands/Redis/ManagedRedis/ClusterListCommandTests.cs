@@ -1,9 +1,9 @@
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json;
-using AzureMcp.Arguments;
 using AzureMcp.Commands.Redis.ManagedRedis;
 using AzureMcp.Models.Command;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -35,7 +35,7 @@ public class ClusterListCommandTests
     public async Task ExecuteAsync_ReturnsClusters_WhenClustersExist()
     {
         var expectedClusters = new ClusterModel[] { new() { Name = "cluster1" }, new() { Name = "cluster2" } };
-        _redisService.ListClustersAsync("sub123", Arg.Any<string>(), Arg.Any<Models.AuthMethod>(), Arg.Any<RetryPolicyArguments>())
+        _redisService.ListClustersAsync("sub123", Arg.Any<string>(), Arg.Any<Models.AuthMethod>(), Arg.Any<RetryPolicyOptions>())
             .Returns(expectedClusters);
 
         var command = new ClusterListCommand(_logger);
@@ -80,7 +80,7 @@ public class ClusterListCommandTests
     public async Task ExecuteAsync_HandlesException()
     {
         var expectedError = "Test error. To mitigate this issue, please refer to the troubleshooting guidelines here at https://aka.ms/azmcp/troubleshooting.";
-        _redisService.ListClustersAsync("sub123", Arg.Any<string>(), Arg.Any<Models.AuthMethod>(), Arg.Any<RetryPolicyArguments>())
+        _redisService.ListClustersAsync("sub123", Arg.Any<string>(), Arg.Any<Models.AuthMethod>(), Arg.Any<RetryPolicyOptions>())
             .ThrowsAsync(new Exception("Test error"));
 
         var command = new ClusterListCommand(_logger);
@@ -110,7 +110,7 @@ public class ClusterListCommandTests
 
         Assert.NotNull(response);
         Assert.Equal(400, response.Status);
-        Assert.Equal($"Missing required arguments: {missingParameter}", response.Message);
+        Assert.Equal($"Missing Required arguments: {missingParameter}", response.Message);
     }
 
     private record ClusterListResult(IEnumerable<ClusterModel> Clusters);

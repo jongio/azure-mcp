@@ -1,13 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Arguments.Search.Service;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Options.Search.Service;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Search.Service;
 
-public sealed class ServiceListCommand(ILogger<ServiceListCommand> logger) : SubscriptionCommand<ServiceListArguments>()
+public sealed class ServiceListCommand(ILogger<ServiceListCommand> logger) : SubscriptionCommand<ServiceListOptions>()
 {
     private const string _commandTitle = "List Azure AI Search Services";
     private readonly ILogger<ServiceListCommand> _logger = logger;

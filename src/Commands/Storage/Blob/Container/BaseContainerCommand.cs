@@ -2,16 +2,16 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics.CodeAnalysis;
-using AzureMcp.Arguments.Storage.Blob;
-using AzureMcp.Models.Argument;
+using AzureMcp.Models.Option;
+using AzureMcp.Options.Storage.Blob;
 
 namespace AzureMcp.Commands.Storage.Blob.Container;
 
 public abstract class BaseContainerCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : BaseStorageCommand<TArgs> where TArgs : BaseContainerArguments, new()
+    : BaseStorageCommand<TArgs> where TArgs : BaseContainerOptions, new()
 {
-    protected readonly Option<string> _containerOption = ArgumentDefinitions.Storage.Container;
+    protected readonly Option<string> _containerOption = OptionDefinitions.Storage.Container;
 
     protected BaseContainerCommand()
     {

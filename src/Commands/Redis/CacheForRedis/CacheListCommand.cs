@@ -1,19 +1,17 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine.Parsing;
-using AzureMcp.Arguments.Redis.CacheForRedis;
-using AzureMcp.Models.Command;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Options.Redis.CacheForRedis;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using ModelContextProtocol.Server;
 
 namespace AzureMcp.Commands.Redis.CacheForRedis;
 
 /// <summary>
 /// Lists Azure Cache for Redis resources (Basic, Standard, and Premium tier caches) in the specified subscription.
 /// </summary>
-public sealed class CacheListCommand(ILogger<CacheListCommand> logger) : SubscriptionCommand<CacheListArguments>()
+public sealed class CacheListCommand(ILogger<CacheListCommand> logger) : SubscriptionCommand<CacheListOptions>()
 {
     private const string _commandTitle = "List Redis Caches";
     private readonly ILogger<CacheListCommand> _logger = logger;
