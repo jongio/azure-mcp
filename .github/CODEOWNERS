@@ -29,7 +29,7 @@
 # Services
 ##################
 # PRLabel: %area-AppConfig
-/src/Options/AppConfig/              @JonathanCrd @conniey
+/src/Options/AppConfig/                @JonathanCrd @conniey
 /src/Commands/AppConfig/               @JonathanCrd @conniey
 /src/Services/Azure/AppConfig/         @JonathanCrd @conniey
 
@@ -46,7 +46,7 @@
 
 
 # PRLabel: %area-CosmosDB
-/src/Options/Cosmos/               @sajeetharan @xiangyan99
+/src/Options/Cosmos/                 @sajeetharan @xiangyan99
 /src/Commands/Cosmos/                @sajeetharan @xiangyan99
 /src/Services/Azure/Cosmos/          @sajeetharan @xiangyan99
 
@@ -55,7 +55,7 @@
 
 
 # PRLabel: %area-Azd
-/src/Options/Extension/               @wbreza @jongio
+/src/Options/Extension/                 @wbreza @jongio
 /src/Commands/Extension/                @wbreza @jongio
 /src/Services/Azure/Extension/          @wbreza @jongio
 
@@ -64,7 +64,7 @@
 
 
 # PRLabel: %area-ARM
-/src/Options/Group/                  @ArthurMa1978 @jongio
+/src/Options/Group/                    @ArthurMa1978 @jongio
 /src/Commands/Group/                   @ArthurMa1978 @jongio
 /src/Services/Azure/Group/             @ArthurMa1978 @jongio
 
@@ -73,7 +73,7 @@
 
 
 # PRLabel: %area-KeyVault
-/src/Options/KeyVault/               @conniey @JonathanCrd
+/src/Options/KeyVault/                 @conniey @JonathanCrd
 /src/Commands/KeyVault/                @conniey @JonathanCrd
 /src/Services/Azure/KeyVault/          @conniey @JonathanCrd
 
@@ -82,7 +82,7 @@
 
 
 # PRLabel: %area-Kusto
-/src/Options/Kusto/                  @danield137 @xiangyan99
+/src/Options/Kusto/                    @danield137 @xiangyan99
 /src/Commands/Kusto/                   @danield137 @xiangyan99
 /src/Services/Azure/Kusto/             @danield137 @xiangyan99
 
@@ -91,7 +91,7 @@
 
 
 # PRLabel: %area-Monitor
-/src/Options/Monitor/                @smritiy @srnagar @jongio
+/src/Options/Monitor/                  @smritiy @srnagar @jongio
 /src/Commands/Monitor/                 @smritiy @srnagar @jongio
 /src/Services/Azure/Monitor/           @smritiy @srnagar @jongio
 
@@ -100,7 +100,7 @@
 
 
 # PRLabel: %area-Search
-/src/Options/Search/                @pablocastro @jongio
+/src/Options/Search/                  @pablocastro @jongio
 /src/Commands/Search/                 @pablocastro @jongio
 /src/Services/Azure/Search/           @pablocastro @jongio
  
@@ -109,7 +109,7 @@
 
 
 # PRLabel: %area-ServiceBus
-/src/Options/ServiceBus/             @conniey @JonathanCrd
+/src/Options/ServiceBus/               @conniey @JonathanCrd
 /src/Commands/ServiceBus/              @conniey @JonathanCrd
 /src/Services/Azure/ServiceBus/        @conniey @JonathanCrd
  
@@ -117,7 +117,7 @@
 # ServiceOwners:                       @shankarsama @EldertGrootenboer
 
 # PRLabel: %area-Redis
-/src/Options/Redis/             @philon-msft @xiangyan99
+/src/Options/Redis/               @philon-msft @xiangyan99
 /src/Commands/Redis/              @philon-msft @xiangyan99
 /src/Services/Azure/Redis/        @philon-msft @xiangyan99
 
@@ -125,7 +125,7 @@
 # ServiceOwners:                       @philon-msft @carldc
 
 # PRLabel: %area-Storage
-/src/Options/Storage/                @alzimmermsft @jongio
+/src/Options/Storage/                  @alzimmermsft @jongio
 /src/Commands/Storage/                 @alzimmermsft @jongio
 /src/Services/Azure/Storage/           @alzimmermsft @jongio
  
