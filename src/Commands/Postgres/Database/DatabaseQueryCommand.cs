@@ -26,9 +26,9 @@ public sealed class DatabaseQueryCommand(ILogger<DatabaseQueryCommand> logger) :
 
     protected override DatabaseQueryOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Query = parseResult.GetValueForOption(_queryOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Query = parseResult.GetValueForOption(_queryOption);
+        return options;
     }
 
 
@@ -37,14 +37,14 @@ public sealed class DatabaseQueryCommand(ILogger<DatabaseQueryCommand> logger) :
     {
         try
         {
-            var args = BindOptions(parseResult);
+            var options = BindOptions(parseResult);
             if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
                 return context.Response;
             }
 
             IPostgresService pgService = context.GetService<IPostgresService>() ?? throw new InvalidOperationException("PostgreSQL service is not available.");
-            List<string> queryResult = await pgService.ExecuteQueryAsync(args.Subscription!, args.ResourceGroup!, args.User!, args.Server!, args.Database!, args.Query!);
+            List<string> queryResult = await pgService.ExecuteQueryAsync(options.Subscription!, options.ResourceGroup!, options.User!, options.Server!, options.Database!, options.Query!);
             context.Response.Results = queryResult?.Count > 0 ?
                 ResponseResult.Create(
                     new DatabaseQueryCommandResult(queryResult),

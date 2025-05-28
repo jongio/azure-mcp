@@ -9,9 +9,9 @@ using AzureMcp.Options;
 namespace AzureMcp.Commands.Monitor.HealthModels;
 
 public abstract class BaseMonitorHealthModelsCommand<
-    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : SubscriptionCommand<TArgs>
-    where TArgs : SubscriptionOptions, new()
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
+    : SubscriptionCommand<TOptions>
+    where TOptions : SubscriptionOptions, new()
 {
     protected readonly Option<string> _entityOption = OptionDefinitions.Monitor.Health.Entity;
     protected readonly Option<string> _healthModelOption = OptionDefinitions.Monitor.Health.HealthModel;

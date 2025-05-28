@@ -41,16 +41,16 @@ public sealed class TopicDetailsCommand : SubscriptionCommand<BaseTopicOptions>
 
     protected override BaseTopicOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.TopicName = parseResult.GetValueForOption(_topicOption);
-        args.Namespace = parseResult.GetValueForOption(_namespaceOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.TopicName = parseResult.GetValueForOption(_topicOption);
+        options.Namespace = parseResult.GetValueForOption(_namespaceOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -61,10 +61,10 @@ public sealed class TopicDetailsCommand : SubscriptionCommand<BaseTopicOptions>
 
             var service = context.GetService<IServiceBusService>();
             var details = await service.GetTopicDetails(
-                args.Namespace!,
-                args.TopicName!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Namespace!,
+                options.TopicName!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = ResponseResult.Create(
                 new TopicDetailsCommandResult(details),

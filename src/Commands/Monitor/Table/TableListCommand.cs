@@ -34,7 +34,7 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseMon
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -45,12 +45,12 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseMon
 
             var monitorService = context.GetService<IMonitorService>();
             var tables = await monitorService.ListTables(
-                args.Subscription!,
-                args.ResourceGroup!,
-                args.Workspace!,
-                args.TableType,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Subscription!,
+                options.ResourceGroup!,
+                options.Workspace!,
+                options.TableType,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = tables?.Count > 0 ?
                 ResponseResult.Create(new TableListCommandResult(tables), MonitorJsonContext.Default.TableListCommandResult) :
@@ -67,10 +67,10 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseMon
 
     protected override TableListOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.TableType = parseResult.GetValueForOption(_tableTypeOption) ?? OptionDefinitions.Monitor.TableType.GetDefaultValue();
-        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? OptionDefinitions.Common.ResourceGroup.GetDefaultValue();
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.TableType = parseResult.GetValueForOption(_tableTypeOption) ?? OptionDefinitions.Monitor.TableType.GetDefaultValue();
+        options.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? OptionDefinitions.Common.ResourceGroup.GetDefaultValue();
+        return options;
     }
 
     internal record TableListCommandResult(List<string> Tables);

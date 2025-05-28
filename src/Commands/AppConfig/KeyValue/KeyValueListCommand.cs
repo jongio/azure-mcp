@@ -38,16 +38,16 @@ public sealed class KeyValueListCommand(ILogger<KeyValueListCommand> logger) : B
 
     protected override KeyValueListOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Key = parseResult.GetValueForOption(_keyOption);
-        args.Label = parseResult.GetValueForOption(_labelOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Key = parseResult.GetValueForOption(_keyOption);
+        options.Label = parseResult.GetValueForOption(_labelOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -58,12 +58,12 @@ public sealed class KeyValueListCommand(ILogger<KeyValueListCommand> logger) : B
 
             var appConfigService = context.GetService<IAppConfigService>();
             var settings = await appConfigService.ListKeyValues(
-                args.Account!,
-                args.Subscription!,
-                args.Key,
-                args.Label,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Account!,
+                options.Subscription!,
+                options.Key,
+                options.Label,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = settings?.Count > 0 ?
                 ResponseResult.Create(

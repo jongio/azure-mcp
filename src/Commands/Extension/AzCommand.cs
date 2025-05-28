@@ -46,9 +46,9 @@ Your job is to answer questions about an Azure environment by executing Azure CL
 
     protected override AzOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Command = parseResult.GetValueForOption(_commandOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Command = parseResult.GetValueForOption(_commandOption);
+        return options;
     }
 
     private static string? FindAzCliPath()
@@ -146,7 +146,7 @@ Your job is to answer questions about an Azure environment by executing Azure CL
     [McpServerTool(Destructive = true, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -155,8 +155,8 @@ Your job is to answer questions about an Azure environment by executing Azure CL
                 return context.Response;
             }
 
-            ArgumentNullException.ThrowIfNull(args.Command);
-            var command = args.Command;
+            ArgumentNullException.ThrowIfNull(options.Command);
+            var command = options.Command;
             var processService = context.GetService<IExternalProcessService>();
 
             // Try to authenticate, but continue even if it fails
@@ -176,7 +176,7 @@ Your job is to answer questions about an Azure environment by executing Azure CL
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred executing command. Command: {Command}.", args.Command);
+            _logger.LogError(ex, "An exception occurred executing command. Command: {Command}.", options.Command);
             HandleException(context.Response, ex);
         }
 

@@ -30,7 +30,7 @@ public sealed class ClusterGetCommand : BaseClusterCommand<ClusterGetOptions>
     [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -41,17 +41,17 @@ public sealed class ClusterGetCommand : BaseClusterCommand<ClusterGetOptions>
 
             var kusto = context.GetService<IKustoService>();
             var cluster = await kusto.GetCluster(
-                args.Subscription!,
-                args.ClusterName!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Subscription!,
+                options.ClusterName!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = cluster is null ?
             null : ResponseResult.Create(new ClusterGetCommandResult(cluster), KustoJsonContext.Default.ClusterGetCommandResult);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred getting Kusto cluster details. Cluster: {Cluster}.", args.ClusterName);
+            _logger.LogError(ex, "An exception occurred getting Kusto cluster details. Cluster: {Cluster}.", options.ClusterName);
             HandleException(context.Response, ex);
         }
 

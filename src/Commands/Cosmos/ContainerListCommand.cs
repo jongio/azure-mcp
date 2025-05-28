@@ -26,7 +26,7 @@ public sealed class ContainerListCommand(ILogger<ContainerListCommand> logger) :
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -37,12 +37,12 @@ public sealed class ContainerListCommand(ILogger<ContainerListCommand> logger) :
 
             var cosmosService = context.GetService<ICosmosService>();
             var containers = await cosmosService.ListContainers(
-                args.Account!,
-                args.Database!,
-                args.Subscription!,
-                args.AuthMethod ?? AuthMethod.Credential,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Account!,
+                options.Database!,
+                options.Subscription!,
+                options.AuthMethod ?? AuthMethod.Credential,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = containers?.Count > 0 ?
                 ResponseResult.Create(

@@ -9,13 +9,13 @@ using AzureMcp.Options.Kusto;
 namespace AzureMcp.Commands.Kusto;
 
 public abstract class BaseClusterCommand<
-    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : SubscriptionCommand<TArgs> where TArgs : BaseClusterOptions, new()
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
+    : SubscriptionCommand<TOptions> where TOptions : BaseClusterOptions, new()
 {
     protected readonly Option<string> _clusterNameOption = OptionDefinitions.Kusto.Cluster;
     protected readonly Option<string> _clusterUriOption = OptionDefinitions.Kusto.ClusterUri;
 
-    protected static bool UseClusterUri(BaseClusterOptions args) => !string.IsNullOrEmpty(args.ClusterUri);
+    protected static bool UseClusterUri(BaseClusterOptions options) => !string.IsNullOrEmpty(options.ClusterUri);
 
     protected override void RegisterOptions(Command command)
     {
@@ -68,12 +68,12 @@ public abstract class BaseClusterCommand<
         return validationResult;
     }
 
-    protected override TArgs BindOptions(ParseResult parseResult)
+    protected override TOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.ClusterUri = parseResult.GetValueForOption(_clusterUriOption);
-        args.ClusterName = parseResult.GetValueForOption(_clusterNameOption);
+        var options = base.BindOptions(parseResult);
+        options.ClusterUri = parseResult.GetValueForOption(_clusterUriOption);
+        options.ClusterName = parseResult.GetValueForOption(_clusterNameOption);
 
-        return args;
+        return options;
     }
 }

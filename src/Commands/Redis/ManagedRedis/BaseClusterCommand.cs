@@ -23,9 +23,9 @@ public abstract class BaseClusterCommand<
 
     protected override T BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Cluster = parseResult.GetValueForOption(_clusterOption);
-        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? "";
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Cluster = parseResult.GetValueForOption(_clusterOption);
+        options.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? "";
+        return options;
     }
 }

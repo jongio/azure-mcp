@@ -26,7 +26,7 @@ public sealed class KeyValueLockCommand(ILogger<KeyValueLockCommand> logger) : B
     [McpServerTool(Destructive = false, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -37,21 +37,21 @@ public sealed class KeyValueLockCommand(ILogger<KeyValueLockCommand> logger) : B
 
             var appConfigService = context.GetService<IAppConfigService>();
             await appConfigService.LockKeyValue(
-                args.Account!,
-                args.Key!,
-                args.Subscription!,
-                args.Tenant,
-                args.RetryPolicy,
-                args.Label);
+                options.Account!,
+                options.Key!,
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy,
+                options.Label);
 
             context.Response.Results =
                 ResponseResult.Create(
-                    new KeyValueLockCommandResult(args.Key, args.Label),
+                    new KeyValueLockCommandResult(options.Key, options.Label),
                     AppConfigJsonContext.Default.KeyValueLockCommandResult);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred locking value. Key: {Key}, Label: {Label}", args.Key, args.Label);
+            _logger.LogError(ex, "An exception occurred locking value. Key: {Key}, Label: {Label}", options.Key, options.Label);
             HandleException(context.Response, ex);
         }
 

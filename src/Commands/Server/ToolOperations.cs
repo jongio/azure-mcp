@@ -144,7 +144,7 @@ public class ToolOperations
             };
         }
 
-        var args = command.GetCommand().Options;
+        var options = command.GetCommand().Options;
 
 
         var schema = new JsonObject
@@ -152,20 +152,20 @@ public class ToolOperations
             ["type"] = "object"
         };
 
-        if (args != null && args.Count > 0)
+        if (options != null && options.Count > 0)
         {
             var arguments = new JsonObject();
-            foreach (var arg in args)
+            foreach (var option in options)
             {
-                arguments.Add(arg.Name, new JsonObject()
+                arguments.Add(option.Name, new JsonObject()
                 {
-                    ["type"] = arg.ValueType.ToString().ToLower(),
-                    ["description"] = arg.Description,
+                    ["type"] = option.ValueType.ToString().ToLower(),
+                    ["description"] = option.Description,
                 });
             }
 
             schema["properties"] = arguments;
-            schema["required"] = new JsonArray(args.Where(p => p.IsRequired).Select(p => (JsonNode)p.Name).ToArray());
+            schema["required"] = new JsonArray(options.Where(p => p.IsRequired).Select(p => (JsonNode)p.Name).ToArray());
         }
 
         var newOptions = new JsonSerializerOptions(McpJsonUtilities.DefaultOptions);

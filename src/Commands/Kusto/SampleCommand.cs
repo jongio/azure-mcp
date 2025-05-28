@@ -23,9 +23,9 @@ public sealed class SampleCommand(ILogger<SampleCommand> logger) : BaseTableComm
 
     protected override SampleOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Limit = parseResult.GetValueForOption(_limitOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Limit = parseResult.GetValueForOption(_limitOption);
+        return options;
     }
 
     public override string Name => "sample";
@@ -42,7 +42,7 @@ public sealed class SampleCommand(ILogger<SampleCommand> logger) : BaseTableComm
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -53,28 +53,28 @@ public sealed class SampleCommand(ILogger<SampleCommand> logger) : BaseTableComm
 
             var kusto = context.GetService<IKustoService>();
             List<JsonElement> results;
-            var query = $"{args.Table} | sample {args.Limit}";
+            var query = $"{options.Table} | sample {options.Limit}";
 
-            if (UseClusterUri(args))
+            if (UseClusterUri(options))
             {
                 results = await kusto.QueryItems(
-                    args.ClusterUri!,
-                    args.Database!,
+                    options.ClusterUri!,
+                    options.Database!,
                     query,
-                    args.Tenant,
-                    args.AuthMethod,
-                    args.RetryPolicy);
+                    options.Tenant,
+                    options.AuthMethod,
+                    options.RetryPolicy);
             }
             else
             {
                 results = await kusto.QueryItems(
-                    args.Subscription!,
-                    args.ClusterName!,
-                    args.Database!,
+                    options.Subscription!,
+                    options.ClusterName!,
+                    options.Database!,
                     query,
-                    args.Tenant,
-                    args.AuthMethod,
-                    args.RetryPolicy);
+                    options.Tenant,
+                    options.AuthMethod,
+                    options.RetryPolicy);
             }
 
             context.Response.Results = results?.Count > 0 ?
@@ -83,7 +83,7 @@ public sealed class SampleCommand(ILogger<SampleCommand> logger) : BaseTableComm
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred sampling table. Cluster: {Cluster}, Database: {Database}, Table: {Table}.", args.ClusterUri ?? args.ClusterName, args.Database, args.Table);
+            _logger.LogError(ex, "An exception occurred sampling table. Cluster: {Cluster}, Database: {Database}, Table: {Table}.", options.ClusterUri ?? options.ClusterName, options.Database, options.Table);
             HandleException(context.Response, ex);
         }
         return context.Response;

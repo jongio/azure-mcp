@@ -28,7 +28,7 @@ public sealed class WorkspaceListCommand(ILogger<WorkspaceListCommand> logger) :
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -39,9 +39,9 @@ public sealed class WorkspaceListCommand(ILogger<WorkspaceListCommand> logger) :
 
             var monitorService = context.GetService<IMonitorService>();
             var workspaces = await monitorService.ListWorkspaces(
-                args.Subscription!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = workspaces?.Count > 0 ?
                 ResponseResult.Create(

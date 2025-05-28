@@ -10,14 +10,14 @@ using Microsoft.Extensions.Logging;
 namespace AzureMcp.Commands.Postgres;
 
 public abstract class BasePostgresCommand<
-    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : SubscriptionCommand<TArgs> where TArgs : BasePostgresOptions, new()
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
+    : SubscriptionCommand<TOptions> where TOptions : BasePostgresOptions, new()
 {
     protected readonly Option<string> _userOption = OptionDefinitions.Postgres.User;
 
-    protected readonly ILogger<BasePostgresCommand<TArgs>> _logger;
+    protected readonly ILogger<BasePostgresCommand<TOptions>> _logger;
 
-    protected BasePostgresCommand(ILogger<BasePostgresCommand<TArgs>> logger)
+    protected BasePostgresCommand(ILogger<BasePostgresCommand<TOptions>> logger)
     {
         _logger = logger;
     }
@@ -29,11 +29,11 @@ public abstract class BasePostgresCommand<
         command.AddOption(_userOption);
     }
 
-    protected override TArgs BindOptions(ParseResult parseResult)
+    protected override TOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
-        args.User = parseResult.GetValueForOption(_userOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
+        options.User = parseResult.GetValueForOption(_userOption);
+        return options;
     }
 }

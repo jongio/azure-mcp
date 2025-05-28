@@ -8,8 +8,8 @@ using AzureMcp.Options.Cosmos;
 namespace AzureMcp.Commands.Cosmos;
 
 public abstract class BaseDatabaseCommand<
-    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : BaseCosmosCommand<TArgs> where TArgs : BaseDatabaseOptions, new()
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
+    : BaseCosmosCommand<TOptions> where TOptions : BaseDatabaseOptions, new()
 {
     protected readonly Option<string> _databaseOption = OptionDefinitions.Cosmos.Database;
 
@@ -19,10 +19,10 @@ public abstract class BaseDatabaseCommand<
         command.AddOption(_databaseOption);
     }
 
-    protected override TArgs BindOptions(ParseResult parseResult)
+    protected override TOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Database = parseResult.GetValueForOption(_databaseOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Database = parseResult.GetValueForOption(_databaseOption);
+        return options;
     }
 }

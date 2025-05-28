@@ -22,7 +22,7 @@ public sealed class TableSchemaCommand(ILogger<TableSchemaCommand> logger) : Bas
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -34,33 +34,33 @@ public sealed class TableSchemaCommand(ILogger<TableSchemaCommand> logger) : Bas
             var kusto = context.GetService<IKustoService>();
             string tableSchema;
 
-            if (UseClusterUri(args))
+            if (UseClusterUri(options))
             {
                 tableSchema = await kusto.GetTableSchema(
-                    args.ClusterUri!,
-                    args.Database!,
-                    args.Table!,
-                    args.Tenant,
-                    args.AuthMethod,
-                    args.RetryPolicy);
+                    options.ClusterUri!,
+                    options.Database!,
+                    options.Table!,
+                    options.Tenant,
+                    options.AuthMethod,
+                    options.RetryPolicy);
             }
             else
             {
                 tableSchema = await kusto.GetTableSchema(
-                    args.Subscription!,
-                    args.ClusterName!,
-                    args.Database!,
-                    args.Table!,
-                    args.Tenant,
-                    args.AuthMethod,
-                    args.RetryPolicy);
+                    options.Subscription!,
+                    options.ClusterName!,
+                    options.Database!,
+                    options.Table!,
+                    options.Tenant,
+                    options.AuthMethod,
+                    options.RetryPolicy);
             }
 
             context.Response.Results = ResponseResult.Create(new TableSchemaCommandResult(tableSchema), KustoJsonContext.Default.TableSchemaCommandResult);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred getting table schema. Cluster: {Cluster}, Table: {Table}.", args.ClusterUri ?? args.ClusterName, args.Table);
+            _logger.LogError(ex, "An exception occurred getting table schema. Cluster: {Cluster}, Table: {Table}.", options.ClusterUri ?? options.ClusterName, options.Table);
             HandleException(context.Response, ex);
         }
         return context.Response;

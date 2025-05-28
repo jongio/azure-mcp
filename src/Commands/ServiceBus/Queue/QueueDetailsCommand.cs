@@ -39,16 +39,16 @@ public sealed class QueueDetailsCommand : SubscriptionCommand<BaseQueueOptions>
 
     protected override BaseQueueOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Name = parseResult.GetValueForOption(_queueOption);
-        args.Namespace = parseResult.GetValueForOption(_namespaceOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Name = parseResult.GetValueForOption(_queueOption);
+        options.Namespace = parseResult.GetValueForOption(_namespaceOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -59,10 +59,10 @@ public sealed class QueueDetailsCommand : SubscriptionCommand<BaseQueueOptions>
 
             var service = context.GetService<IServiceBusService>();
             var details = await service.GetQueueDetails(
-                args.Namespace!,
-                args.Name!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Namespace!,
+                options.Name!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = ResponseResult.Create(
                 new QueueDetailsCommandResult(details),

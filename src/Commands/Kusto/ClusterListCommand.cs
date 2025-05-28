@@ -32,7 +32,7 @@ public sealed class ClusterListCommand : SubscriptionCommand<ClusterListOptions>
     [McpServerTool(Destructive = true, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -43,9 +43,9 @@ public sealed class ClusterListCommand : SubscriptionCommand<ClusterListOptions>
 
             var kusto = context.GetService<IKustoService>();
             var clusterNames = await kusto.ListClusters(
-                args.Subscription!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = clusterNames?.Count > 0 ?
                 ResponseResult.Create(new ClusterListCommandResult(clusterNames), KustoJsonContext.Default.ClusterListCommandResult) :
@@ -53,7 +53,7 @@ public sealed class ClusterListCommand : SubscriptionCommand<ClusterListOptions>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred listing Kusto clusters. Subscription: {Subscription}.", args.Subscription);
+            _logger.LogError(ex, "An exception occurred listing Kusto clusters. Subscription: {Subscription}.", options.Subscription);
             HandleException(context.Response, ex);
         }
         return context.Response;

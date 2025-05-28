@@ -86,19 +86,19 @@ public sealed class AzdCommand(ILogger<AzdCommand> logger, int processTimeoutSec
 
     protected override AzdOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Command = parseResult.GetValueForOption(_commandOption);
-        args.Cwd = parseResult.GetValueForOption(_cwdOption);
-        args.Environment = parseResult.GetValueForOption(_environmentOption);
-        args.Learn = parseResult.GetValueForOption(_learnOption);
+        var options = base.BindOptions(parseResult);
+        options.Command = parseResult.GetValueForOption(_commandOption);
+        options.Cwd = parseResult.GetValueForOption(_cwdOption);
+        options.Environment = parseResult.GetValueForOption(_environmentOption);
+        options.Learn = parseResult.GetValueForOption(_learnOption);
 
-        return args;
+        return options;
     }
 
     [McpServerTool(Destructive = true, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -108,29 +108,29 @@ public sealed class AzdCommand(ILogger<AzdCommand> logger, int processTimeoutSec
             }
 
             // If the agent is asking for help, return the best practices text
-            if (args.Learn && string.IsNullOrWhiteSpace(args.Command))
+            if (options.Learn && string.IsNullOrWhiteSpace(options.Command))
             {
                 context.Response.Message = _bestPracticesText;
                 context.Response.Status = 200;
                 return context.Response;
             }
 
-            ArgumentNullException.ThrowIfNull(args.Command);
-            ArgumentNullException.ThrowIfNull(args.Cwd);
+            ArgumentNullException.ThrowIfNull(options.Command);
+            ArgumentNullException.ThrowIfNull(options.Cwd);
 
             // Check if the command is a long-running command. The command can contain other flags.
             // If is long running command return error message to the user.
-            if (longRunningCommands.Any(c => args.Command.StartsWith(c, StringComparison.OrdinalIgnoreCase)))
+            if (longRunningCommands.Any(c => options.Command.StartsWith(c, StringComparison.OrdinalIgnoreCase)))
             {
-                var terminalCommand = $"azd {args.Command}";
+                var terminalCommand = $"azd {options.Command}";
 
-                if (!args.Command.Contains("--cwd", StringComparison.OrdinalIgnoreCase))
+                if (!options.Command.Contains("--cwd", StringComparison.OrdinalIgnoreCase))
                 {
-                    terminalCommand += $" --cwd {args.Cwd}";
+                    terminalCommand += $" --cwd {options.Cwd}";
                 }
-                if (!args.Command.Contains("-e", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(args.Environment))
+                if (!options.Command.Contains("-e", StringComparison.OrdinalIgnoreCase) && !string.IsNullOrWhiteSpace(options.Environment))
                 {
-                    terminalCommand += $" -e {args.Environment}";
+                    terminalCommand += $" -e {options.Environment}";
                 }
 
                 context.Response.Status = 400;
@@ -147,13 +147,13 @@ public sealed class AzdCommand(ILogger<AzdCommand> logger, int processTimeoutSec
                 return context.Response;
             }
 
-            var command = args.Command;
+            var command = options.Command;
 
-            command += $" --cwd {args.Cwd}";
+            command += $" --cwd {options.Cwd}";
 
-            if (args.Environment is not null)
+            if (options.Environment is not null)
             {
-                command += $" -e {args.Environment}";
+                command += $" -e {options.Environment}";
             }
 
             // We need to always pass the --no-prompt flag to avoid prompting for user input and getting the process stuck
@@ -179,7 +179,7 @@ public sealed class AzdCommand(ILogger<AzdCommand> logger, int processTimeoutSec
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred executing command. Command: {Command}.", args.Command);
+            _logger.LogError(ex, "An exception occurred executing command. Command: {Command}.", options.Command);
             HandleException(context.Response, ex);
         }
 

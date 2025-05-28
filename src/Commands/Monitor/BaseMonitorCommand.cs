@@ -10,9 +10,9 @@ using AzureMcp.Options.Monitor;
 namespace AzureMcp.Commands.Monitor;
 
 public abstract class BaseMonitorCommand<
-    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : SubscriptionCommand<TArgs>
-    where TArgs : SubscriptionOptions, IWorkspaceOptions, new()
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
+    : SubscriptionCommand<TOptions>
+    where TOptions : SubscriptionOptions, IWorkspaceOptions, new()
 {
     protected readonly Option<string> _workspaceOption = OptionDefinitions.Monitor.Workspace;
 
@@ -22,10 +22,10 @@ public abstract class BaseMonitorCommand<
         command.AddOption(_workspaceOption);
     }
 
-    protected override TArgs BindOptions(ParseResult parseResult)
+    protected override TOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Workspace = parseResult.GetValueForOption(_workspaceOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Workspace = parseResult.GetValueForOption(_workspaceOption);
+        return options;
     }
 }

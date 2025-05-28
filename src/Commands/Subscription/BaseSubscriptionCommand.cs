@@ -7,8 +7,8 @@ using AzureMcp.Options.Subscription;
 namespace AzureMcp.Commands.Subscription;
 
 public abstract class BaseSubscriptionCommand<
-    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs> : GlobalCommand<TArgs>
-    where TArgs : BaseSubscriptionOptions, new()
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions> : GlobalCommand<TOptions>
+    where TOptions : BaseSubscriptionOptions, new()
 {
     protected BaseSubscriptionCommand()
     {

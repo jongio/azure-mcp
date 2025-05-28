@@ -27,7 +27,7 @@ public sealed class ContainerListCommand(ILogger<ContainerListCommand> logger) :
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -38,10 +38,10 @@ public sealed class ContainerListCommand(ILogger<ContainerListCommand> logger) :
 
             var storageService = context.GetService<IStorageService>();
             var containers = await storageService.ListContainers(
-                args.Account!,
-                args.Subscription!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Account!,
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = containers?.Count > 0
                 ? ResponseResult.Create(
@@ -51,7 +51,7 @@ public sealed class ContainerListCommand(ILogger<ContainerListCommand> logger) :
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error listing containers. Account: {Account}.", args.Account);
+            _logger.LogError(ex, "Error listing containers. Account: {Account}.", options.Account);
             HandleException(context.Response, ex);
         }
 

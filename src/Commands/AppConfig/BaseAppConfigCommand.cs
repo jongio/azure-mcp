@@ -22,8 +22,8 @@ public abstract class BaseAppConfigCommand<
 
     protected override T BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Account = parseResult.GetValueForOption(_accountOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Account = parseResult.GetValueForOption(_accountOption);
+        return options;
     }
 }

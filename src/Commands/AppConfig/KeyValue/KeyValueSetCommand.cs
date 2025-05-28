@@ -33,15 +33,15 @@ public sealed class KeyValueSetCommand(ILogger<KeyValueSetCommand> logger) : Bas
 
     protected override KeyValueSetOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Value = parseResult.GetValueForOption(_valueOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Value = parseResult.GetValueForOption(_valueOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = false, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -52,22 +52,22 @@ public sealed class KeyValueSetCommand(ILogger<KeyValueSetCommand> logger) : Bas
 
             var appConfigService = context.GetService<IAppConfigService>();
             await appConfigService.SetKeyValue(
-                args.Account!,
-                args.Key!,
-                args.Value!,
-                args.Subscription!,
-                args.Tenant,
-                args.RetryPolicy,
-                args.Label);
+                options.Account!,
+                options.Key!,
+                options.Value!,
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy,
+                options.Label);
 
             context.Response.Results = ResponseResult.Create(
-                new KeyValueSetCommandResult(args.Key, args.Value, args.Label),
+                new KeyValueSetCommandResult(options.Key, options.Value, options.Label),
                 AppConfigJsonContext.Default.KeyValueSetCommandResult
             );
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred setting value. Key: {Key}.", args.Key);
+            _logger.LogError(ex, "An exception occurred setting value. Key: {Key}.", options.Key);
             HandleException(context.Response, ex);
         }
 

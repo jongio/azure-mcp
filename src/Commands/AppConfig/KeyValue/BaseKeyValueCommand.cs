@@ -23,9 +23,9 @@ public abstract class BaseKeyValueCommand<
 
     protected override T BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Key = parseResult.GetValueForOption(_keyOption);
-        args.Label = parseResult.GetValueForOption(_labelOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Key = parseResult.GetValueForOption(_keyOption);
+        options.Label = parseResult.GetValueForOption(_labelOption);
+        return options;
     }
 }

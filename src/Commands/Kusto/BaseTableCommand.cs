@@ -8,8 +8,8 @@ using AzureMcp.Options.Kusto;
 namespace AzureMcp.Commands.Kusto;
 
 public abstract class BaseTableCommand<
-    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : BaseDatabaseCommand<TArgs> where TArgs : BaseTableOptions, new()
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
+    : BaseDatabaseCommand<TOptions> where TOptions : BaseTableOptions, new()
 {
     protected readonly Option<string> _tableOption = OptionDefinitions.Kusto.Table;
 
@@ -19,10 +19,10 @@ public abstract class BaseTableCommand<
         command.AddOption(_tableOption);
     }
 
-    protected override TArgs BindOptions(ParseResult parseResult)
+    protected override TOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Table = parseResult.GetValueForOption(_tableOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Table = parseResult.GetValueForOption(_tableOption);
+        return options;
     }
 }

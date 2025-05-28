@@ -29,7 +29,7 @@ public sealed class GroupListCommand(ILogger<GroupListCommand> logger) : Subscri
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -40,9 +40,9 @@ public sealed class GroupListCommand(ILogger<GroupListCommand> logger) : Subscri
 
             var resourceGroupService = context.GetService<IResourceGroupService>();
             var groups = await resourceGroupService.GetResourceGroups(
-                args.Subscription!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = groups?.Count > 0 ?
                 ResponseResult.Create(new Result(groups), JsonSourceGenerationContext.Default.Result) :

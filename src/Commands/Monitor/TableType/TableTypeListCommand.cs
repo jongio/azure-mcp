@@ -27,15 +27,15 @@ public sealed class TableTypeListCommand(ILogger<TableTypeListCommand> logger) :
 
     protected override TableTypeListOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -46,11 +46,11 @@ public sealed class TableTypeListCommand(ILogger<TableTypeListCommand> logger) :
 
             var monitorService = context.GetService<IMonitorService>();
             var tableTypes = await monitorService.ListTableTypes(
-                args.Subscription!,
-                args.ResourceGroup!,
-                args.Workspace!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Subscription!,
+                options.ResourceGroup!,
+                options.Workspace!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = tableTypes?.Count > 0 ?
                 ResponseResult.Create<TableTypeListCommandResult>(

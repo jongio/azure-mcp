@@ -10,8 +10,8 @@ using Microsoft.Azure.Cosmos;
 namespace AzureMcp.Commands.Cosmos;
 
 public abstract class BaseCosmosCommand<
-    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : SubscriptionCommand<TArgs> where TArgs : BaseCosmosOptions, new()
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
+    : SubscriptionCommand<TOptions> where TOptions : BaseCosmosOptions, new()
 {
     protected readonly Option<string> _accountOption = OptionDefinitions.Cosmos.Account;
 
@@ -21,11 +21,11 @@ public abstract class BaseCosmosCommand<
         command.AddOption(_accountOption);
     }
 
-    protected override TArgs BindOptions(ParseResult parseResult)
+    protected override TOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Account = parseResult.GetValueForOption(_accountOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Account = parseResult.GetValueForOption(_accountOption);
+        return options;
     }
 
     protected override string GetErrorMessage(Exception ex) => ex switch

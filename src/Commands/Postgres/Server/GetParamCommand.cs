@@ -27,9 +27,9 @@ public sealed class GetParamCommand(ILogger<GetParamCommand> logger) : BaseServe
 
     protected override GetParamOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Param = parseResult.GetValueForOption(_paramOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Param = parseResult.GetValueForOption(_paramOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
@@ -37,7 +37,7 @@ public sealed class GetParamCommand(ILogger<GetParamCommand> logger) : BaseServe
     {
         try
         {
-            var args = BindOptions(parseResult);
+            var options = BindOptions(parseResult);
 
             if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
@@ -45,7 +45,7 @@ public sealed class GetParamCommand(ILogger<GetParamCommand> logger) : BaseServe
             }
 
             IPostgresService pgService = context.GetService<IPostgresService>() ?? throw new InvalidOperationException("PostgreSQL service is not available.");
-            var parameterValue = await pgService.GetServerParameterAsync(args.Subscription!, args.ResourceGroup!, args.User!, args.Server!, args.Param!);
+            var parameterValue = await pgService.GetServerParameterAsync(options.Subscription!, options.ResourceGroup!, options.User!, options.Server!, options.Param!);
             context.Response.Results = parameterValue?.Length > 0 ?
                 ResponseResult.Create(
                     new GetParamCommandResult(parameterValue),

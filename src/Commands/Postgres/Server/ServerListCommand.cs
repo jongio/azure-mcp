@@ -23,14 +23,14 @@ public sealed class ServerListCommand(ILogger<ServerListCommand> logger) : BaseP
     {
         try
         {
-            var args = BindOptions(parseResult);
+            var options = BindOptions(parseResult);
             if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
                 return context.Response;
             }
 
             IPostgresService pgService = context.GetService<IPostgresService>() ?? throw new InvalidOperationException("PostgreSQL service is not available.");
-            List<string> servers = await pgService.ListServersAsync(args.Subscription!, args.ResourceGroup!, args.User!);
+            List<string> servers = await pgService.ListServersAsync(options.Subscription!, options.ResourceGroup!, options.User!);
             context.Response.Results = servers?.Count > 0 ?
                 ResponseResult.Create(
                     new ServerListCommandResult(servers),

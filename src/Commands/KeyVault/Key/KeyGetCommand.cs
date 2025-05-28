@@ -40,16 +40,16 @@ public sealed class KeyGetCommand(ILogger<KeyGetCommand> logger) : SubscriptionC
 
     protected override KeyGetOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.VaultName = parseResult.GetValueForOption(_vaultOption);
-        args.KeyName = parseResult.GetValueForOption(_keyOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.VaultName = parseResult.GetValueForOption(_vaultOption);
+        options.KeyName = parseResult.GetValueForOption(_keyOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -60,11 +60,11 @@ public sealed class KeyGetCommand(ILogger<KeyGetCommand> logger) : SubscriptionC
 
             var service = context.GetService<IKeyVaultService>();
             var key = await service.GetKey(
-                args.VaultName!,
-                args.KeyName!,
-                args.Subscription!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.VaultName!,
+                options.KeyName!,
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = ResponseResult.Create(
                 new KeyGetCommandResult(key.Name, key.KeyType.ToString(), key.Properties.Enabled, key.Properties.NotBefore, key.Properties.ExpiresOn, key.Properties.CreatedOn, key.Properties.UpdatedOn),
@@ -72,7 +72,7 @@ public sealed class KeyGetCommand(ILogger<KeyGetCommand> logger) : SubscriptionC
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting key {KeyName} from vault {VaultName}", args.KeyName, args.VaultName);
+            _logger.LogError(ex, "Error getting key {KeyName} from vault {VaultName}", options.KeyName, options.VaultName);
             HandleException(context.Response, ex);
         }
 

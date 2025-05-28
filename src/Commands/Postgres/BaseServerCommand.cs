@@ -9,8 +9,8 @@ using Microsoft.Extensions.Logging;
 namespace AzureMcp.Commands.Postgres;
 
 public abstract class BaseServerCommand<
-    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>(ILogger<BasePostgresCommand<TArgs>> logger)
-    : BasePostgresCommand<TArgs>(logger) where TArgs : BasePostgresOptions, new()
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>(ILogger<BasePostgresCommand<TOptions>> logger)
+    : BasePostgresCommand<TOptions>(logger) where TOptions : BasePostgresOptions, new()
 
 {
     private readonly Option<string> _serverOption = OptionDefinitions.Postgres.Server;
@@ -26,10 +26,10 @@ public abstract class BaseServerCommand<
         command.AddOption(_serverOption);
     }
 
-    protected override TArgs BindOptions(ParseResult parseResult)
+    protected override TOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Server = parseResult.GetValueForOption(_serverOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Server = parseResult.GetValueForOption(_serverOption);
+        return options;
     }
 }

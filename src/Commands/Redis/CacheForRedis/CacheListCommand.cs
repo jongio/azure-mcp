@@ -29,7 +29,7 @@ public sealed class CacheListCommand(ILogger<CacheListCommand> logger) : Subscri
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -40,10 +40,10 @@ public sealed class CacheListCommand(ILogger<CacheListCommand> logger) : Subscri
 
             var redisService = context.GetService<IRedisService>() ?? throw new InvalidOperationException("Redis service is not available.");
             var caches = await redisService.ListCachesAsync(
-                args.Subscription!,
-                args.Tenant,
-                args.AuthMethod,
-                args.RetryPolicy);
+                options.Subscription!,
+                options.Tenant,
+                options.AuthMethod,
+                options.RetryPolicy);
 
             context.Response.Results = caches.Any() ?
                 ResponseResult.Create(

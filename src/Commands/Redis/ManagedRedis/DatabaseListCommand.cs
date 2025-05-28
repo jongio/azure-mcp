@@ -28,7 +28,7 @@ public sealed class DatabaseListCommand(ILogger<DatabaseListCommand> logger) : B
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -39,12 +39,12 @@ public sealed class DatabaseListCommand(ILogger<DatabaseListCommand> logger) : B
 
             var redisService = context.GetService<IRedisService>() ?? throw new InvalidOperationException("Redis service is not available.");
             var databases = await redisService.ListDatabasesAsync(
-                args.Cluster!,
-                args.ResourceGroup!,
-                args.Subscription!,
-                args.Tenant,
-                args.AuthMethod,
-                args.RetryPolicy);
+                options.Cluster!,
+                options.ResourceGroup!,
+                options.Subscription!,
+                options.Tenant,
+                options.AuthMethod,
+                options.RetryPolicy);
 
             context.Response.Results = databases.Any() ?
                 ResponseResult.Create(

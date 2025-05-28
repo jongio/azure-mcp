@@ -25,7 +25,7 @@ public sealed class DatabaseListCommand(ILogger<DatabaseListCommand> logger) : B
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -36,11 +36,11 @@ public sealed class DatabaseListCommand(ILogger<DatabaseListCommand> logger) : B
 
             var cosmosService = context.GetService<ICosmosService>();
             var databases = await cosmosService.ListDatabases(
-                args.Account!,
-                args.Subscription!,
-                args.AuthMethod ?? AuthMethod.Credential,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Account!,
+                options.Subscription!,
+                options.AuthMethod ?? AuthMethod.Credential,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = databases?.Count > 0 ?
                 ResponseResult.Create(
@@ -50,7 +50,7 @@ public sealed class DatabaseListCommand(ILogger<DatabaseListCommand> logger) : B
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred listing databases. Account: {Account}.", args.Account);
+            _logger.LogError(ex, "An exception occurred listing databases. Account: {Account}.", options.Account);
             HandleException(context.Response, ex);
         }
 

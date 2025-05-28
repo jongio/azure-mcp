@@ -33,15 +33,15 @@ public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalC
 
     protected override IndexListOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Service = parseResult.GetValueForOption(_serviceOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Service = parseResult.GetValueForOption(_serviceOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -53,8 +53,8 @@ public sealed class IndexListCommand(ILogger<IndexListCommand> logger) : GlobalC
             var searchService = context.GetService<ISearchService>();
 
             var indexes = await searchService.ListIndexes(
-                args.Service!,
-                args.RetryPolicy);
+                options.Service!,
+                options.RetryPolicy);
 
             context.Response.Results = indexes?.Count > 0
                 ? ResponseResult.Create(

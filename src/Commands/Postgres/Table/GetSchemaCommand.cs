@@ -25,9 +25,9 @@ public sealed class GetSchemaCommand(ILogger<GetSchemaCommand> logger) : BaseDat
 
     protected override GetSchemaOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Table = parseResult.GetValueForOption(_tableOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Table = parseResult.GetValueForOption(_tableOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
@@ -35,7 +35,7 @@ public sealed class GetSchemaCommand(ILogger<GetSchemaCommand> logger) : BaseDat
     {
         try
         {
-            var args = BindOptions(parseResult);
+            var options = BindOptions(parseResult);
 
             if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
@@ -43,7 +43,7 @@ public sealed class GetSchemaCommand(ILogger<GetSchemaCommand> logger) : BaseDat
             }
 
             IPostgresService pgService = context.GetService<IPostgresService>() ?? throw new InvalidOperationException("PostgreSQL service is not available.");
-            List<string> schema = await pgService.GetTableSchemaAsync(args.Subscription!, args.ResourceGroup!, args.User!, args.Server!, args.Database!, args.Table!);
+            List<string> schema = await pgService.GetTableSchemaAsync(options.Subscription!, options.ResourceGroup!, options.User!, options.Server!, options.Database!, options.Table!);
             context.Response.Results = schema?.Count > 0 ?
                 ResponseResult.Create(
                     new GetSchemaCommandResult(schema),

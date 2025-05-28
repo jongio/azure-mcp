@@ -28,7 +28,7 @@ public sealed class ServiceListCommand(ILogger<ServiceListCommand> logger) : Sub
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -40,9 +40,9 @@ public sealed class ServiceListCommand(ILogger<ServiceListCommand> logger) : Sub
             var searchService = context.GetService<ISearchService>();
 
             var services = await searchService.ListServices(
-                args.Subscription!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = services?.Count > 0 ?
                 ResponseResult.Create(

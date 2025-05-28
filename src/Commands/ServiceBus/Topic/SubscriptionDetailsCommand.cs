@@ -43,17 +43,17 @@ public sealed class SubscriptionDetailsCommand : SubscriptionCommand<Subscriptio
 
     protected override SubscriptionDetailsOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Namespace = parseResult.GetValueForOption(_namespaceOption);
-        args.TopicName = parseResult.GetValueForOption(_topicOption);
-        args.SubscriptionName = parseResult.GetValueForOption(_subscriptionNameOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Namespace = parseResult.GetValueForOption(_namespaceOption);
+        options.TopicName = parseResult.GetValueForOption(_topicOption);
+        options.SubscriptionName = parseResult.GetValueForOption(_subscriptionNameOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -64,11 +64,11 @@ public sealed class SubscriptionDetailsCommand : SubscriptionCommand<Subscriptio
 
             var service = context.GetService<IServiceBusService>();
             var details = await service.GetSubscriptionDetails(
-                args.Namespace!,
-                args.TopicName!,
-                args.SubscriptionName!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Namespace!,
+                options.TopicName!,
+                options.SubscriptionName!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = ResponseResult.Create(
                 new SubscriptionDetailsCommandResult(details),

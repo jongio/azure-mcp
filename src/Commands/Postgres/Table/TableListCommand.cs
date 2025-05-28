@@ -21,14 +21,14 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseDat
     {
         try
         {
-            var args = BindOptions(parseResult);
+            var options = BindOptions(parseResult);
             if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
                 return context.Response;
             }
 
             IPostgresService pgService = context.GetService<IPostgresService>() ?? throw new InvalidOperationException("PostgreSQL service is not available.");
-            List<string> tables = await pgService.ListTablesAsync(args.Subscription!, args.ResourceGroup!, args.User!, args.Server!, args.Database!);
+            List<string> tables = await pgService.ListTablesAsync(options.Subscription!, options.ResourceGroup!, options.User!, options.Server!, options.Database!);
             context.Response.Results = tables?.Count > 0 ?
                 ResponseResult.Create(
                     new TableListCommandResult(tables),

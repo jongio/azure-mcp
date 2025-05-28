@@ -29,7 +29,7 @@ public sealed class DatabaseListCommand : BaseClusterCommand<DatabaseListOptions
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -42,22 +42,22 @@ public sealed class DatabaseListCommand : BaseClusterCommand<DatabaseListOptions
 
             List<string> databasesNames = [];
 
-            if (UseClusterUri(args))
+            if (UseClusterUri(options))
             {
                 databasesNames = await kusto.ListDatabases(
-                    args.ClusterUri!,
-                    args.Tenant,
-                    args.AuthMethod,
-                    args.RetryPolicy);
+                    options.ClusterUri!,
+                    options.Tenant,
+                    options.AuthMethod,
+                    options.RetryPolicy);
             }
             else
             {
                 databasesNames = await kusto.ListDatabases(
-                    args.Subscription!,
-                    args.ClusterName!,
-                    args.Tenant,
-                    args.AuthMethod,
-                    args.RetryPolicy);
+                    options.Subscription!,
+                    options.ClusterName!,
+                    options.Tenant,
+                    options.AuthMethod,
+                    options.RetryPolicy);
             }
 
             context.Response.Results = databasesNames?.Count > 0 ?
@@ -66,7 +66,7 @@ public sealed class DatabaseListCommand : BaseClusterCommand<DatabaseListOptions
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred listing databases. Cluster: {Cluster}.", args.ClusterUri ?? args.ClusterName);
+            _logger.LogError(ex, "An exception occurred listing databases. Cluster: {Cluster}.", options.ClusterUri ?? options.ClusterName);
             HandleException(context.Response, ex);
         }
         return context.Response;

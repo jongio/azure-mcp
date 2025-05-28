@@ -27,7 +27,7 @@ public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : Sub
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -38,9 +38,9 @@ public sealed class AccountListCommand(ILogger<AccountListCommand> logger) : Sub
 
             var appConfigService = context.GetService<IAppConfigService>();
             var accounts = await appConfigService.GetAppConfigAccounts(
-                args.Subscription!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = accounts?.Count > 0 ?
                 ResponseResult.Create(

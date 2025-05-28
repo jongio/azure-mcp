@@ -39,17 +39,17 @@ public sealed class EntityGetHealthCommand(ILogger<EntityGetHealthCommand> logge
 
     protected override EntityGetHealthOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Entity = parseResult.GetValueForOption(_entityOption);
-        args.HealthModelName = parseResult.GetValueForOption(_healthModelOption);
-        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Entity = parseResult.GetValueForOption(_entityOption);
+        options.HealthModelName = parseResult.GetValueForOption(_healthModelOption);
+        options.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle, Name = _commandName)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -60,13 +60,13 @@ public sealed class EntityGetHealthCommand(ILogger<EntityGetHealthCommand> logge
 
             var service = context.GetService<IMonitorHealthModelService>();
             var result = await service.GetEntityHealth(
-                args.Entity!,
-                args.HealthModelName!,
-                args.ResourceGroup!,
-                args.Subscription!,
-                args.AuthMethod,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Entity!,
+                options.HealthModelName!,
+                options.ResourceGroup!,
+                options.Subscription!,
+                options.AuthMethod,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = ResponseResult.Create<JsonNode>(result, JsonSourceGenerationContext.Default.JsonNode);
         }
@@ -75,12 +75,12 @@ public sealed class EntityGetHealthCommand(ILogger<EntityGetHealthCommand> logge
             _logger.LogError(ex,
                 "An exception occurred getting health for entity: {Entity} in healthModel: {HealthModelName}, resourceGroup: {ResourceGroup}, subscription: {Subscription}, authMethod: {AuthMethod}"
                 + ", tenant: {Tenant}.",
-                args.Entity,
-                args.HealthModelName,
-                args.ResourceGroup,
-                args.Subscription,
-                args.AuthMethod,
-                args.Tenant);
+                options.Entity,
+                options.HealthModelName,
+                options.ResourceGroup,
+                options.Subscription,
+                options.AuthMethod,
+                options.Tenant);
             HandleException(context.Response, ex);
         }
 

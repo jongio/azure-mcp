@@ -130,16 +130,16 @@ public class AccessPolicyListCommandTests
     {
         var command = new AccessPolicyListCommand(_logger);
 
-        var args = new List<string>();
+        var options = new List<string>();
         if (parameterToKeep == "--subscription")
-            args.AddRange(["--subscription", "sub123"]);
+            options.AddRange(["--subscription", "sub123"]);
         if (parameterToKeep == "--resource-group")
-            args.AddRange(["--resource-group", "rg1"]);
+            options.AddRange(["--resource-group", "rg1"]);
         if (parameterToKeep == "--cache")
-            args.AddRange(["--cache", "cache1"]);
+            options.AddRange(["--cache", "cache1"]);
 
         var parser = new Parser(command.GetCommand());
-        var parseResult = parser.Parse(args.ToArray());
+        var parseResult = parser.Parse(options.ToArray());
         var context = new CommandContext(_serviceProvider);
 
         var response = await command.ExecuteAsync(context, parseResult);

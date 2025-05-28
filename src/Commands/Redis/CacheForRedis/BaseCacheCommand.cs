@@ -23,9 +23,9 @@ public abstract class BaseCacheCommand<
 
     protected override T BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Cache = parseResult.GetValueForOption(_cacheOption);
-        args.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? "";
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Cache = parseResult.GetValueForOption(_cacheOption);
+        options.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption) ?? "";
+        return options;
     }
 }

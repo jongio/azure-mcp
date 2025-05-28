@@ -8,8 +8,8 @@ using AzureMcp.Options;
 namespace AzureMcp.Commands.Subscription;
 
 public abstract class SubscriptionCommand<
-    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs> : GlobalCommand<TArgs>
-    where TArgs : SubscriptionOptions, new()
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions> : GlobalCommand<TOptions>
+    where TOptions : SubscriptionOptions, new()
 {
     protected readonly Option<string> _subscriptionOption = OptionDefinitions.Common.Subscription;
 
@@ -19,10 +19,10 @@ public abstract class SubscriptionCommand<
         command.AddOption(_subscriptionOption);
     }
 
-    protected override TArgs BindOptions(ParseResult parseResult)
+    protected override TOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Subscription = parseResult.GetValueForOption(_subscriptionOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Subscription = parseResult.GetValueForOption(_subscriptionOption);
+        return options;
     }
 }

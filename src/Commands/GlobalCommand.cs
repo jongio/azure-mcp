@@ -20,8 +20,8 @@ internal static class TrimAnnotations
 }
 
 public abstract class GlobalCommand<
-    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs> : BaseCommand
-    where TArgs : GlobalOptions, new()
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions> : BaseCommand
+    where TOptions : GlobalOptions, new()
 {
     protected readonly Option<string> _tenantOption = OptionDefinitions.Common.Tenant;
     protected readonly Option<AuthMethod> _authMethodOption = OptionDefinitions.Common.AuthMethod;
@@ -84,10 +84,9 @@ public abstract class GlobalCommand<
 
         return commandPath;
     }
-
-    protected virtual TArgs BindOptions(ParseResult parseResult)
+    protected virtual TOptions BindOptions(ParseResult parseResult)
     {
-        var args = new TArgs
+        var options = new TOptions
         {
             Tenant = parseResult.GetValueForOption(_tenantOption),
             AuthMethod = parseResult.GetValueForOption(_authMethodOption)
@@ -96,7 +95,7 @@ public abstract class GlobalCommand<
         // Only create RetryPolicy if any retry options are specified
         if (parseResult.HasAnyRetryOptions())
         {
-            args.RetryPolicy = new RetryPolicyOptions
+            options.RetryPolicy = new RetryPolicyOptions
             {
                 MaxRetries = parseResult.GetValueForOption(_retryMaxRetries),
                 DelaySeconds = parseResult.GetValueForOption(_retryDelayOption),
@@ -106,7 +105,7 @@ public abstract class GlobalCommand<
             };
         }
 
-        return args;
+        return options;
     }
 
     protected override string GetErrorMessage(Exception ex) => ex switch

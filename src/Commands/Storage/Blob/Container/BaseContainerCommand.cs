@@ -8,8 +8,8 @@ using AzureMcp.Options.Storage.Blob;
 namespace AzureMcp.Commands.Storage.Blob.Container;
 
 public abstract class BaseContainerCommand<
-    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TArgs>
-    : BaseStorageCommand<TArgs> where TArgs : BaseContainerOptions, new()
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
+    : BaseStorageCommand<TOptions> where TOptions : BaseContainerOptions, new()
 {
     protected readonly Option<string> _containerOption = OptionDefinitions.Storage.Container;
 
@@ -23,10 +23,10 @@ public abstract class BaseContainerCommand<
         command.AddOption(_containerOption);
     }
 
-    protected override TArgs BindOptions(ParseResult parseResult)
+    protected override TOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Container = parseResult.GetValueForOption(_containerOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Container = parseResult.GetValueForOption(_containerOption);
+        return options;
     }
 }

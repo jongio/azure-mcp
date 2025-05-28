@@ -22,7 +22,7 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseDat
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -34,24 +34,24 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseDat
             var kusto = context.GetService<IKustoService>();
             List<string> tableNames = [];
 
-            if (UseClusterUri(args))
+            if (UseClusterUri(options))
             {
                 tableNames = await kusto.ListTables(
-                    args.ClusterUri!,
-                    args.Database!,
-                    args.Tenant,
-                    args.AuthMethod,
-                    args.RetryPolicy);
+                    options.ClusterUri!,
+                    options.Database!,
+                    options.Tenant,
+                    options.AuthMethod,
+                    options.RetryPolicy);
             }
             else
             {
                 tableNames = await kusto.ListTables(
-                    args.Subscription!,
-                    args.ClusterName!,
-                    args.Database!,
-                    args.Tenant,
-                    args.AuthMethod,
-                    args.RetryPolicy);
+                    options.Subscription!,
+                    options.ClusterName!,
+                    options.Database!,
+                    options.Tenant,
+                    options.AuthMethod,
+                    options.RetryPolicy);
             }
 
             context.Response.Results = tableNames?.Count > 0 ?
@@ -60,7 +60,7 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseDat
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred listing tables. Cluster: {Cluster}, Database: {Database}.", args.ClusterUri ?? args.ClusterName, args.Database);
+            _logger.LogError(ex, "An exception occurred listing tables. Cluster: {Cluster}, Database: {Database}.", options.ClusterUri ?? options.ClusterName, options.Database);
             HandleException(context.Response, ex);
         }
         return context.Response;

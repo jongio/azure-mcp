@@ -39,16 +39,16 @@ public sealed class KeyListCommand(ILogger<KeyListCommand> logger) : Subscriptio
 
     protected override KeyListOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.VaultName = parseResult.GetValueForOption(_vaultOption);
-        args.IncludeManagedKeys = parseResult.GetValueForOption(_includeManagedKeysOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.VaultName = parseResult.GetValueForOption(_vaultOption);
+        options.IncludeManagedKeys = parseResult.GetValueForOption(_includeManagedKeysOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -59,11 +59,11 @@ public sealed class KeyListCommand(ILogger<KeyListCommand> logger) : Subscriptio
 
             var keyVaultService = context.GetService<IKeyVaultService>();
             var keys = await keyVaultService.ListKeys(
-                args.VaultName!,
-                args.IncludeManagedKeys,
-                args.Subscription!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.VaultName!,
+                options.IncludeManagedKeys,
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = keys?.Count > 0 ?
                 ResponseResult.Create(
@@ -73,7 +73,7 @@ public sealed class KeyListCommand(ILogger<KeyListCommand> logger) : Subscriptio
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred listing keys from vault {VaultName}.", args.VaultName);
+            _logger.LogError(ex, "An exception occurred listing keys from vault {VaultName}.", options.VaultName);
             HandleException(context.Response, ex);
         }
 

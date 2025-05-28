@@ -37,15 +37,15 @@ public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseCon
 
     protected override ItemQueryOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Query = parseResult.GetValueForOption(_queryOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Query = parseResult.GetValueForOption(_queryOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -56,14 +56,14 @@ public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseCon
 
             var cosmosService = context.GetService<ICosmosService>();
             var items = await cosmosService.QueryItems(
-                args.Account!,
-                args.Database!,
-                args.Container!,
-                args.Query ?? DefaultQuery,
-                args.Subscription!,
-                args.AuthMethod ?? AuthMethod.Credential,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Account!,
+                options.Database!,
+                options.Container!,
+                options.Query ?? DefaultQuery,
+                options.Subscription!,
+                options.AuthMethod ?? AuthMethod.Credential,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = items?.Count > 0 ?
                 ResponseResult.Create(new ItemQueryCommandResult(items), CosmosJsonContext.Default.ItemQueryCommandResult) :
@@ -72,7 +72,7 @@ public sealed class ItemQueryCommand(ILogger<ItemQueryCommand> logger) : BaseCon
         catch (Exception ex)
         {
             _logger.LogError(ex, "An exception occurred querying container. Account: {Account}, Database: {Database},"
-                + " Container: {Container}", args.Account, args.Database, args.Container);
+                + " Container: {Container}", options.Account, options.Database, options.Container);
 
             HandleException(context.Response, ex);
         }

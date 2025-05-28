@@ -29,7 +29,7 @@ public sealed class BlobListCommand(ILogger<BlobListCommand> logger) : BaseConta
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -40,11 +40,11 @@ public sealed class BlobListCommand(ILogger<BlobListCommand> logger) : BaseConta
 
             var storageService = context.GetService<IStorageService>();
             var blobs = await storageService.ListBlobs(
-                args.Account!,
-                args.Container!,
-                args.Subscription!,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Account!,
+                options.Container!,
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = blobs?.Count > 0
                 ? ResponseResult.Create(new BlobListCommandResult(blobs), StorageJsonContext.Default.BlobListCommandResult)
@@ -52,7 +52,7 @@ public sealed class BlobListCommand(ILogger<BlobListCommand> logger) : BaseConta
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error listing storage blobs.  Account: {Account}, Container: {Container}.", args.Account, args.Container);
+            _logger.LogError(ex, "Error listing storage blobs.  Account: {Account}, Container: {Container}.", options.Account, options.Container);
             HandleException(context.Response, ex);
         }
 

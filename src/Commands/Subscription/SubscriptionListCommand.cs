@@ -27,7 +27,7 @@ public sealed class SubscriptionListCommand(ILogger<SubscriptionListCommand> log
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -37,7 +37,7 @@ public sealed class SubscriptionListCommand(ILogger<SubscriptionListCommand> log
             }
 
             var subscriptionService = context.GetService<ISubscriptionService>();
-            var subscriptions = await subscriptionService.GetSubscriptions(args.Tenant, args.RetryPolicy);
+            var subscriptions = await subscriptionService.GetSubscriptions(options.Tenant, options.RetryPolicy);
 
             context.Response.Results = subscriptions?.Count > 0
                 ? ResponseResult.Create(

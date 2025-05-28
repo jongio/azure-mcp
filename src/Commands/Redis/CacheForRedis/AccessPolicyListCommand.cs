@@ -28,7 +28,7 @@ public sealed class AccessPolicyListCommand(ILogger<AccessPolicyListCommand> log
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -39,12 +39,12 @@ public sealed class AccessPolicyListCommand(ILogger<AccessPolicyListCommand> log
 
             var redisService = context.GetService<IRedisService>() ?? throw new InvalidOperationException("Redis service is not available.");
             var accessPolicyAssignments = await redisService.ListAccessPolicyAssignmentsAsync(
-                args.Cache!,
-                args.ResourceGroup!,
-                args.Subscription!,
-                args.Tenant,
-                args.AuthMethod,
-                args.RetryPolicy);
+                options.Cache!,
+                options.ResourceGroup!,
+                options.Subscription!,
+                options.Tenant,
+                options.AuthMethod,
+                options.RetryPolicy);
 
             context.Response.Results = accessPolicyAssignments.Any() ?
                 ResponseResult.Create(

@@ -40,16 +40,16 @@ public sealed class IndexDescribeCommand(ILogger<IndexDescribeCommand> logger) :
 
     protected override IndexDescribeOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Service = parseResult.GetValueForOption(_serviceOption);
-        args.Index = parseResult.GetValueForOption(_indexOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Service = parseResult.GetValueForOption(_serviceOption);
+        options.Index = parseResult.GetValueForOption(_indexOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -61,9 +61,9 @@ public sealed class IndexDescribeCommand(ILogger<IndexDescribeCommand> logger) :
             var searchService = context.GetService<ISearchService>();
 
             var indexDefinition = await searchService.DescribeIndex(
-                args.Service!,
-                args.Index!,
-                args.RetryPolicy);
+                options.Service!,
+                options.Index!,
+                options.RetryPolicy);
 
             context.Response.Results = indexDefinition != null
                 ? ResponseResult.Create(new(indexDefinition), SearchJsonContext.Default.IndexDescribeCommandResult)

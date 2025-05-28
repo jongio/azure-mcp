@@ -27,9 +27,9 @@ public sealed class QueryCommand : BaseDatabaseCommand<QueryOptions>
 
     protected override QueryOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Query = parseResult.GetValueForOption(_queryOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Query = parseResult.GetValueForOption(_queryOption);
+        return options;
     }
 
     public override string Name => "query";
@@ -46,7 +46,7 @@ public sealed class QueryCommand : BaseDatabaseCommand<QueryOptions>
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -58,26 +58,26 @@ public sealed class QueryCommand : BaseDatabaseCommand<QueryOptions>
             List<JsonElement> results = [];
             var kusto = context.GetService<IKustoService>();
 
-            if (UseClusterUri(args))
+            if (UseClusterUri(options))
             {
                 results = await kusto.QueryItems(
-                    args.ClusterUri!,
-                    args.Database!,
-                    args.Query!,
-                    args.Tenant,
-                    args.AuthMethod,
-                    args.RetryPolicy);
+                    options.ClusterUri!,
+                    options.Database!,
+                    options.Query!,
+                    options.Tenant,
+                    options.AuthMethod,
+                    options.RetryPolicy);
             }
             else
             {
                 results = await kusto.QueryItems(
-                    args.Subscription!,
-                    args.ClusterName!,
-                    args.Database!,
-                    args.Query!,
-                    args.Tenant,
-                    args.AuthMethod,
-                    args.RetryPolicy);
+                    options.Subscription!,
+                    options.ClusterName!,
+                    options.Database!,
+                    options.Query!,
+                    options.Tenant,
+                    options.AuthMethod,
+                    options.RetryPolicy);
             }
 
             context.Response.Results = results?.Count > 0 ?
@@ -87,7 +87,7 @@ public sealed class QueryCommand : BaseDatabaseCommand<QueryOptions>
         catch (Exception ex)
         {
             _logger.LogError(ex, "An exception occurred querying Kusto. Cluster: {Cluster}, Database: {Database},"
-            + " Query: {Query}", args.ClusterUri ?? args.ClusterName, args.Database, args.Query);
+            + " Query: {Query}", options.ClusterUri ?? options.ClusterName, options.Database, options.Query);
             HandleException(context.Response, ex);
         }
         return context.Response;

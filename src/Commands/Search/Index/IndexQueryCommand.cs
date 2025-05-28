@@ -40,17 +40,17 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
 
     protected override IndexQueryOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.Service = parseResult.GetValueForOption(_serviceOption);
-        args.Index = parseResult.GetValueForOption(_indexOption);
-        args.Query = parseResult.GetValueForOption(_queryOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.Service = parseResult.GetValueForOption(_serviceOption);
+        options.Index = parseResult.GetValueForOption(_indexOption);
+        options.Query = parseResult.GetValueForOption(_queryOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -62,10 +62,10 @@ public sealed class IndexQueryCommand(ILogger<IndexQueryCommand> logger) : Globa
             var searchService = context.GetService<ISearchService>();
 
             var results = await searchService.QueryIndex(
-                args.Service!,
-                args.Index!,
-                args.Query!,
-                args.RetryPolicy);
+                options.Service!,
+                options.Index!,
+                options.Query!,
+                options.RetryPolicy);
 
             context.Response.Results = ResponseResult.Create(results, SearchJsonContext.Default.ListJsonElement);
         }

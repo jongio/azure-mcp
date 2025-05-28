@@ -26,7 +26,7 @@ public sealed class KeyValueShowCommand(ILogger<KeyValueShowCommand> logger) : B
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -37,12 +37,12 @@ public sealed class KeyValueShowCommand(ILogger<KeyValueShowCommand> logger) : B
 
             var appConfigService = context.GetService<IAppConfigService>();
             var setting = await appConfigService.GetKeyValue(
-                args.Account!,
-                args.Key!,
-                args.Subscription!,
-                args.Tenant,
-                args.RetryPolicy,
-                args.Label);
+                options.Account!,
+                options.Key!,
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy,
+                options.Label);
 
             context.Response.Results = ResponseResult.Create(
                 new KeyValueShowResult(setting),
@@ -50,7 +50,7 @@ public sealed class KeyValueShowCommand(ILogger<KeyValueShowCommand> logger) : B
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "An exception occurred getting value. Key: {Key}.", args.Key);
+            _logger.LogError(ex, "An exception occurred getting value. Key: {Key}.", options.Key);
             HandleException(context.Response, ex);
         }
 

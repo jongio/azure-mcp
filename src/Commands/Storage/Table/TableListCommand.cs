@@ -26,7 +26,7 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseSto
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -37,12 +37,12 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseSto
 
             var storageService = context.GetService<IStorageService>();
             var tables = await storageService.ListTables(
-                args.Account!,
-                args.Subscription!,
-                args.AuthMethod ?? AuthMethod.Credential,
+                options.Account!,
+                options.Subscription!,
+                options.AuthMethod ?? AuthMethod.Credential,
                 null,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Tenant,
+                options.RetryPolicy);
 
             context.Response.Results = tables?.Count > 0
                 ? ResponseResult.Create(new TableListCommandResult(tables), StorageJsonContext.Default.TableListCommandResult)
@@ -51,7 +51,7 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseSto
             // Only show warning if we actually had to fall back to a different auth method
             if (context.Response.Results is not null && !string.IsNullOrEmpty(context.Response.Message))
             {
-                var authMethod = args.AuthMethod ?? AuthMethod.Credential;
+                var authMethod = options.AuthMethod ?? AuthMethod.Credential;
                 context.Response.Message = authMethod switch
                 {
                     AuthMethod.Credential when context.Response.Message.Contains("connection string") =>
@@ -70,7 +70,7 @@ public sealed class TableListCommand(ILogger<TableListCommand> logger) : BaseSto
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error listing tables. Account: {Account}.", args.Account);
+            _logger.LogError(ex, "Error listing tables. Account: {Account}.", options.Account);
             HandleException(context.Response, ex);
         }
 

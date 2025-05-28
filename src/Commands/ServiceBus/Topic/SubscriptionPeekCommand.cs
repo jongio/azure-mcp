@@ -44,22 +44,20 @@ public sealed class SubscriptionPeekCommand : SubscriptionCommand<SubscriptionPe
         command.AddOption(_maxMessagesOption);
     }
 
-
-
     protected override SubscriptionPeekOptions BindOptions(ParseResult parseResult)
     {
-        var args = base.BindOptions(parseResult);
-        args.SubscriptionName = parseResult.GetValueForOption(_subscriptionNameOption);
-        args.TopicName = parseResult.GetValueForOption(_topicOption);
-        args.Namespace = parseResult.GetValueForOption(_namespaceOption);
-        args.MaxMessages = parseResult.GetValueForOption(_maxMessagesOption);
-        return args;
+        var options = base.BindOptions(parseResult);
+        options.SubscriptionName = parseResult.GetValueForOption(_subscriptionNameOption);
+        options.TopicName = parseResult.GetValueForOption(_topicOption);
+        options.Namespace = parseResult.GetValueForOption(_namespaceOption);
+        options.MaxMessages = parseResult.GetValueForOption(_maxMessagesOption);
+        return options;
     }
 
     [McpServerTool(Destructive = false, ReadOnly = true, Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -70,12 +68,12 @@ public sealed class SubscriptionPeekCommand : SubscriptionCommand<SubscriptionPe
 
             var service = context.GetService<IServiceBusService>();
             var messages = await service.PeekSubscriptionMessages(
-                args.Namespace!,
-                args.TopicName!,
-                args.SubscriptionName!,
-                args.MaxMessages ?? 1,
-                args.Tenant,
-                args.RetryPolicy);
+                options.Namespace!,
+                options.TopicName!,
+                options.SubscriptionName!,
+                options.MaxMessages ?? 1,
+                options.Tenant,
+                options.RetryPolicy);
 
             var peekedMessages = messages ?? new List<ServiceBusReceivedMessage>();
 

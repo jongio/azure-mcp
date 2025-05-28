@@ -28,7 +28,7 @@ public sealed class ContainerDetailsCommand(ILogger<ContainerDetailsCommand> log
     [McpServerTool(Destructive = false, ReadOnly = true)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
@@ -39,11 +39,11 @@ public sealed class ContainerDetailsCommand(ILogger<ContainerDetailsCommand> log
 
             var storageService = context.GetService<IStorageService>();
             var details = await storageService.GetContainerDetails(
-                args.Account!,
-                args.Container!,
-                args.Subscription!,
-                args.Tenant,
-                args.RetryPolicy
+                options.Account!,
+                options.Container!,
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy
             );
 
             var result = new ContainerDetailsCommandResult(new JsonBlobContainerProperties(details));
@@ -52,7 +52,7 @@ public sealed class ContainerDetailsCommand(ILogger<ContainerDetailsCommand> log
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error getting container details. Account: {Account}, Container: {Container}.", args.Account, args.Container);
+            _logger.LogError(ex, "Error getting container details. Account: {Account}, Container: {Container}.", options.Account, options.Container);
             HandleException(context.Response, ex);
             return context.Response;
         }
