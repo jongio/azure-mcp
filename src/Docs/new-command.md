@@ -3,21 +3,52 @@
 
 # Implementing a New Command in Azure MCP
 
-This document provides a guide for implementing commands in Azure MCP following established patterns.
+This document provides a comprehensive guide for implementing commands in Azure MCP following established patterns.
 
-## Command Structure 
+## Command Architecture
 
-Commands follow this exact pattern:
-```
-azmcp <service> <resource> <operation>
-```
+### Command Design Principles
 
-Example: `azmcp storage container list`
+1. **Command Interface**
+   - `IBaseCommand` serves as the root interface with core command capabilities:
+     - `Name`: Command name for CLI display
+     - `Description`: Detailed command description
+     - `Title`: Human-readable command title
+     - `GetCommand()`: Retrieves System.CommandLine command definition
+     - `ExecuteAsync()`: Executes command logic
+     - `Validate()`: Validates command inputs
 
-Where:
-- `service` - Azure service name (lowercase)
-- `resource` - Resource type (singular noun, lowercase)
-- `operation` - Action to perform (verb, lowercase)
+2. **Command Hierarchy**
+   All commands must implement the hierarchy pattern:
+     ```
+     IBaseCommand
+     └── BaseCommand
+         └── GlobalCommand<TOptions>
+             └── SubscriptionCommand<TOptions>
+                 └── Service-specific base commands
+                     └── Resource-specific commands
+     ```   - Commands use primary constructors with ILogger injection and optional parameters (e.g., timeouts)
+   - Classes are always sealed unless explicitly intended for inheritance
+   - Commands are marked with [McpServerTool] attribute to define their characteristics
+
+3. **Command Pattern**
+   Commands follow the Model-Context-Protocol (MCP) pattern with this naming convention:
+   ```
+   azmcp <service> <resource> <operation>
+   ```
+   Example: `azmcp storage container list`
+
+   Where:
+   - `service`: Azure service name (lowercase, e.g., storage, cosmos, kusto)
+   - `resource`: Resource type (singular noun, lowercase)
+   - `operation`: Action to perform (verb, lowercase)
+   
+   Each command is:
+   - Registered in CommandFactory
+   - Organized in a hierarchy of command groups
+   - Documented with a title, description and examples
+   - Validated before execution
+   - Returns a standardized response format
 
 ## Required Files
 
@@ -51,18 +82,14 @@ IMPORTANT:
 ### 2. Command Class
 
 ```csharp
-public sealed class {Resource}{Operation}Command : Base{Service}Command<{Resource}{Operation}Options>
+public sealed class {Resource}{Operation}Command(ILogger<{Resource}{Operation}Command> logger) 
+    : Base{Service}Command<{Resource}{Operation}Options>
 {
     private const string _commandTitle = "Human Readable Title";
-    private readonly ILogger<{Resource}{Operation}Command> _logger;
+    private readonly ILogger<{Resource}{Operation}Command> _logger = logger;
     
     // Define options from OptionDefinitions
     private readonly Option<string> _newOption = OptionDefinitions.Service.NewOption;
-
-    public {Resource}{Operation}Command(ILogger<{Resource}{Operation}Command> logger)
-    {
-        _logger = logger;
-    }
 
     public override string Name => "operation";
 
@@ -80,7 +107,9 @@ public sealed class {Resource}{Operation}Command : Base{Service}Command<{Resourc
     {
         base.RegisterOptions(command);
         command.AddOption(_newOption);
-    }    protected override {Resource}{Operation}Options BindOptions(ParseResult parseResult)
+    }    
+    
+    protected override {Resource}{Operation}Options BindOptions(ParseResult parseResult)
     {
         var args = base.BindOptions(parseResult);
         args.NewOption = parseResult.GetValueForOption(_newOption);
@@ -88,69 +117,115 @@ public sealed class {Resource}{Operation}Command : Base{Service}Command<{Resourc
     }
 
     [McpServerTool(
-        Destructive = false,
-        ReadOnly = true,
-        Title = _commandTitle,
-        OpenWorld = false,
-        Idempotent = true)]
+        Destructive = false,     // Set to true for commands that modify resources
+        ReadOnly = true,        // Set to false for commands that modify resources
+        Title = _commandTitle)]  // Display name shown in UI
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
-        var args = BindOptions(parseResult);
+        var options = BindOptions(parseResult);
 
         try
         {
-            var validationResult = Validate(parseResult.CommandResult); 
-            if (!validationResult.IsValid)
+            // Required validation step using the base Validate method
+            if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
-                context.Response.Status = 400;
-                context.Response.Message = validationResult.ErrorMessage!;
                 return context.Response;
             }
 
+            // Get the appropriate service from DI
             var service = context.GetService<I{Service}Service>();
-            var results = await service.{Operation}(args);
+            
+            // Call service operation(s)
+            var results = await service.{Operation}(
+                options.RequiredParam!,
+                options.OptionalParam,
+                options.Subscription!,
+                options.Tenant,
+                options.RetryPolicy);
 
-            context.Response.Results = results?.Count > 0 ?
-                ResponseResult.Create(results, {Service}JsonContext.Default.{Resource}{Operation}CommandResult) :
+            // Set results if any were returned
+            context.Response.Results = results?.Count > 0 ? 
+                ResponseResult.Create(
+                    // Use a strongly-typed result record
+                    new {Operation}CommandResult(results),
+                    // Use source generated JsonContext
+                    {Service}JsonContext.Default.{Operation}CommandResult) : 
                 null;
         }
         catch (Exception ex)
         {
+            // Log error with context information
             _logger.LogError(ex, "Error in {Operation}. Options: {Options}", Name, args);
+            // Let base class handle standard error processing
             HandleException(context.Response, ex);
         }
 
         return context.Response;
     }
 
+    // Optional: Override HandleException to handle service-specific errors
+    protected override string GetErrorMessage(Exception ex) => ex switch
+    {
+        // Service-specific errors
+        ResourceNotFoundException => "Resource not found. Verify the resource exists and you have access.",
+        AuthorizationException authEx => 
+            $"Authorization failed accessing the resource. Details: {authEx.Message}",
+        ServiceException svcEx => svcEx.Message,
+        // Fall back to base handler
+        _ => base.GetErrorMessage(ex)
+    };
+
+    protected override int GetStatusCode(Exception ex) => ex switch  
+    {
+        // Map exceptions to HTTP status codes
+        ResourceNotFoundException => 404,
+        AuthorizationException => 403,
+        ServiceException svcEx => svcEx.Status,
+        // Fall back to base handler
+        _ => base.GetStatusCode(ex)
+    };
+
     internal record {Resource}{Operation}CommandResult(List<ResultType> Results);
 }
 ```
 
-### 3. Base Service Command 
+### 3. Base Service Command Classes
+
+Each service has its own hierarchy of base command classes that inherit from `GlobalCommand` or `SubscriptionCommand`. For example:
 
 ```csharp
-public abstract class Base{Service}Command<TOptions> : GlobalCommand<TOptions> 
-    where TOptions : Base{Service}Options, new()
+// Base command for all service commands
+public abstract class Base{Service}Command<
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions> 
+    : SubscriptionCommand<TOptions> where TOptions : Base{Service}Options, new()
 {
     protected readonly Option<string> _commonOption = OptionDefinitions.Service.CommonOption;
+    protected readonly Option<string> _resourceGroupOption = OptionDefinitions.Common.ResourceGroup;
 
     protected override void RegisterOptions(Command command)
     {
         base.RegisterOptions(command);
         command.AddOption(_commonOption);
     }
+}
 
-    protected override TOptions BindOptions(ParseResult parseResult)
+// Base command for resource-specific commands
+public abstract class Base{Resource}Command<TOptions> : Base{Service}Command<TOptions>
+    where TOptions : Base{Resource}Options, new() 
+{
+    protected readonly Option<string> _resourceOption = OptionDefinitions.Service.Resource;
+    
+    protected override void RegisterOptions(Command command) 
     {
-        var args = base.BindOptions(parseResult);
-        args.CommonOption = parseResult.GetValueForOption(_commonOption);
-        return args;
+        base.RegisterOptions(command);
+        command.AddOption(_resourceOption);
     }
 }
 ```
 
 ### 4. Unit Tests
+
+Unit tests follow a standardized pattern that tests initialization, validation, and execution:
 
 ```csharp
 public class {Resource}{Operation}CommandTests
@@ -175,21 +250,50 @@ public class {Resource}{Operation}CommandTests
     [Fact]
     public void Constructor_InitializesCommandCorrectly()
     {
-        // Arrange & Act
         var command = _command.GetCommand();
-
-        // Assert
         Assert.Equal("operation", command.Name);
         Assert.NotNull(command.Description);
         Assert.NotEmpty(command.Description);
     }
 
-    [Fact] 
-    public async Task ExecuteAsync_WithValidInput_ReturnsSuccess()
+    [Theory]
+    [InlineData("--required value", true)]
+    [InlineData("--optional-param value --required value", true)]
+    [InlineData("", false)]
+    public async Task ExecuteAsync_ValidatesInputCorrectly(string args, bool shouldSucceed)
+    {
+        // Arrange
+        if (shouldSucceed)
+        {
+            _service.{Operation}(Arg.Any<{Resource}{Operation}Options>())
+                .Returns(new List<ResultType>());
+        }
+
+        var context = new CommandContext(_serviceProvider);
+        var parseResult = _command.GetCommand().Parse(args);
+
+        // Act
+        var response = await _command.ExecuteAsync(context, parseResult);
+
+        // Assert
+        Assert.Equal(shouldSucceed ? 200 : 400, response.Status);
+        if (shouldSucceed)
+        {
+            Assert.NotNull(response.Results);
+            Assert.Equal("Success", response.Message);
+        }
+        else
+        {
+            Assert.Contains("required", response.Message.ToLower());
+        }
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_HandlesServiceErrors()
     {
         // Arrange
         _service.{Operation}(Arg.Any<{Resource}{Operation}Options>())
-            .Returns(new List<ResultType>());
+            .Returns(Task.FromException<List<ResultType>>(new Exception("Test error")));
 
         var context = new CommandContext(_serviceProvider);
         var parseResult = _command.GetCommand().Parse("--required value");
@@ -198,56 +302,74 @@ public class {Resource}{Operation}CommandTests
         var response = await _command.ExecuteAsync(context, parseResult);
 
         // Assert
-        Assert.Equal(200, response.Status);
-        Assert.NotNull(response.Results);
-    }
-
-    [Fact]
-    public async Task ExecuteAsync_WithMissingRequiredOption_ReturnsBadRequest()
-    {
-        // Arrange
-        var context = new CommandContext(_serviceProvider);
-        var parseResult = _command.GetCommand().Parse("");
-
-        // Act
-        var response = await _command.ExecuteAsync(context, parseResult);
-
-        // Assert
-        Assert.Equal(400, response.Status);
-        Assert.Contains("required", response.Message.ToLower());
+        Assert.Equal(500, response.Status);
+        Assert.Contains("Test error", response.Message);
+        Assert.Contains("troubleshooting", response.Message);
     }
 }
 ```
 
 ### 5. Integration Tests
 
-```csharp
-public class {Service}CommandTests : CommandTestsBase, 
-    IClassFixture<LiveTestFixture>
-{
-    private readonly {Service}Service _{service}Service;
+Integration tests inherit from `CommandTestsBase` and use test fixtures:
 
-    public {Service}CommandTests(LiveTestFixture fixture, ITestOutputHelper output)
+```csharp
+public class {Service}CommandTests : CommandTestsBase, IClassFixture<LiveTestFixture>
+{
+    protected const string TenantNameReason = "Service principals cannot use TenantName for lookup";
+    protected LiveTestSettings Settings { get; }
+    protected StringBuilder FailureOutput { get; } = new();
+    protected ITestOutputHelper Output { get; }
+    protected IMcpClient Client { get; }
+
+    public {Service}CommandTests(LiveTestFixture fixture, ITestOutputHelper output) 
         : base(fixture, output)
     {
-        _{service}Service = new {Service}Service();
+        Client = fixture.Client;
+        Settings = fixture.Settings;
+        Output = output;
     }
 
-    [Fact]
+    [Theory]
+    [InlineData(AuthMethod.Credential)]
+    [InlineData(AuthMethod.Key)] 
     [Trait("Category", "Live")]
-    public async Task Should_{Operation}_{Resource}()
+    public async Task Should_{Operation}_{Resource}_WithAuth(AuthMethod authMethod)
     {
+        // Arrange
         var result = await CallToolAsync(
             "azmcp-{service}-{resource}-{operation}",
             new() 
             {
-                { "required-option", "value" }
+                { "subscription", Settings.Subscription },
+                { "resource-group", Settings.ResourceGroup },
+                { "auth-method", authMethod.ToString().ToLowerInvariant() }
             });
 
-        // Assert expected result format
-        var resultArray = result.AssertProperty("propertyName");
-        Assert.Equal(JsonValueKind.Array, resultArray.ValueKind);
-        Assert.NotEmpty(resultArray.EnumerateArray());
+        // Assert
+        var items = result.AssertProperty("items");
+        Assert.Equal(JsonValueKind.Array, items.ValueKind);
+
+        // Check results format
+        foreach (var item in items.EnumerateArray())
+        {
+            Assert.True(item.TryGetProperty("name", out _));
+            Assert.True(item.TryGetProperty("type", out _));
+        }
+    }
+
+    [Theory]
+    [InlineData("--invalid-param")]
+    [InlineData("--subscription invalidSub")]
+    [Trait("Category", "Live")]
+    public async Task Should_Return400_WithInvalidInput(string args)
+    {
+        var result = await CallToolAsync(
+            $"azmcp-{service}-{resource}-{operation} {args}");
+
+        Assert.Equal(400, result.GetProperty("status").GetInt32());
+        Assert.Contains("required", 
+            result.GetProperty("message").GetString()!.ToLower());
     }
 }
 ```
@@ -271,21 +393,171 @@ private void Register{Service}Commands()
         GetLogger<{Resource}{Operation}Command>()));
 ```
 
+## Error Handling
+
+Commands in Azure MCP follow a standardized error handling approach using the base `HandleException` method inherited from `BaseCommand`. Here are the key aspects:
+
+### 1. Status Code Mapping
+The base implementation handles common status codes:
+```csharp
+protected virtual int GetStatusCode(Exception ex) => ex switch 
+{
+    // Common error response codes
+    AuthenticationFailedException => 401,   // Unauthorized
+    RequestFailedException rfEx => rfEx.Status,  // Service-reported status 
+    HttpRequestException => 503,   // Service unavailable
+    ValidationException => 400,    // Bad request
+    _ => 500  // Unknown errors
+};
+```
+
+### 2. Error Message Formatting
+Error messages should be user-actionable and help debug issues:
+```csharp 
+protected virtual string GetErrorMessage(Exception ex) => ex switch
+{
+    AuthenticationFailedException authEx =>
+        $"Authentication failed. Please run 'az login' to sign in. Details: {authEx.Message}",
+    RequestFailedException rfEx => rfEx.Message,
+    HttpRequestException httpEx =>
+        $"Service unavailable or connectivity issues. Details: {httpEx.Message}",
+    _ => ex.Message
+};
+```
+
+### 3. Response Format
+The base `HandleException` combines status, message and details:
+```csharp
+protected virtual void HandleException(CommandResponse response, Exception ex)
+{
+    // Create a strongly typed exception result
+    var result = new ExceptionResult(
+        Message: ex.Message,
+        StackTrace: ex.StackTrace,
+        Type: ex.GetType().Name);
+
+    response.Status = GetStatusCode(ex);
+    // Add link to troubleshooting guide
+    response.Message = GetErrorMessage(ex) + 
+        ". Details at https://aka.ms/azmcp/troubleshooting";
+    response.Results = ResponseResult.Create(
+        result, JsonSourceGenerationContext.Default.ExceptionResult);
+}
+```
+
+### 4. Service-Specific Errors
+Commands should override error handlers to add service-specific mappings:
+```csharp
+protected override string GetErrorMessage(Exception ex) => ex switch
+{
+    // Add service-specific cases
+    ResourceNotFoundException => 
+        "Resource not found. Verify name and permissions.",
+    ServiceQuotaExceededException => 
+        "Service quota exceeded. Request quota increase.",
+    _ => base.GetErrorMessage(ex) // Fall back to base implementation
+};
+```
+
+### 5. Error Context Logging 
+Always log errors with relevant context information:
+```csharp
+catch (Exception ex)
+{
+    _logger.LogError(ex, 
+        "Error in {Operation}. Resource: {Resource}, Options: {@Options}", 
+        Name, resourceId, options);
+    HandleException(context.Response, ex);
+}
+```
+
+### 6. Common Error Scenarios to Handle
+
+1. **Authentication/Authorization**
+   - Azure credential expiry 
+   - Missing RBAC permissions
+   - Invalid connection strings
+   
+2. **Validation**
+   - Missing required parameters
+   - Invalid parameter formats 
+   - Conflicting options
+
+3. **Resource State**
+   - Resource not found
+   - Resource locked/in use
+   - Invalid resource state
+
+4. **Service Limits**
+   - Throttling/rate limits
+   - Quota exceeded
+   - Service capacity 
+
+5. **Network/Connectivity**
+   - Service unavailable
+   - Request timeouts
+   - Network failures
+
 ## Testing Requirements
 
-1. Unit Tests:
-   - Constructor initialization
-   - Option validation
-   - Success path
-   - Error paths
-   - Service error handling
-   - Required option validation
+### Unit Tests
+Core test cases for every command:
+```csharp
+[Theory]
+[InlineData("", false, "Missing required options")]  // Validation
+[InlineData("--param invalid", false, "Invalid format")] // Input format
+[InlineData("--param value", true, null)]  // Success case
+public async Task ExecuteAsync_ValidatesInput(
+    string args, bool shouldSucceed, string expectedError)
+{
+    var response = await ExecuteCommand(args);
+    Assert.Equal(shouldSucceed ? 200 : 400, response.Status);
+    if (!shouldSucceed)
+        Assert.Contains(expectedError, response.Message);
+}
 
-2. Integration Tests:
-   - Live command execution
-   - Response format validation
-   - Error scenarios
-   - Authentication handling
+[Fact]
+public async Task ExecuteAsync_HandlesServiceError()
+{
+    // Arrange
+    _service.Operation()
+        .Returns(Task.FromException(new ServiceException("Test error")));
+        
+    // Act 
+    var response = await ExecuteCommand("--param value");
+        
+    // Assert
+    Assert.Equal(500, response.Status);
+    Assert.Contains("Test error", response.Message);
+    Assert.Contains("troubleshooting", response.Message);
+}
+```
+
+### Integration Tests
+Live test scenarios should include:
+```csharp
+[Theory]
+[InlineData(AuthMethod.Credential)]  // Default auth
+[InlineData(AuthMethod.Key)]         // Key based auth
+public async Task Should_HandleAuth(AuthMethod method)
+{
+    var result = await CallCommand(new()
+    {
+        { "auth-method", method.ToString() }
+    });
+    // Verify auth worked
+    Assert.Equal(200, result.Status);
+}
+
+[Theory]
+[InlineData("--invalid-value")]    // Bad input
+[InlineData("--missing-required")] // Missing params  
+public async Task Should_Return400_ForInvalidInput(string args)
+{
+    var result = await CallCommand(args);
+    Assert.Equal(400, result.Status);
+    Assert.Contains("validation", result.Message.ToLower());
+}
 
 ## Best Practices
 
@@ -298,9 +570,12 @@ private void Register{Service}Commands()
 
 2. Error Handling:
    - Return 400 for validation errors
+   - Return 401 for authentication failures
    - Return 500 for unexpected errors
-   - Use ValidateOptions for input validation
-   - Handle service-specific exceptions
+   - Return service-specific status codes from RequestFailedException
+   - Add troubleshooting URL to error messages
+   - Log errors with context information
+   - Override GetErrorMessage and GetStatusCode for custom error handling
 
 3. Response Format:
    - Always set Results property for success
