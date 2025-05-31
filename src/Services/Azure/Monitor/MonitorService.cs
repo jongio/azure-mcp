@@ -32,47 +32,6 @@ public class MonitorService(ISubscriptionService subscriptionService, ITenantSer
             """
     };
 
-    public async Task<(string PrimarySharedKey, string SecondarySharedKey)> GetWorkspaceKeys(
-        string subscription,
-        string workspaceName,
-        string? tenant = null,
-        RetryPolicyOptions? retryPolicy = null)
-    {
-        ValidateRequiredParameters(subscription, workspaceName);
-
-        try
-        {
-            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy);
-            var workspaces = subscriptionResource.GetOperationalInsightsWorkspaces();
-
-            OperationalInsightsWorkspaceResource? workspace = null;
-            foreach (var w in workspaces)
-            {
-                if (w.Data.Name == workspaceName)
-                {
-                    workspace = w;
-                    break;
-                }
-            }
-
-            if (workspace == null)
-            {
-                throw new InvalidOperationException($"Workspace {workspaceName} not found in subscription {subscription}");
-            }
-
-            var sharedKeys = await workspace.GetSharedKeysAsync();
-
-            return (
-                sharedKeys.Value.PrimarySharedKey ?? throw new InvalidOperationException("Primary shared key not found"),
-                sharedKeys.Value.SecondarySharedKey ?? throw new InvalidOperationException("Secondary shared key not found")
-            );
-        }
-        catch (Exception ex)
-        {
-            throw new Exception($"Error retrieving workspace keys: {ex.Message}", ex);
-        }
-    }
-
     public async Task<List<JsonNode>> QueryWorkspace(
         string subscription,
         string workspace,
