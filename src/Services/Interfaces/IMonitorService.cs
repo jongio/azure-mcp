@@ -36,7 +36,9 @@ public interface IMonitorService
         string table,
         int? hours = 24, int? limit = 20,
         string? tenant = null,
-        RetryPolicyOptions? retryPolicy = null);    Task<List<string>> ListTableTypes(
+        RetryPolicyOptions? retryPolicy = null);
+
+    Task<List<string>> ListTableTypes(
         string subscription,
         string resourceGroup,
         string workspace,
