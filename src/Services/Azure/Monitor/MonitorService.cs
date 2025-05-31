@@ -32,6 +32,47 @@ public class MonitorService(ISubscriptionService subscriptionService, ITenantSer
             """
     };
 
+    public async Task<(string PrimarySharedKey, string SecondarySharedKey)> GetWorkspaceKeys(
+        string subscription,
+        string workspaceName,
+        string? tenant = null,
+        RetryPolicyOptions? retryPolicy = null)
+    {
+        ValidateRequiredParameters(subscription, workspaceName);
+
+        try
+        {
+            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy);
+            var workspaces = subscriptionResource.GetOperationalInsightsWorkspaces();
+
+            OperationalInsightsWorkspaceResource? workspace = null;
+            foreach (var w in workspaces)
+            {
+                if (w.Data.Name == workspaceName)
+                {
+                    workspace = w;
+                    break;
+                }
+            }
+
+            if (workspace == null)
+            {
+                throw new InvalidOperationException($"Workspace {workspaceName} not found in subscription {subscription}");
+            }
+
+            var sharedKeys = await workspace.GetSharedKeysAsync();
+
+            return (
+                sharedKeys.Value.PrimarySharedKey ?? throw new InvalidOperationException("Primary shared key not found"),
+                sharedKeys.Value.SecondarySharedKey ?? throw new InvalidOperationException("Secondary shared key not found")
+            );
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error retrieving workspace keys: {ex.Message}", ex);
+        }
+    }
+
     public async Task<List<JsonNode>> QueryWorkspace(
         string subscription,
         string workspace,
@@ -78,7 +119,7 @@ public class MonitorService(ISubscriptionService subscriptionService, ITenantSer
                         var rowDict = new JsonObject();
                         for (int i = 0; i < columns.Count; i++)
                         {
-                            rowDict[columns[i].Name] = JsonNode.Parse(row[i]?.ToString() ?? "null");
+                            rowDict[columns[i].Name] = JsonValue.Create(row[i]?.ToString() ?? "null");
                         }
                         results.Add(rowDict);
                     }
@@ -163,7 +204,6 @@ public class MonitorService(ISubscriptionService subscriptionService, ITenantSer
             throw new Exception($"Error retrieving Log Analytics workspaces: {ex.Message}", ex);
         }
     }
-
     public async Task<List<JsonNode>> QueryLogs(
         string subscription,
         string workspace,
@@ -176,7 +216,7 @@ public class MonitorService(ISubscriptionService subscriptionService, ITenantSer
     {
         ValidateRequiredParameters(subscription, workspace, table);
 
-        // Get the workspace ID regardless of what was passed
+        // Get the workspace ID and reuse it
         var (workspaceId, _) = await GetWorkspaceInfo(workspace, subscription, tenant, retryPolicy);
 
         // Check if the query is a predefined query name
@@ -197,21 +237,44 @@ public class MonitorService(ISubscriptionService subscriptionService, ITenantSer
 
         try
         {
-            // Convert hours to days for QueryWorkspace
-            double days = (hours ?? 24) / 24.0;
+            var credential = await GetCredential(tenant);
+            var options = AddDefaultPolicies(new LogsQueryClientOptions());
 
-            // Call QueryWorkspace with the prepared query
-            var jsonResults = await QueryWorkspace(
-                subscription,
+            if (retryPolicy != null)
+            {
+                options.Retry.Delay = TimeSpan.FromSeconds(retryPolicy.DelaySeconds);
+                options.Retry.MaxDelay = TimeSpan.FromSeconds(retryPolicy.MaxDelaySeconds);
+                options.Retry.MaxRetries = retryPolicy.MaxRetries;
+                options.Retry.Mode = retryPolicy.Mode;
+                options.Retry.NetworkTimeout = TimeSpan.FromSeconds(retryPolicy.NetworkTimeoutSeconds);
+            }
+            var client = new LogsQueryClient(credential, options);
+            var timeRange = new QueryTimeRange(TimeSpan.FromHours(hours ?? 24));
+
+            var response = await client.QueryWorkspaceAsync(
                 workspaceId,
                 query,
-                (int)Math.Ceiling(days), // Round up to ensure we cover the full time range
-                tenant,
-                retryPolicy
-            );
+                timeRange);
+            var results = new List<JsonNode>();
+            if (response.Value.Table != null)
+            {
+                var rows = response.Value.Table.Rows;
+                var columns = response.Value.Table.Columns;
 
-            // Return the list as an object to match the interface
-            return jsonResults;
+                if (rows != null && columns != null && rows.Any())
+                {
+                    foreach (var row in rows)
+                    {
+                        var rowDict = new JsonObject();
+                        for (int i = 0; i < columns.Count; i++)
+                        {
+                            rowDict[columns[i].Name] = JsonValue.Create(row[i]?.ToString() ?? "null");
+                        }
+                        results.Add(rowDict);
+                    }
+                }
+            }
+            return results;
         }
         catch (Exception ex)
         {

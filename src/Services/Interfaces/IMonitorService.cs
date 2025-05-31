@@ -44,4 +44,10 @@ public interface IMonitorService
         string workspace,
         string? tenant,
         RetryPolicyOptions? retryPolicy);
+
+    Task<(string PrimarySharedKey, string SecondarySharedKey)> GetWorkspaceKeys(
+        string subscription,
+        string workspaceName,
+        string? tenant = null,
+        RetryPolicyOptions? retryPolicy = null);
 }
