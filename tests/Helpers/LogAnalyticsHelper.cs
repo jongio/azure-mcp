@@ -6,31 +6,27 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.Core;
 using Azure.Monitor.Ingestion;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 using AzureMcp.Services.Azure.Authentication;
 using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Tests.Helpers;
 
-public class LogRecord
-{
-    [JsonPropertyName("TimeGenerated")]
-    public DateTimeOffset TimeGenerated { get; set; } = DateTimeOffset.UtcNow;
-
-    [JsonPropertyName("Level")]
-    public string Level { get; set; } = "";
-
-    [JsonPropertyName("Message")]
-    public string Message { get; set; } = "";
-
-    [JsonPropertyName("Application")]
-    public string Application { get; set; } = "";
-
-    [JsonExtensionData]
-    public Dictionary<string, JsonElement> AdditionalData { get; set; } = new();
-}
-
-public class LogAnalyticsHelper(string workspaceName, string subscription, IMonitorService monitorService, string? tenantId = null, string logType = "TestLogs_CL")
+/// <summary>
+/// Helper class for sending logs to Azure Log Analytics using the Azure Monitor Ingestion SDK.
+/// </summary>
+/// <remarks>
+/// Initializes a new instance of the LogAnalyticsHelper class.
+/// </remarks>
+public class LogAnalyticsHelper(
+    string workspaceName,
+    string subscription,
+    IMonitorService monitorService,
+    string? tenantId = null,
+    string logType = "TestLogs_CL",
+    ILogger? logger = null)
 {
     private readonly string _workspaceName = workspaceName;
     private readonly string _subscription = subscription;
@@ -38,6 +34,8 @@ public class LogAnalyticsHelper(string workspaceName, string subscription, IMoni
     private readonly string? _tenantId = tenantId;
     private readonly TokenCredential _credential = new CustomChainedCredential(tenantId);
     private readonly IMonitorService _monitorService = monitorService ?? throw new ArgumentNullException(nameof(monitorService));
+    private readonly ILogger _logger = logger ?? NullLogger.Instance;
+    private readonly SemaphoreSlim _clientInitLock = new(1, 1);
     private string? _workspaceId;
     private LogsIngestionClient? _logsIngestionClient;
 
@@ -57,106 +55,153 @@ public class LogAnalyticsHelper(string workspaceName, string subscription, IMoni
         return _workspaceId;
     }
 
-    private LogsIngestionClient GetLogsIngestionClient(string customerId)
+    private async Task<LogsIngestionClient> GetLogsIngestionClientAsync(string customerId)
     {
-        if (_logsIngestionClient == null)
+        if (_logsIngestionClient != null)
         {
-            if (string.IsNullOrEmpty(customerId))
-            {
-                throw new ArgumentNullException(nameof(customerId), "Customer ID cannot be null or empty");
-            }
-
-            try
-            {
-                var endpoint = new Uri($"https://{customerId}.ods.opinsights.azure.com");
-                var options = new LogsIngestionClientOptions
-                {
-                    Retry =
-                    {
-                        MaxRetries = 3,
-                        Delay = TimeSpan.FromSeconds(2),
-                        MaxDelay = TimeSpan.FromSeconds(10)
-                    }
-                };
-
-                _logsIngestionClient = new LogsIngestionClient(endpoint, _credential, options);
-            }
-            catch (Exception ex)
-            {
-                throw new InvalidOperationException($"Failed to create LogsIngestionClient: {ex.Message}", ex);
-            }
+            return _logsIngestionClient;
         }
-        return _logsIngestionClient;
+
+        if (string.IsNullOrEmpty(customerId))
+        {
+            throw new ArgumentNullException(nameof(customerId), "Customer ID cannot be null or empty");
+        }
+
+        await _clientInitLock.WaitAsync();
+        try
+        {
+            // Double-check after acquiring lock
+            if (_logsIngestionClient != null)
+            {
+                return _logsIngestionClient;
+            }
+
+            var endpoint = new Uri($"https://{customerId}.ods.opinsights.azure.com");
+            var options = new LogsIngestionClientOptions
+            {
+                Retry =
+                {
+                    MaxRetries = 3,
+                    Delay = TimeSpan.FromSeconds(2),
+                    MaxDelay = TimeSpan.FromSeconds(10)
+                }
+            };
+
+            _logsIngestionClient = new LogsIngestionClient(endpoint, _credential, options);
+            return _logsIngestionClient;
+        }
+        catch (Exception ex)
+        {
+            throw new InvalidOperationException($"Failed to create LogsIngestionClient: {ex.Message}", ex);
+        }
+        finally
+        {
+            _clientInitLock.Release();
+        }
     }
 
-    public async Task<HttpStatusCode> SendInfoLogAsync()
+    /// <summary>
+    /// Creates and sends a log with the specified level and message.
+    /// </summary>
+    private async Task<HttpStatusCode> CreateAndSendLogAsync(
+        string level,
+        string message,
+        CancellationToken cancellationToken = default)
     {
-        var workspaceId = await GetWorkspaceIdAsync();
-
-        // Create info log
-        var infoLog = new LogRecord
+        var workspaceId = await GetWorkspaceIdAsync().ConfigureAwait(false);
+        
+        var log = new LogRecord
         {
             TimeGenerated = DateTimeOffset.UtcNow,
-            Level = "Information",
-            Message = $"Test info message: {DateTimeOffset.UtcNow:O}",
+            Level = level,
+            Message = message,
             Application = "MonitorCommandTests"
         };
 
-        // Send only the info log
-        return await SendLogAsync(workspaceId, [infoLog]);
+        return await SendLogAsync(workspaceId, [log], cancellationToken).ConfigureAwait(false);
     }
 
-    public async Task<(HttpStatusCode infoStatus, HttpStatusCode errorStatus)> SendTestLogsAsync(string testId)
+    /// <summary>
+    /// Sends an information level log message.
+    /// </summary>
+    public Task<HttpStatusCode> SendInfoLogAsync(CancellationToken cancellationToken = default)
     {
-        var workspaceId = await GetWorkspaceIdAsync();
+        return CreateAndSendLogAsync(
+            "Information",
+            $"Test info message: {DateTimeOffset.UtcNow:O}",
+            cancellationToken);
+    }
 
-        // Create test logs
-        var infoLog = new LogRecord
-        {
-            TimeGenerated = DateTimeOffset.UtcNow,
-            Level = "Information",
-            Message = $"Test info message: {testId}",
-            Application = "MonitorCommandTests"
-        };
+    /// <summary>
+    /// Sends both information and error test logs.
+    /// </summary>
+    public async Task<(HttpStatusCode infoStatus, HttpStatusCode errorStatus)> SendTestLogsAsync(
+        string testId,
+        CancellationToken cancellationToken = default)
+    {
+        var infoStatus = await CreateAndSendLogAsync(
+            "Information",
+            $"Test info message: {testId}",
+            cancellationToken).ConfigureAwait(false);
 
-        var errorLog = new LogRecord
-        {
-            TimeGenerated = DateTimeOffset.UtcNow,
-            Level = "Error",
-            Message = $"Test error message {Guid.NewGuid()}",
-            Application = "MonitorCommandTests"
-        };
-
-        // Send logs
-        var infoStatus = await SendLogAsync(workspaceId, [infoLog]);
-        var errorStatus = await SendLogAsync(workspaceId, [errorLog]);
+        var errorStatus = await CreateAndSendLogAsync(
+            "Error",
+            $"Test error message {Guid.NewGuid()}",
+            cancellationToken).ConfigureAwait(false);
 
         return (infoStatus, errorStatus);
     }
 
-    private async Task<HttpStatusCode> SendLogAsync(string customerId, LogRecord[] logs)
+    /// <summary>
+    /// Sends log records to Azure Monitor using the Logs Ingestion API.
+    /// </summary>
+    private async Task<HttpStatusCode> SendLogAsync(
+        string customerId,
+        LogRecord[] logs,
+        CancellationToken cancellationToken = default)
     {
-        var client = GetLogsIngestionClient(customerId);
-        var jsonContent = JsonSerializer.Serialize(logs);
+        var client = await GetLogsIngestionClientAsync(customerId).ConfigureAwait(false);
 
         try
         {
             using var content = RequestContent.Create(logs);
+            _logger.LogInformation("Sending {Count} logs to workspace {WorkspaceId}", logs.Length, customerId);
+
+            cancellationToken.ThrowIfCancellationRequested();
             var response = await client.UploadAsync(
-                customerId,      // DCR rule ID
-                _logType,       // Stream name (table name)
-                content,        // Log data as request content
-                null,           // No content type (defaults to application/json)
-                default         // No request context
-            );
+                customerId,  // DCR rule ID
+                _logType,   // Stream name (table name)
+                content,    // Log data
+                null,       // No content type (defaults to application/json)
+                default    // No request context
+            ).ConfigureAwait(false);
             
-            return (HttpStatusCode)response.Status;
+            var status = (HttpStatusCode)response.Status;
+            _logger.LogInformation("Log upload completed with status {Status}", status);
+            return status;
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is not OperationCanceledException)
         {
-            // Log the error and return a 500 status code
-            Console.Error.WriteLine($"Error sending logs: {ex.Message}");
+            _logger.LogError(ex, "Error sending logs to workspace {WorkspaceId}", customerId);
             return HttpStatusCode.InternalServerError;
         }
     }
+}
+
+public class LogRecord
+{
+    [JsonPropertyName("TimeGenerated")]
+    public DateTimeOffset TimeGenerated { get; set; } = DateTimeOffset.UtcNow;
+
+    [JsonPropertyName("Level")]
+    public string Level { get; set; } = "";
+
+    [JsonPropertyName("Message")]
+    public string Message { get; set; } = "";
+
+    [JsonPropertyName("Application")]
+    public string Application { get; set; } = "";
+
+    [JsonExtensionData]
+    public Dictionary<string, JsonElement> AdditionalData { get; set; } = new();
 }

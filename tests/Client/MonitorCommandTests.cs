@@ -107,7 +107,7 @@ public class MonitorCommandTests(LiveTestFixture fixture, ITestOutputHelper outp
 
         // No recent logs found, create a new one
         Output.WriteLine($"No recent logs found, sending new log...");
-        var status = await _logHelper!.SendInfoLogAsync();
+        var status = await _logHelper!.SendInfoLogAsync(TestContext.Current.CancellationToken);
         Output.WriteLine($"Info log sent with status code: {status}");
 
         // Start time for query window - use the current time
