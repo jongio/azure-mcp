@@ -16,7 +16,8 @@ using Xunit;
 namespace AzureMcp.Tests.Client;
 
 public class MonitorCommandTests(LiveTestFixture fixture, ITestOutputHelper output) : CommandTestsBase(fixture, output), IClassFixture<LiveTestFixture>, IAsyncLifetime
-{    private LogAnalyticsHelper? _logHelper;
+{
+    private LogAnalyticsHelper? _logHelper;
     private const string TestLogType = "TestLogs_CL";
     private IMonitorService? _monitorService;
 
