@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 using System.Net;
-using System.Net.Http.Headers;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.Core;
+using Azure.Monitor.Ingestion;
+
 using AzureMcp.Services.Azure.Authentication;
 using AzureMcp.Services.Interfaces;
 
@@ -39,6 +39,7 @@ public class LogAnalyticsHelper(string workspaceName, string subscription, IMoni
     private readonly TokenCredential _credential = new CustomChainedCredential(tenantId);
     private readonly IMonitorService _monitorService = monitorService ?? throw new ArgumentNullException(nameof(monitorService));
     private string? _workspaceId;
+    private LogsIngestionClient? _logsIngestionClient;
 
     private async Task<string> GetWorkspaceIdAsync()
     {
@@ -54,6 +55,38 @@ public class LogAnalyticsHelper(string workspaceName, string subscription, IMoni
 
         _workspaceId = workspace.CustomerId;
         return _workspaceId;
+    }
+
+    private LogsIngestionClient GetLogsIngestionClient(string customerId)
+    {
+        if (_logsIngestionClient == null)
+        {
+            if (string.IsNullOrEmpty(customerId))
+            {
+                throw new ArgumentNullException(nameof(customerId), "Customer ID cannot be null or empty");
+            }
+
+            try
+            {
+                var endpoint = new Uri($"https://{customerId}.ods.opinsights.azure.com");
+                var options = new LogsIngestionClientOptions
+                {
+                    Retry =
+                    {
+                        MaxRetries = 3,
+                        Delay = TimeSpan.FromSeconds(2),
+                        MaxDelay = TimeSpan.FromSeconds(10)
+                    }
+                };
+
+                _logsIngestionClient = new LogsIngestionClient(endpoint, _credential, options);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException($"Failed to create LogsIngestionClient: {ex.Message}", ex);
+            }
+        }
+        return _logsIngestionClient;
     }
 
     public async Task<HttpStatusCode> SendInfoLogAsync()
@@ -103,32 +136,27 @@ public class LogAnalyticsHelper(string workspaceName, string subscription, IMoni
 
     private async Task<HttpStatusCode> SendLogAsync(string customerId, LogRecord[] logs)
     {
+        var client = GetLogsIngestionClient(customerId);
         var jsonContent = JsonSerializer.Serialize(logs);
-        var contentType = "application/json";
-        var dateString = DateTime.UtcNow.ToString("r");
 
-        // Use the Data Collection API endpoint
-        var uri = $"https://{customerId}.ods.opinsights.azure.com/api/logs?api-version=2016-04-01";
-
-        using var request = new HttpRequestMessage(HttpMethod.Post, uri);
-        request.Headers.Add("Accept", "application/json");
-        request.Headers.Add("Log-Type", _logType);
-        request.Headers.Add("x-ms-date", dateString);
-
-        // Get a token for the Data Collection API
-        var token = await _credential.GetTokenAsync(
-            new TokenRequestContext(
-                new[] { "https://monitor.azure.com/.default" },
-                tenantId: _tenantId), 
-            default);
+        try
+        {
+            using var content = RequestContent.Create(logs);
+            var response = await client.UploadAsync(
+                customerId,      // DCR rule ID
+                _logType,       // Stream name (table name)
+                content,        // Log data as request content
+                null,           // No content type (defaults to application/json)
+                default         // No request context
+            );
             
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.Token);
-
-        request.Content = new StringContent(jsonContent, Encoding.UTF8);
-        request.Content.Headers.ContentType = new MediaTypeHeaderValue(contentType);
-
-        using var client = new HttpClient();
-        var response = await client.SendAsync(request);
-        return response.StatusCode;
+            return (HttpStatusCode)response.Status;
+        }
+        catch (Exception ex)
+        {
+            // Log the error and return a 500 status code
+            Console.Error.WriteLine($"Error sending logs: {ex.Message}");
+            return HttpStatusCode.InternalServerError;
+        }
     }
 }
