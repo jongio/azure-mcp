@@ -315,7 +315,8 @@
                 "DOTNET_ENVIRONMENT": "Development"
             }
         },
-        {            "name": "Debug Monitor Log Query",
+        {            
+            "name": "Debug Monitor Log Query",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
