@@ -6,11 +6,10 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.Core;
 using Azure.Monitor.Ingestion;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-
 using AzureMcp.Services.Azure.Authentication;
 using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace AzureMcp.Tests.Helpers;
 
@@ -109,7 +108,7 @@ public class LogAnalyticsHelper(
         CancellationToken cancellationToken = default)
     {
         var workspaceId = await GetWorkspaceIdAsync().ConfigureAwait(false);
-        
+
         var log = new LogRecord
         {
             TimeGenerated = DateTimeOffset.UtcNow,
@@ -175,7 +174,7 @@ public class LogAnalyticsHelper(
                 null,       // No content type (defaults to application/json)
                 default    // No request context
             ).ConfigureAwait(false);
-            
+
             var status = (HttpStatusCode)response.Status;
             _logger.LogInformation("Log upload completed with status {Status}", status);
             return status;
