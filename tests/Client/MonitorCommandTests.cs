@@ -16,9 +16,10 @@ using Xunit;
 namespace AzureMcp.Tests.Client;
 
 public class MonitorCommandTests(LiveTestFixture fixture, ITestOutputHelper output) : CommandTestsBase(fixture, output), IClassFixture<LiveTestFixture>, IAsyncLifetime
-{    private OtelLogHelper? _logHelper;
+{
+    private OtelLogHelper? _logHelper;
     private const string ServiceName = "MonitorCommandTests";
-    private IMonitorService? _monitorService; 
+    private IMonitorService? _monitorService;
 
     ValueTask IAsyncLifetime.InitializeAsync()
     {
@@ -77,11 +78,12 @@ public class MonitorCommandTests(LiveTestFixture fixture, ITestOutputHelper outp
     }
 
     [Fact()]
-    [Trait("Category", "Live")]    public async Task Should_query_monitor_logs()
+    [Trait("Category", "Live")]
+    public async Task Should_query_monitor_logs()
     {
         // Send test logs via OpenTelemetry first to ensure we have data
         var queryStartTime = DateTime.UtcNow;
-        
+
         // Try sending test logs
         Output.WriteLine("Sending test logs via OpenTelemetry...");
         var (infoStatus, errorStatus) = await _logHelper!.SendTestLogsAsync("test_query", TestContext.Current.CancellationToken);
@@ -105,7 +107,7 @@ public class MonitorCommandTests(LiveTestFixture fixture, ITestOutputHelper outp
 
         Assert.NotNull(result);
         Assert.Equal(JsonValueKind.Array, result.Value.ValueKind);
-        
+
         var logs = result.Value.EnumerateArray();
         Assert.NotEmpty(logs); // Should find the logs we just sent
 

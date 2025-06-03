@@ -3,10 +3,10 @@
 
 using System.Diagnostics;
 using System.Net;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
@@ -70,8 +70,8 @@ public class OtelLogHelper : IDisposable
         CancellationToken cancellationToken = default)
     {
         var infoStatus = await SendLogAsync(
-            LogLevel.Information, 
-            $"Test info message: {testId}", 
+            LogLevel.Information,
+            $"Test info message: {testId}",
             cancellationToken).ConfigureAwait(false);
 
         var errorStatus = await SendLogAsync(
