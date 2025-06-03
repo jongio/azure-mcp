@@ -2,39 +2,39 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics;
+using System.Net;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using AzureMcp.Services.Interfaces;
+using Microsoft.Extensions.DependencyInjection;
 using OpenTelemetry;
 using OpenTelemetry.Logs;
 using OpenTelemetry.Resources;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 
 namespace AzureMcp.Tests.Helpers;
 
 /// <summary>
-/// Helper class for sending logs using OpenTelemetry for testing purposes.
+/// Helper class for sending logs using OpenTelemetry.
 /// </summary>
-public class LogAnalyticsHelper : IDisposable
+public class OtelLogHelper : IDisposable
 {
-    private readonly string _logType;
+    private const string DefaultCategory = "OtelLogHelper";
+    private readonly string _serviceName;
     private readonly ILogger _logger;
-    private readonly ActivitySource _activitySource;
     private readonly ILoggerFactory _loggerFactory;
+    private readonly ActivitySource _activitySource;
 
-    public LogAnalyticsHelper(
-        string endpoint = "http://localhost:4317",
-        string logType = "TestLogs_CL",
+    public OtelLogHelper(
+        string serviceName = DefaultCategory,
+        string endpoint = "http://localhost:18889",
         ILogger? logger = null)
     {
-        _logType = logType;
+        _serviceName = serviceName;
         _logger = logger ?? NullLogger.Instance;
-        _activitySource = new ActivitySource("AzureMcp.Tests");
+        _activitySource = new ActivitySource(_serviceName);
 
         var resourceBuilder = ResourceBuilder.CreateDefault()
-            .AddService("AzureMcp.Tests")
-            .AddAttributes(new Dictionary<string, object>
-            {
-                ["log_type"] = logType
-            });
+            .AddService(_serviceName);
 
         _loggerFactory = LoggerFactory.Create(builder =>
         {
@@ -45,6 +45,8 @@ public class LogAnalyticsHelper : IDisposable
                 {
                     otlpOptions.Endpoint = new Uri(endpoint);
                 });
+                options.IncludeFormattedMessage = true;
+                options.IncludeScopes = true;
             });
         });
     }
@@ -52,9 +54,9 @@ public class LogAnalyticsHelper : IDisposable
     /// <summary>
     /// Sends an information level log message.
     /// </summary>
-    public async Task<bool> SendInfoLogAsync(CancellationToken cancellationToken = default)
+    public Task<HttpStatusCode> SendInfoLogAsync(CancellationToken cancellationToken = default)
     {
-        return await CreateAndSendLogAsync(
+        return SendLogAsync(
             LogLevel.Information,
             $"Test info message: {DateTimeOffset.UtcNow:O}",
             cancellationToken);
@@ -63,44 +65,44 @@ public class LogAnalyticsHelper : IDisposable
     /// <summary>
     /// Sends both information and error test logs.
     /// </summary>
-    public async Task<(bool infoStatus, bool errorStatus)> SendTestLogsAsync(
+    public async Task<(HttpStatusCode infoStatus, HttpStatusCode errorStatus)> SendTestLogsAsync(
         string testId,
         CancellationToken cancellationToken = default)
     {
-        var infoStatus = await CreateAndSendLogAsync(
-            LogLevel.Information,
-            $"Test info message: {testId}",
-            cancellationToken);
+        var infoStatus = await SendLogAsync(
+            LogLevel.Information, 
+            $"Test info message: {testId}", 
+            cancellationToken).ConfigureAwait(false);
 
-        var errorStatus = await CreateAndSendLogAsync(
+        var errorStatus = await SendLogAsync(
             LogLevel.Error,
             $"Test error message {Guid.NewGuid()}",
-            cancellationToken);
+            cancellationToken).ConfigureAwait(false);
 
         return (infoStatus, errorStatus);
     }
 
     /// <summary>
-    /// Creates and sends a log with the specified level and message.
+    /// Sends a log with the specified level and message.
     /// </summary>
-    private Task<bool> CreateAndSendLogAsync(
+    private Task<HttpStatusCode> SendLogAsync(
         LogLevel level,
         string message,
         CancellationToken cancellationToken = default)
     {
         using var activity = _activitySource.StartActivity("SendLog");
-        var logger = _loggerFactory.CreateLogger(_logType);
+        var logger = _loggerFactory.CreateLogger(_serviceName);
 
         try
         {
             logger.Log(level, message);
             _logger.LogInformation("Sent log message with level {Level}: {Message}", level, message);
-            return Task.FromResult(true);
+            return Task.FromResult(HttpStatusCode.OK);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to send log message");
-            return Task.FromResult(false);
+            return Task.FromResult(HttpStatusCode.InternalServerError);
         }
     }
 

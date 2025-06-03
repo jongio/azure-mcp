@@ -16,15 +16,15 @@ using Xunit;
 namespace AzureMcp.Tests.Client;
 
 public class MonitorCommandTests(LiveTestFixture fixture, ITestOutputHelper output) : CommandTestsBase(fixture, output), IClassFixture<LiveTestFixture>, IAsyncLifetime
-{
-    private LogAnalyticsHelper? _logHelper;
-    private const string TestLogType = "TestLogs_CL";
-    private IMonitorService? _monitorService;
+{    private OtelLogHelper? _logHelper;
+    private const string ServiceName = "MonitorCommandTests";
+    private IMonitorService? _monitorService; 
 
     ValueTask IAsyncLifetime.InitializeAsync()
     {
         _monitorService = GetMonitorService();
-        _logHelper = new LogAnalyticsHelper(Settings.ResourceBaseName, Settings.SubscriptionId, _monitorService, Settings.TenantId, TestLogType);
+        // If APPLICATIONINSIGHTS_CONNECTION_STRING is set, it will be used automatically
+        _logHelper = new OtelLogHelper();
         return ValueTask.CompletedTask;
     }
 
@@ -77,86 +77,40 @@ public class MonitorCommandTests(LiveTestFixture fixture, ITestOutputHelper outp
     }
 
     [Fact()]
-    [Trait("Category", "Live")]
-    public async Task Should_query_monitor_logs()
+    [Trait("Category", "Live")]    public async Task Should_query_monitor_logs()
     {
-        // First try to find any existing logs from last 24 hours
-        Output.WriteLine($"Checking for existing logs in the last 24 hours...");
+        // Send test logs via OpenTelemetry first to ensure we have data
         var queryStartTime = DateTime.UtcNow;
+        
+        // Try sending test logs
+        Output.WriteLine("Sending test logs via OpenTelemetry...");
+        var (infoStatus, errorStatus) = await _logHelper!.SendTestLogsAsync("test_query", TestContext.Current.CancellationToken);
+        Output.WriteLine($"Test logs sent with status codes: Info={infoStatus}, Error={errorStatus}");
+
+        // Query logs using Azure Monitor's Logs API
+        var elapsed = (DateTime.UtcNow - queryStartTime).TotalSeconds;
+        Output.WriteLine($"Querying logs after {elapsed:F1}s wait...");
+
+        // Perform a broad query that should catch our test messages
         var result = await CallToolAsync("azmcp-monitor-log-query",
             new()
             {
                 { "subscription", Settings.SubscriptionId },
                 { "workspace", Settings.ResourceBaseName },
-                { "query", $"{TestLogType} | where TimeGenerated > ago(24h) | limit 1 | project TimeGenerated, Message" },
-                { "table-name", TestLogType },
+                { "query", "traces | where TimeGenerated > ago(5m) | where Message startswith 'Test' | order by TimeGenerated desc | limit 10" },
+                { "table-name", "traces" },
                 { "resource-group", Settings.ResourceGroupName },
-                { "hours", "24" }
+                { "hours", "1" }
             });
 
         Assert.NotNull(result);
         Assert.Equal(JsonValueKind.Array, result.Value.ValueKind);
+        
         var logs = result.Value.EnumerateArray();
+        Assert.NotEmpty(logs); // Should find the logs we just sent
+
         var queryDuration = (DateTime.UtcNow - queryStartTime).TotalSeconds;
-
-        if (logs.Any())
-        {
-            Output.WriteLine($"Found existing logs from last 24 hours");
-            Output.WriteLine($"Query performance: {queryDuration:F1}s to execute");
-            return;
-        }
-
-        // No recent logs found, create a new one
-        Output.WriteLine($"No recent logs found, sending new log...");
-        var status = await _logHelper!.SendInfoLogAsync(TestContext.Current.CancellationToken);
-        Output.WriteLine($"Info log sent with status code: {status}");
-
-        // Start time for query window - use the current time
-        var testStartTime = DateTime.UtcNow;
-        Output.WriteLine($"Starting to query for new log (max wait: 60s)...");
-        const int maxWaitTimeSeconds = 60; // Reduced from 120s since we have optimized querying
-        var attemptCount = 0;
-
-        while ((DateTime.UtcNow - testStartTime).TotalSeconds < maxWaitTimeSeconds)
-        {
-            // More aggressive polling at start (1s, 2s, 4s, 8s, 15s...)
-            var delaySeconds = Math.Min(Math.Pow(2, attemptCount), 15);
-            attemptCount++;
-
-            var elapsed = (DateTime.UtcNow - testStartTime).TotalSeconds;
-            Output.WriteLine($"Attempt {attemptCount}: Querying for logs at {elapsed:F1}s...");
-
-            queryStartTime = DateTime.UtcNow;
-            result = await CallToolAsync("azmcp-monitor-log-query",
-                new()
-                {
-                    { "subscription", Settings.SubscriptionId },
-                    { "workspace", Settings.ResourceBaseName },
-                    { "query", $"{TestLogType} | where TimeGenerated > datetime({testStartTime:yyyy-MM-dd HH:mm:ss.fff}) | limit 1 | project TimeGenerated, Message" },
-                    { "table-name", TestLogType },
-                    { "resource-group", Settings.ResourceGroupName },
-                    { "hours", "1" } // Only look at last hour for new logs
-                });
-
-            queryDuration = (DateTime.UtcNow - queryStartTime).TotalSeconds;
-            Output.WriteLine($"Query completed in {queryDuration:F1} seconds");
-
-            Assert.NotNull(result);
-            Assert.Equal(JsonValueKind.Array, result.Value.ValueKind);
-            logs = result.Value.EnumerateArray();
-            if (logs.Any())
-            {
-                var totalTime = (DateTime.UtcNow - testStartTime).TotalSeconds;
-                Output.WriteLine($"Success! Found new log after {totalTime:F1} seconds (attempt {attemptCount})");
-                Output.WriteLine($"Query performance: {queryDuration:F1}s to execute, {totalTime:F1}s total test time");
-                return;
-            }
-
-            Output.WriteLine($"No logs found yet (attempt {attemptCount}), waiting {delaySeconds:F1} seconds before retrying...");
-            await Task.Delay(TimeSpan.FromSeconds(delaySeconds), TestContext.Current.CancellationToken);
-        }
-
-        Assert.Fail($"No logs found in {TestLogType} table after waiting {maxWaitTimeSeconds} seconds");
+        Output.WriteLine($"Found {logs.Count()} logs in {queryDuration:F1}s");
     }
 
     [Fact]
