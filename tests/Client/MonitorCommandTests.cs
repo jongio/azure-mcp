@@ -177,4 +177,22 @@ public class MonitorCommandTests(LiveTestFixture fixture, ITestOutputHelper outp
         var array = tableTypesArray.EnumerateArray();
         Assert.NotEmpty(array);
     }
+
+    [Fact]
+    [Trait("Category", "Live")]
+    public async Task Should_send_log_directly()
+    {
+        Assert.NotNull(_logHelper);
+
+        var status = await _logHelper!.SendInfoLogAsync(TestContext.Current.CancellationToken);
+        Output.WriteLine($"Info log sent with status code: {status}");
+
+        if ((int)status < 200 || (int)status >= 300)
+        {
+            Output.WriteLine($"Failed to send log. Status code: {status} ({(int)status})");
+            // The exception info will be bubbled up by the test runner
+        }
+
+        Assert.True((int)status >= 200 && (int)status < 300, $"Expected successful status code, got {status}");
+    }
 }

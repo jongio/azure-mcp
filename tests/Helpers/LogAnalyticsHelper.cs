@@ -161,29 +161,21 @@ public class LogAnalyticsHelper(
     {
         var client = await GetLogsIngestionClientAsync(customerId).ConfigureAwait(false);
 
-        try
-        {
-            using var content = RequestContent.Create(logs);
-            _logger.LogInformation("Sending {Count} logs to workspace {WorkspaceId}", logs.Length, customerId);
+        using var content = RequestContent.Create(logs);
+        _logger.LogInformation("Sending {Count} logs to workspace {WorkspaceId}", logs.Length, customerId);
 
-            cancellationToken.ThrowIfCancellationRequested();
-            var response = await client.UploadAsync(
-                customerId,  // DCR rule ID
-                _logType,   // Stream name (table name)
-                content,    // Log data
-                null,       // No content type (defaults to application/json)
-                default    // No request context
-            ).ConfigureAwait(false);
+        cancellationToken.ThrowIfCancellationRequested();
+        var response = await client.UploadAsync(
+            customerId,  // DCR rule ID
+            _logType,   // Stream name (table name)
+            content,    // Log data
+            null,       // No content type (defaults to application/json)
+            default    // No request context
+        ).ConfigureAwait(false);
 
-            var status = (HttpStatusCode)response.Status;
-            _logger.LogInformation("Log upload completed with status {Status}", status);
-            return status;
-        }
-        catch (Exception ex) when (ex is not OperationCanceledException)
-        {
-            _logger.LogError(ex, "Error sending logs to workspace {WorkspaceId}", customerId);
-            return HttpStatusCode.InternalServerError;
-        }
+        var status = (HttpStatusCode)response.Status;
+        _logger.LogInformation("Log upload completed with status {Status}", status);
+        return status;
     }
 }
 
