@@ -1,3 +1,25 @@
+using System;
+using System.Collections.Generic;
+using System.CommandLine;
+using System.CommandLine.Parsing;
+using System.Threading.Tasks;
+using AzureMcp.Commands;
+using AzureMcp.Commands.Sql.Index;
+using AzureMcp.Models;
+using AzureMcp.Models.Command;
+using AzureMcp.Models.Sql;
+using AzureMcp.Options;
+using AzureMcp.Services.Azure;
+using AzureMcp.Services.Interfaces;
+using Azure.Core;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using NSubstitute;
+using Xunit;
+
+namespace AzureMcp.Tests.Commands.Sql.Index;
+
 public class SqlIndexRecommendCommandTests
 {
     private readonly IServiceProvider _serviceProvider;
@@ -33,13 +55,14 @@ public class SqlIndexRecommendCommandTests
     public async Task ExecuteAsync_ValidatesInputCorrectly(string args, bool shouldSucceed)
     {
         if (shouldSucceed)
-        {
-            _service.GetIndexRecommendations(
+        {            _service.GetIndexRecommendationsAsync(
+                Arg.Any<string>(),
                 Arg.Any<string>(),
                 Arg.Any<string>(),
                 Arg.Any<int>(),
-                Arg.Any<string>())
-                .Returns(new List<SqlIndexRecommendCommand.IndexRecommendation>());
+                Arg.Any<string>(),
+                Arg.Any<RetryPolicyOptions>())
+                .Returns(new List<SqlIndexRecommendation>());
         }
 
         var context = new CommandContext(_serviceProvider);
@@ -52,18 +75,17 @@ public class SqlIndexRecommendCommandTests
         {
             Assert.Contains("database", response.Message.ToLower());
         }
-    }
-
-    [Fact]
+    }    [Fact]
     public async Task ExecuteAsync_HandlesServiceErrors()
-    {
-        _service.GetIndexRecommendations(
+    {        _service.GetIndexRecommendationsAsync(
+            Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<int>(),
-            Arg.Any<string>())
-            .Returns(Task.FromException<List<SqlIndexRecommendCommand.IndexRecommendation>>(
-                new SqlException("Test error")));
+            Arg.Any<string>(),
+            Arg.Any<RetryPolicyOptions>())
+            .Returns(Task.FromException<List<SqlIndexRecommendation>>(
+                new Exception("Test SQL error")));
 
         var context = new CommandContext(_serviceProvider);
         var parseResult = _command.GetCommand().Parse("--database mydb --subscription sub1");
