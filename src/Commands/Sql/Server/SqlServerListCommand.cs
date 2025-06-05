@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.CommandLine.Parsing;
 using AzureMcp.Models.Command;
 using AzureMcp.Options.Sql.Server;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using System.CommandLine.Parsing;
 
 namespace AzureMcp.Commands.Sql.Server;
 
@@ -34,7 +34,8 @@ public sealed class SqlServerListCommand(ILogger<SqlServerListCommand> logger) :
             if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
                 return context.Response;
-            }            var sqlService = context.GetService<ISqlService>() ?? throw new InvalidOperationException("Sql service is not available.");
+            }
+            var sqlService = context.GetService<ISqlService>() ?? throw new InvalidOperationException("Sql service is not available.");
             var servers = await sqlService.ListServers(
                 options.Subscription!,
                 options.Tenant,

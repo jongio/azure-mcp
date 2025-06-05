@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Threading.Tasks;
+using Azure.Core;
 using AzureMcp.Commands;
 using AzureMcp.Commands.Sql.Index;
 using AzureMcp.Models;
@@ -11,7 +12,6 @@ using AzureMcp.Models.Sql;
 using AzureMcp.Options;
 using AzureMcp.Services.Azure;
 using AzureMcp.Services.Interfaces;
-using Azure.Core;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -31,11 +31,11 @@ public class SqlIndexRecommendCommandTests
     {
         _service = Substitute.For<ISqlService>();
         _logger = Substitute.For<ILogger<SqlIndexRecommendCommand>>();
-        
+
         var collection = new ServiceCollection();
         collection.AddSingleton(_service);
         _serviceProvider = collection.BuildServiceProvider();
-        
+
         _command = new(_logger);
     }
 
@@ -55,7 +55,8 @@ public class SqlIndexRecommendCommandTests
     public async Task ExecuteAsync_ValidatesInputCorrectly(string args, bool shouldSucceed)
     {
         if (shouldSucceed)
-        {            _service.GetIndexRecommendationsAsync(
+        {
+            _service.GetIndexRecommendationsAsync(
                 Arg.Any<string>(),
                 Arg.Any<string>(),
                 Arg.Any<string>(),
@@ -75,9 +76,11 @@ public class SqlIndexRecommendCommandTests
         {
             Assert.Contains("database", response.Message.ToLower());
         }
-    }    [Fact]
+    }
+    [Fact]
     public async Task ExecuteAsync_HandlesServiceErrors()
-    {        _service.GetIndexRecommendationsAsync(
+    {
+        _service.GetIndexRecommendationsAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<string>(),

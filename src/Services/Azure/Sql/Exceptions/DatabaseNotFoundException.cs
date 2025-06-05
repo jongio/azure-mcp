@@ -3,7 +3,7 @@
 
 namespace AzureMcp.Services.Azure.Sql.Exceptions;
 
-public class DatabaseNotFoundException : Exception 
+public class DatabaseNotFoundException : Exception
 {
     public DatabaseNotFoundException(string message) : base(message)
     {

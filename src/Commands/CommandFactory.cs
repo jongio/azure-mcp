@@ -5,11 +5,11 @@ using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Json.Serialization;
 using AzureMcp.Commands.Server;
+using AzureMcp.Commands.Sql.Database;
+using AzureMcp.Commands.Sql.Index;
+using AzureMcp.Commands.Sql.Server;
 using AzureMcp.Commands.Storage.Blob;
 using AzureMcp.Commands.Subscription;
-using AzureMcp.Commands.Sql.Database;
-using AzureMcp.Commands.Sql.Server;
-using AzureMcp.Commands.Sql.Index;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -438,7 +438,7 @@ public class CommandFactory
         var sqlServer = new CommandGroup("server", "Sql server operations - Commands for listing and managing Sql servers in your Azure subscription.");
         sql.AddSubGroup(sqlServer);
 
-        var index = new CommandGroup(            "index",
+        var index = new CommandGroup("index",
             "Sql index operations");
         sql.AddSubGroup(index);
 

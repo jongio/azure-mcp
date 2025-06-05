@@ -12,7 +12,8 @@ namespace AzureMcp.Commands.Sql;
 public abstract class BaseSqlCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
     : SubscriptionCommand<TOptions> where TOptions : BaseSqlOptions, new()
-{    protected readonly Option<string> _databaseOption = OptionDefinitions.Sql.Database;
+{
+    protected readonly Option<string> _databaseOption = OptionDefinitions.Sql.Database;
     protected readonly Option<string> _serverOption = OptionDefinitions.Sql.Server;
 
     protected override void RegisterOptions(Command command)
