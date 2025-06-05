@@ -5,6 +5,7 @@ using Microsoft.Data.SqlClient;
 using AzureMcp.Commands.Sql;
 using AzureMcp.Models.Option;
 using AzureMcp.Models.Sql;
+using static AzureMcp.Models.Sql.IIndexRecommendCommandResult;
 using AzureMcp.Options.Sql.Index;
 using AzureMcp.Services.Azure.Sql.Exceptions;
 using AzureMcp.Services.Interfaces;
@@ -85,7 +86,7 @@ public sealed class SqlIndexRecommendCommand(ILogger<SqlIndexRecommendCommand> l
             }).ToList();
 
             context.Response.Results = recommendations?.Count > 0 ? 
-                ResponseResult.Create(
+                ResponseResult.Create<SqlIndexRecommendCommand.IndexRecommendCommandResult>(
                     new IndexRecommendCommandResult(recommendations),
                     SqlJsonContext.Default.IndexRecommendCommandResult) : 
                 null;
@@ -104,5 +105,5 @@ public sealed class SqlIndexRecommendCommand(ILogger<SqlIndexRecommendCommand> l
         SqlException sqlEx => $"Sql error occurred: {sqlEx.Message}",
         DatabaseNotFoundException => "Database not found. Verify the database exists and you have access.",
         _ => base.GetErrorMessage(ex)
-    };    internal record IndexRecommendCommandResult(List<Models.Sql.SqlIndexRecommendation> Recommendations);
+    };    internal record IndexRecommendCommandResult(List<Models.Sql.SqlIndexRecommendation> Recommendations) : IIndexRecommendCommandResult;
 }

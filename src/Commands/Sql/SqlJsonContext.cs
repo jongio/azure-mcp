@@ -8,7 +8,7 @@ using AzureMcp.Commands.Sql.Server;
 
 namespace AzureMcp.Commands.Sql;
 
-[JsonSerializable(typeof(SqlIndexRecommendCommand.IndexRecommendCommandResult))]
+[JsonSerializable(typeof(Index.SqlIndexRecommendCommand.IndexRecommendCommandResult))]
 [JsonSerializable(typeof(SqlDatabaseListCommand.DatabaseListCommandResult))]
 [JsonSerializable(typeof(SqlServerListCommand.ServerListCommandResult))]
 [JsonSerializable(typeof(Database.SqlDatabaseListCommand.DatabaseListCommandResult))]
