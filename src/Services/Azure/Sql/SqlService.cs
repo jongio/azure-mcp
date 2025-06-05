@@ -128,16 +128,76 @@ public sealed class SqlService(
         }
     }
 
-    public Task<List<string>> ListServers(string subscription, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
+    public async Task<List<string>> ListServers(string subscription, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
-        // TODO: Implement actual logic
-        return Task.FromResult(new List<string>());
+        ValidateRequiredParameters(subscription);
+        try
+        {
+            var credential = await GetCredential();
+            var subscriptionInfo = await _subscriptionService.GetSubscription(subscription);
+
+            var clientOptions = new ArmClientOptions();
+            if (retryPolicy != null)
+            {
+                clientOptions.Retry.MaxRetries = retryPolicy.MaxRetries;
+                clientOptions.Retry.Mode = retryPolicy.Mode;
+            }
+
+            var armClient = new ArmClient(credential, subscriptionInfo.Id, clientOptions);
+            var subscriptionResource = armClient.GetSubscriptionResource(subscriptionInfo.Id);
+            var sqlServers = new List<string>();
+
+            foreach (var server in subscriptionResource.GetSqlServers())
+            {
+                sqlServers.Add(server.Data.Name);
+            }
+
+            return sqlServers;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error listing SQL servers for subscription {Subscription}", subscription);
+            throw new SqlServiceException($"Error listing SQL servers: {ex.Message}", ex);
+        }
     }
 
-    public Task<List<string>> ListDatabases(string server, string resourceGroup, string subscription, string? tenant = null, AuthMethod? authMethod = null, RetryPolicyOptions? retryPolicy = null)
+    public async Task<List<string>> ListDatabases(string server, string resourceGroup, string subscription, string? tenant = null, AuthMethod? authMethod = null, RetryPolicyOptions? retryPolicy = null)
     {
-        // TODO: Implement actual logic
-        return Task.FromResult(new List<string>());
+        ValidateRequiredParameters(subscription, resourceGroup, server);
+        try
+        {
+            var credential = await GetCredential();
+            var subscriptionInfo = await _subscriptionService.GetSubscription(subscription);
+
+            var clientOptions = new ArmClientOptions();
+            if (retryPolicy != null)
+            {
+                clientOptions.Retry.MaxRetries = retryPolicy.MaxRetries;
+                clientOptions.Retry.Mode = retryPolicy.Mode;
+            }
+
+            var armClient = new ArmClient(credential, subscriptionInfo.Id, clientOptions);
+            var resourceGroupResource = armClient.GetResourceGroupResource(ResourceGroupResource.CreateResourceIdentifier(subscriptionInfo.Id, resourceGroup));
+            var serverResponse = await resourceGroupResource.GetSqlServerAsync(server);
+
+            if (serverResponse?.Value == null)
+            {
+                throw new SqlResourceNotFoundException($"SQL Server '{server}' not found in resource group '{resourceGroup}' and subscription '{subscription}'");
+            }
+
+            var serverResource = serverResponse.Value;
+            var databases = new List<string>();
+            await foreach (var db in serverResource.GetSqlDatabases().GetAllAsync())
+            {
+                databases.Add(db.Data.Name);
+            }
+            return databases;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error listing SQL databases for server {Server} in resource group {ResourceGroup}", server, resourceGroup);
+            throw new SqlServiceException($"Error listing SQL databases: {ex.Message}", ex);
+        }
     }
 }
 
