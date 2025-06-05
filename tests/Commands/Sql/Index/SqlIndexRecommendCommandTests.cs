@@ -60,7 +60,8 @@ public class SqlIndexRecommendCommandTests
                 Arg.Any<string>(),
                 Arg.Any<string>(),
                 Arg.Any<string>(),
-                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<int?>(),
                 Arg.Any<string>(),
                 Arg.Any<RetryPolicyOptions>())
                 .Returns(new List<SqlIndexRecommendation>());
@@ -84,7 +85,8 @@ public class SqlIndexRecommendCommandTests
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<string>(),
-            Arg.Any<int>(),
+            Arg.Any<string>(),
+            Arg.Any<int?>(),
             Arg.Any<string>(),
             Arg.Any<RetryPolicyOptions>())
             .Returns(Task.FromException<List<SqlIndexRecommendation>>(

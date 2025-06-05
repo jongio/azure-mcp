@@ -72,6 +72,7 @@ public sealed class IndexRecommendCommand(ILogger<IndexRecommendCommand> logger)
             var results = await service.GetIndexRecommendationsAsync(
               options.Database!,
               options.ServerName!,
+              options.ResourceGroup!,
               options.TableName,
               options.MinimumImpact,
               options.Subscription!,
