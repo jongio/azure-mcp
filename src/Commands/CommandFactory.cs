@@ -7,6 +7,9 @@ using System.Text.Json.Serialization;
 using AzureMcp.Commands.Server;
 using AzureMcp.Commands.Storage.Blob;
 using AzureMcp.Commands.Subscription;
+using AzureMcp.Commands.Sql.Database;
+using AzureMcp.Commands.Sql.Server;
+using AzureMcp.Commands.Sql.Index;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
@@ -97,6 +100,7 @@ public class CommandFactory
         RegisterMcpServerCommands();
         RegisterServiceBusCommands();
         RegisterRedisCommands();
+        RegisterSqlCommands();
     }
 
     private void RegisterBestPracticesCommand()
@@ -420,6 +424,29 @@ public class CommandFactory
         cluster.AddSubGroup(database);
 
         database.AddCommand("list", new Redis.ManagedRedis.DatabaseListCommand(GetLogger<Redis.ManagedRedis.DatabaseListCommand>()));
+    }
+
+    private void RegisterSqlCommands()
+    {        // Create Sql command group
+        var sql = new CommandGroup("sql", "Sql operations - Commands for managing and querying Azure Sql resources.");
+        _rootGroup.AddSubGroup(sql);
+
+        // Create Sql database subgroups
+        var databases = new CommandGroup("database", "Sql database operations - Commands for listing, creating, and managing Sql databases in your Azure subscription.");
+        sql.AddSubGroup(databases);
+
+        var sqlServer = new CommandGroup("server", "Sql server operations - Commands for listing and managing Sql servers in your Azure subscription.");
+        sql.AddSubGroup(sqlServer);
+
+        var index = new CommandGroup(            "index",
+            "Sql index operations");
+        sql.AddSubGroup(index);
+
+        // Register SQL commands
+        databases.AddCommand("list", new Sql.Database.SqlDatabaseListCommand(GetLogger<SqlDatabaseListCommand>()));
+        sqlServer.AddCommand("list", new Sql.Server.SqlServerListCommand(GetLogger<SqlServerListCommand>()));
+        index.AddCommand("recommend", new Sql.Index.SqlIndexRecommendCommand(
+            GetLogger<SqlIndexRecommendCommand>()));
     }
 
     private void ConfigureCommands(CommandGroup group)
