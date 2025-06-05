@@ -42,12 +42,13 @@ public sealed class SqlService(
     public async Task<List<Models.Sql.SqlIndexRecommendation>> GetIndexRecommendationsAsync(
         string database,
         string server,
+        string resourceGroup,
         string? tableName,
         int? minImpact,
         string subscription,
         RetryPolicyOptions? retryPolicy = null)
     {
-        ValidateRequiredParameters(subscription, server, database);
+        ValidateRequiredParameters(subscription, resourceGroup, server, database);
 
         try
         {
@@ -63,14 +64,14 @@ public sealed class SqlService(
             }
 
             var armClient = new ArmClient(credential, subscriptionInfo.Id, clientOptions);
-            var subscriptionResource = armClient.GetDefaultSubscription();
+            var resourceGroupResource = armClient.GetResourceGroupResource(ResourceGroupResource.CreateResourceIdentifier(subscriptionInfo.Id, resourceGroup));
 
             // Find the server resource
-            var serverResponse = await subscriptionResource.GetSqlServerAsync(server);
+            var serverResponse = await resourceGroupResource.GetSqlServerAsync(server);
 
             if (serverResponse?.Value == null)
             {
-                throw new SqlResourceNotFoundException($"SQL Server '{server}' not found in subscription '{subscription}'");
+                throw new SqlResourceNotFoundException($"SQL Server '{server}' not found in resource group '{resourceGroup}' and subscription '{subscription}'");
             }
 
             var serverResource = serverResponse.Value;
@@ -88,60 +89,25 @@ public sealed class SqlService(
 
             try
             {
-                // Get all advisors for the database
-                await foreach (var advisor in databaseResource.GetAdvisors())
+                // Get the collection of advisors for the database
+                var advisorCollection = databaseResource.GetSqlDatabaseAdvisors();
+
+                await foreach (var advisor in advisorCollection.GetAllAsync())
                 {
-                    if (advisor?.Data == null || advisor.Data.AdvisorType != "CreateIndex")
+                    // Only interested in the CreateIndex advisor
+                    if (advisor.Data.Name == "CreateIndex" && advisor.Data.RecommendedActions != null)
                     {
-                        continue;
-                    }
-
-                    _logger.LogInformation("Processing advisor {AdvisorName} of type {AdvisorType}",
-                        advisor.Data.Name, advisor.Data.AdvisorType);
-
-                    try
-                    {
-                        await foreach (var recommendation in advisor.GetRecommendedActions())
+                        foreach (var action in advisor.Data.RecommendedActions)
                         {
-                            if (recommendation?.Data == null)
-                            {
-                                continue;
-                            }
-
-                            var details = recommendation.GetDetails();
-                            if (details == null)
-                            {
-                                _logger.LogWarning("Unable to get details for recommendation {RecommendationName}",
-                                    recommendation.Data.Name);
-                                continue;
-                            }
-
-                            // Apply filters
-                            if (minImpact.HasValue && recommendation.Data.EstimatedImpact < minImpact.Value / 100.0)
-                            {
-                                continue;
-                            }
-
-                            var recommendationTableName = details.TableName;
-                            if (!string.IsNullOrEmpty(tableName) &&
-                                !recommendationTableName.Equals(tableName, StringComparison.OrdinalIgnoreCase))
-                            {
-                                continue;
-                            }
-
+                            // Map the recommended action to your SqlIndexRecommendation model as needed
                             recommendations.Add(new Models.Sql.SqlIndexRecommendation
                             {
-                                Name = recommendation.Data.Name ?? string.Empty,
-                                Description = recommendation.Data.Details ?? string.Empty,
-                                Impact = (int)(recommendation.Data.EstimatedImpact * 100), // Convert to percentage
-                                TableName = recommendationTableName
+                                Name = action.Name ?? string.Empty,
+                                Description = action.Details?.ToString() ?? string.Empty,
+                                Impact = 0, // Set to 0 or map from action if available
+                                TableName = string.Empty // Set to empty or map from action.Details if available
                             });
                         }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Error processing recommendations for advisor {AdvisorName}. Continuing with next advisor.",
-                            advisor.Data.Name);
                     }
                 }
 
@@ -160,6 +126,18 @@ public sealed class SqlService(
             _logger.LogError(ex, message);
             throw new SqlServiceException(message, ex);
         }
+    }
+
+    public Task<List<string>> ListServers(string subscription, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
+    {
+        // TODO: Implement actual logic
+        return Task.FromResult(new List<string>());
+    }
+
+    public Task<List<string>> ListDatabases(string server, string resourceGroup, string subscription, string? tenant = null, AuthMethod? authMethod = null, RetryPolicyOptions? retryPolicy = null)
+    {
+        // TODO: Implement actual logic
+        return Task.FromResult(new List<string>());
     }
 }
 

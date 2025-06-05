@@ -73,6 +73,7 @@ public sealed class SqlIndexRecommendCommand(ILogger<SqlIndexRecommendCommand> l
             var serviceRecommendations = await service.GetIndexRecommendationsAsync(
                 options.Database!,
                 options.ServerName!,
+                options.ResourceGroup!,
                 options.TableName,
                 options.MinimumImpact ?? 20,
                 options.Subscription!,
