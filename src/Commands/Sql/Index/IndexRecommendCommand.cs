@@ -6,20 +6,20 @@ using System.Text.Json.Serialization.Metadata;
 using AzureMcp.Commands.Sql;
 using AzureMcp.Models.Option;
 using AzureMcp.Models.Sql;
-using static AzureMcp.Models.Sql.IIndexRecommendCommandResult;
 using AzureMcp.Options.Sql.Index;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
+using static AzureMcp.Models.Sql.IIndexRecommendCommandResult;
 
 namespace AzureMcp.Commands.Sql.Index;
 
-public sealed class IndexRecommendCommand(ILogger<IndexRecommendCommand> logger) 
+public sealed class IndexRecommendCommand(ILogger<IndexRecommendCommand> logger)
     : BaseSqlCommand<IndexRecommendOptions>
 {
     private const string _commandTitle = "SQL Index Recommendations";
     private readonly ILogger<IndexRecommendCommand> _logger = logger;
-    
+
     private readonly Option<string> _tableOption = OptionDefinitions.Sql.Table;
     private readonly Option<int> _minimumImpactOption = OptionDefinitions.Sql.MinimumImpact;
 
@@ -43,8 +43,8 @@ public sealed class IndexRecommendCommand(ILogger<IndexRecommendCommand> logger)
         base.RegisterOptions(command);
         command.AddOption(_tableOption);
         command.AddOption(_minimumImpactOption);
-    }    
-    
+    }
+
     protected override IndexRecommendOptions BindOptions(ParseResult parseResult)
     {
         var options = base.BindOptions(parseResult);
@@ -69,23 +69,25 @@ public sealed class IndexRecommendCommand(ILogger<IndexRecommendCommand> logger)
             }
 
             var service = context.GetService<ISqlService>();
-              var results = await service.GetIndexRecommendationsAsync(
-                options.Database!,
-                options.ServerName!,
-                options.TableName,
-                options.MinimumImpact,
-                options.Subscription!,
-                options.RetryPolicy);            if (results?.Count > 0)
+            var results = await service.GetIndexRecommendationsAsync(
+              options.Database!,
+              options.ServerName!,
+              options.TableName,
+              options.MinimumImpact,
+              options.Subscription!,
+              options.RetryPolicy);
+            if (results?.Count > 0)
             {
-                var result = new SqlIndexRecommendCommand.IndexRecommendCommandResult(results);                context.Response.Results = ResponseResult.Create<SqlIndexRecommendCommand.IndexRecommendCommandResult>(
-                    result, 
+                var result = new SqlIndexRecommendCommand.IndexRecommendCommandResult(results);
+                context.Response.Results = ResponseResult.Create<SqlIndexRecommendCommand.IndexRecommendCommandResult>(
+                    result,
                     SqlJsonContext.Default.IndexRecommendCommandResult);
             }
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, 
-                "Error in recommend. Database: {Database}, Table: {Table}, Impact: {Impact}, Options: {@Options}", 
+            _logger.LogError(ex,
+                "Error in recommend. Database: {Database}, Table: {Table}, Impact: {Impact}, Options: {@Options}",
                 options.Database, options.TableName, options.MinimumImpact, options);
             HandleException(context.Response, ex);
         }
@@ -96,13 +98,13 @@ public sealed class IndexRecommendCommand(ILogger<IndexRecommendCommand> logger)
     protected override string GetErrorMessage(Exception ex) => ex switch
     {
         SqlResourceNotFoundException => "SQL resource not found. Verify the resource exists and you have access.",
-        SqlAuthorizationException authEx => 
+        SqlAuthorizationException authEx =>
             $"SQL authorization failed. Details: {authEx.Message}",
         SqlException sqlEx => sqlEx.Message,
         _ => base.GetErrorMessage(ex)
     };
 
-    protected override int GetStatusCode(Exception ex) => ex switch  
+    protected override int GetStatusCode(Exception ex) => ex switch
     {
         SqlResourceNotFoundException => 404,
         SqlAuthorizationException => 403,
@@ -112,5 +114,5 @@ public sealed class IndexRecommendCommand(ILogger<IndexRecommendCommand> logger)
             _ => 500
         },
         _ => base.GetStatusCode(ex)
-    };    internal record IndexRecommendCommandResult(List<SqlIndexRecommendation> Recommendations) : IIndexRecommendCommandResult;
+    }; internal record IndexRecommendCommandResult(List<SqlIndexRecommendation> Recommendations) : IIndexRecommendCommandResult;
 }

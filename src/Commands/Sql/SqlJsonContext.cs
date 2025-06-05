@@ -2,8 +2,8 @@
 // Licensed under the MIT License.
 
 using System.Text.Json.Serialization;
-using AzureMcp.Commands.Sql.Index;
 using AzureMcp.Commands.Sql.Database;
+using AzureMcp.Commands.Sql.Index;
 using AzureMcp.Commands.Sql.Server;
 
 namespace AzureMcp.Commands.Sql;

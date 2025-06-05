@@ -6,7 +6,8 @@ using System.CommandLine;
 namespace AzureMcp.Models.Option;
 
 public static partial class OptionDefinitions
-{    public static class Sql
+{
+    public static class Sql
     {
         public const string TableName = "table-name";
         public const string MinimumImpactName = "minimum-impact";

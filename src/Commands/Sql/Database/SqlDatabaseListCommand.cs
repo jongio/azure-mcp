@@ -1,11 +1,11 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.CommandLine.Parsing;
 using AzureMcp.Models.Command;
 using AzureMcp.Options.Sql.Database;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
-using System.CommandLine.Parsing;
 
 namespace AzureMcp.Commands.Sql.Database;
 
