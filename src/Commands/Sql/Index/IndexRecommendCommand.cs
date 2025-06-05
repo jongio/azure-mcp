@@ -2,7 +2,11 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics.CodeAnalysis;
+using System.Text.Json.Serialization.Metadata;
+using AzureMcp.Commands.Sql;
 using AzureMcp.Models.Option;
+using AzureMcp.Models.Sql;
+using static AzureMcp.Models.Sql.IIndexRecommendCommandResult;
 using AzureMcp.Options.Sql.Index;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Data.SqlClient;
@@ -71,13 +75,12 @@ public sealed class IndexRecommendCommand(ILogger<IndexRecommendCommand> logger)
                 options.TableName,
                 options.MinimumImpact,
                 options.Subscription!,
-                options.RetryPolicy);
-
-            context.Response.Results = results?.Count > 0 ? 
-                ResponseResult.Create(
-                    new IndexRecommendCommandResult(results),
-                    SqlJsonContext.Default.IndexRecommendCommandResult) : 
-                null;
+                options.RetryPolicy);            if (results?.Count > 0)
+            {
+                var result = new SqlIndexRecommendCommand.IndexRecommendCommandResult(results);                context.Response.Results = ResponseResult.Create<SqlIndexRecommendCommand.IndexRecommendCommandResult>(
+                    result, 
+                    SqlJsonContext.Default.IndexRecommendCommandResult);
+            }
         }
         catch (Exception ex)
         {
@@ -109,7 +112,5 @@ public sealed class IndexRecommendCommand(ILogger<IndexRecommendCommand> logger)
             _ => 500
         },
         _ => base.GetStatusCode(ex)
-    };
-
-    internal record IndexRecommendCommandResult(List<SqlIndexRecommendation> Results);
+    };    internal record IndexRecommendCommandResult(List<SqlIndexRecommendation> Recommendations) : IIndexRecommendCommandResult;
 }

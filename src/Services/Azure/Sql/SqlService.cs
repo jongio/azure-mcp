@@ -21,9 +21,7 @@ public sealed class SqlService(
     private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
     private const string CACHE_GROUP = "sql";
     private const string SQL_SERVERS_CACHE_KEY = "servers"; // Keeping the constant name in caps per C# convention
-    private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(1);
-
-    private new void ValidateRequiredParameters(params string[] parameters)
+    private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(1);    private new void ValidateRequiredParameters(params string[] parameters)
     {
         foreach (var param in parameters)
         {
@@ -31,7 +29,16 @@ public sealed class SqlService(
         }
     }
 
-    public async Task<List<SqlIndexRecommendation>> GetIndexRecommendationsAsync(
+    /// <summary>
+    /// Gets index recommendations for an Azure SQL database table.
+    /// </summary>
+    /// <param name="database">The database name to get recommendations for.</param>
+    /// <param name="server">The name of the SQL server containing the database.</param>
+    /// <param name="tableName">Optional name of a specific table to get recommendations for.</param>
+    /// <param name="minImpact">Optional minimum impact threshold.</param>
+    /// <param name="subscription">Azure subscription ID containing the database.</param>
+    /// <param name="retryPolicy">Optional retry policy for the operation.</param>    /// <returns>A list of index recommendations.</returns>    
+    public async Task<List<Models.Sql.SqlIndexRecommendation>> GetIndexRecommendationsAsync(
         string database,
         string server,
         string? tableName,
@@ -43,11 +50,13 @@ public sealed class SqlService(
 
         var subscriptionResource = await _subscriptionService.GetSubscription(subscription, null, retryPolicy);
 
-        // Note: Return empty list for now since we need to implement the Sql Database Advisor APIs
+        // Note: Return empty list for now since we need to implement the SQL Database Advisor APIs
         // We'll need to get the resource group name to properly implement this
         await Task.Delay(1); // Placeholder for async operation
-        return new List<SqlIndexRecommendation>();
-    }    public async Task<List<string>> ListServers(
+        return new List<Models.Sql.SqlIndexRecommendation>();
+    }
+    
+    public async Task<List<string>> ListServers(
         string subscription,
         string? tenant = null,
         RetryPolicyOptions? retryPolicy = null)
