@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
@@ -57,13 +60,13 @@ public class SqlIndexRecommendCommandTests
         if (shouldSucceed)
         {
             _service.GetIndexRecommendationsAsync(
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Any<string>(),
-                Arg.Any<int?>(),
-                Arg.Any<string>(),
-                Arg.Any<RetryPolicyOptions>())
+                Arg.Any<string>(), // database
+                Arg.Any<string>(), // server
+                Arg.Any<string>(), // resourceGroup
+                Arg.Any<string>(), // tableName
+                Arg.Any<int?>(),   // minImpact
+                Arg.Any<string>(), // subscription
+                Arg.Any<RetryPolicyOptions>()) // retryPolicy
                 .Returns(new List<SqlIndexRecommendation>());
         }
 
@@ -82,13 +85,13 @@ public class SqlIndexRecommendCommandTests
     public async Task ExecuteAsync_HandlesServiceErrors()
     {
         _service.GetIndexRecommendationsAsync(
-            Arg.Any<string>(),
-            Arg.Any<string>(),
-            Arg.Any<string>(),
-            Arg.Any<string>(),
-            Arg.Any<int?>(),
-            Arg.Any<string>(),
-            Arg.Any<RetryPolicyOptions>())
+            Arg.Any<string>(), // database
+            Arg.Any<string>(), // server
+            Arg.Any<string>(), // resourceGroup
+            Arg.Any<string>(), // tableName
+            Arg.Any<int?>(),   // minImpact
+            Arg.Any<string>(), // subscription
+            Arg.Any<RetryPolicyOptions>()) // retryPolicy
             .Returns(Task.FromException<List<SqlIndexRecommendation>>(
                 new Exception("Test SQL error")));
 

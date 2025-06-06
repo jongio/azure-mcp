@@ -216,3 +216,11 @@ public class SqlResourceNotFoundException : SqlServiceException
     {
     }
 }
+
+/// <summary>
+/// Thrown when SQL authorization fails.
+/// </summary>
+public class SqlAuthorizationException : Exception
+{
+    public SqlAuthorizationException(string message) : base(message) { }
+}

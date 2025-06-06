@@ -7,6 +7,7 @@ using AzureMcp.Commands.Sql;
 using AzureMcp.Models.Option;
 using AzureMcp.Models.Sql;
 using AzureMcp.Options.Sql.Index;
+using AzureMcp.Services.Azure.Sql;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
