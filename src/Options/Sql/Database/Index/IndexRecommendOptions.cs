@@ -3,14 +3,14 @@
 
 using System.Text.Json.Serialization;
 using AzureMcp.Models.Option;
-using AzureMcp.Options.Sql.Server;
+using AzureMcp.Options.Sql.Database;
 
-namespace AzureMcp.Options.Sql.Index;
+namespace AzureMcp.Options.Sql.Database.Index;
 
 /// <summary>
 /// Options for getting SQL index recommendations for tables in a database.
 /// </summary>
-public sealed class IndexRecommendOptions : BaseServerOptions
+public sealed class IndexRecommendOptions : BaseDatabaseOptions
 {
     /// <summary>
     /// The name of the table to get index recommendations for.

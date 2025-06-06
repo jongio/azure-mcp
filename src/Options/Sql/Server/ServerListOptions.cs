@@ -6,4 +6,4 @@ namespace AzureMcp.Options.Sql.Server;
 /// <summary>
 /// Options for listing SQL Servers in a subscription.
 /// </summary>
-public class ServerListOptions : BaseSqlOptions;
+public class ServerListOptions : SubscriptionOptions;

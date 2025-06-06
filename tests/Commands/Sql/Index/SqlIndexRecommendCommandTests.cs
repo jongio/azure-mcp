@@ -1,21 +1,13 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Parsing;
-using System.Threading.Tasks;
-using Azure.Core;
-using AzureMcp.Commands;
-using AzureMcp.Commands.Sql.Index;
-using AzureMcp.Models;
+using AzureMcp.Commands.Sql.Database.Index;
 using AzureMcp.Models.Command;
 using AzureMcp.Models.Sql;
 using AzureMcp.Options;
-using AzureMcp.Services.Azure;
 using AzureMcp.Services.Interfaces;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;

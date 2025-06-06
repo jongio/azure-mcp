@@ -6,7 +6,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json.Serialization;
 using AzureMcp.Commands.Server;
 using AzureMcp.Commands.Sql.Database;
-using AzureMcp.Commands.Sql.Index;
+using AzureMcp.Commands.Sql.Database.Index;
 using AzureMcp.Commands.Sql.Server;
 using AzureMcp.Commands.Storage.Blob;
 using AzureMcp.Commands.Subscription;
@@ -445,7 +445,7 @@ public class CommandFactory
         // Register SQL commands
         databases.AddCommand("list", new Sql.Database.SqlDatabaseListCommand(GetLogger<SqlDatabaseListCommand>()));
         sqlServer.AddCommand("list", new Sql.Server.SqlServerListCommand(GetLogger<SqlServerListCommand>()));
-        index.AddCommand("recommend", new Sql.Index.SqlIndexRecommendCommand(
+        index.AddCommand("recommend", new Sql.Database.Index.SqlIndexRecommendCommand(
             GetLogger<SqlIndexRecommendCommand>()));
     }
 

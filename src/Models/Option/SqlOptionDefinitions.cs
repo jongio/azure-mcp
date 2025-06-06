@@ -1,18 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine;
-
 namespace AzureMcp.Models.Option;
 
 public static partial class OptionDefinitions
 {
     public static class Sql
     {
-        public const string TableName = "table-name";
+        public const string TableName = "table";
         public const string MinimumImpactName = "minimum-impact";
         public const string DatabaseName = "database";
-        public const string ServerName = "server-name";
+        public const string ServerName = "server";
 
         public static readonly Option<string> Table = new(
             $"--{TableName}",

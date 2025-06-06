@@ -1,18 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Azure;
-using Azure.Core;
-using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
-using Azure.ResourceManager.Sql;
-using Azure.ResourceManager.Sql.Models;
-using AzureMcp.Models.Sql;
-using AzureMcp.Options;
 using AzureMcp.Services.Azure.Sql;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;

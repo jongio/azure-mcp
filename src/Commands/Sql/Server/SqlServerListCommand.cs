@@ -1,15 +1,15 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine.Parsing;
-using AzureMcp.Models.Command;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Options.Sql;
 using AzureMcp.Options.Sql.Server;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Sql.Server;
 
-public sealed class SqlServerListCommand(ILogger<SqlServerListCommand> logger) : BaseSqlCommand<ServerListOptions>()
+public sealed class SqlServerListCommand(ILogger<SqlServerListCommand> logger) : BaseSqlCommand<BaseSqlOptions>()
 {
     private const string _commandTitle = "List SQL Servers";
     private readonly ILogger<SqlServerListCommand> _logger = logger;
