@@ -41,15 +41,12 @@ public class SqlIndexRecommendCommandTests
         Assert.Equal("recommend", command.Name);
         Assert.NotNull(command.Description);
         Assert.NotEmpty(command.Description);
-    }
-
-    [Theory]
-    [InlineData("--database mydb --subscription sub1", true)]
-    [InlineData("--database mydb --table-name table1 --subscription sub1", true)]
-    [InlineData("--table-name table1", false)]
+    }    [Theory]
+    [InlineData("--database mydb --server myserver --resource-group myrg --subscription sub1", true)]
+    [InlineData("--database mydb --table myTable --server myserver --resource-group myrg --subscription sub1", true)]
+    [InlineData("--table myTable", false)]
     public async Task ExecuteAsync_ValidatesInputCorrectly(string args, bool shouldSucceed)
-    {
-        if (shouldSucceed)
+    {        if (shouldSucceed)
         {
             _service.GetIndexRecommendationsAsync(
                 Arg.Any<string>(), // database
@@ -58,6 +55,7 @@ public class SqlIndexRecommendCommandTests
                 Arg.Any<string>(), // tableName
                 Arg.Any<int?>(),   // minImpact
                 Arg.Any<string>(), // subscription
+                Arg.Any<string?>(), // tenant
                 Arg.Any<RetryPolicyOptions>()) // retryPolicy
                 .Returns(new List<SqlIndexRecommendation>());
         }
@@ -72,8 +70,7 @@ public class SqlIndexRecommendCommandTests
         {
             Assert.Contains("database", response.Message.ToLower());
         }
-    }
-    [Fact]
+    }    [Fact]
     public async Task ExecuteAsync_HandlesServiceErrors()
     {
         _service.GetIndexRecommendationsAsync(
@@ -83,12 +80,11 @@ public class SqlIndexRecommendCommandTests
             Arg.Any<string>(), // tableName
             Arg.Any<int?>(),   // minImpact
             Arg.Any<string>(), // subscription
+            Arg.Any<string?>(), // tenant
             Arg.Any<RetryPolicyOptions>()) // retryPolicy
             .Returns(Task.FromException<List<SqlIndexRecommendation>>(
-                new Exception("Test SQL error")));
-
-        var context = new CommandContext(_serviceProvider);
-        var parseResult = _command.GetCommand().Parse("--database mydb --subscription sub1");
+                new Exception("Test SQL error")));        var context = new CommandContext(_serviceProvider);
+        var parseResult = _command.GetCommand().Parse("--database mydb --server-name myserver --resource-group myrg --subscription sub1");
 
         var response = await _command.ExecuteAsync(context, parseResult);
 

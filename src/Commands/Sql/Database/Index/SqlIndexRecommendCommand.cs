@@ -64,9 +64,7 @@ public sealed class SqlIndexRecommendCommand(ILogger<SqlIndexRecommendCommand> l
             if (!Validate(parseResult.CommandResult, context.Response).IsValid)
             {
                 return context.Response;
-            }
-
-            var service = context.GetService<ISqlService>();
+            }            var service = context.GetService<ISqlService>();
             var serviceRecommendations = await service.GetIndexRecommendationsAsync(
                 options.Database!,
                 options.ServerName!,
@@ -74,6 +72,7 @@ public sealed class SqlIndexRecommendCommand(ILogger<SqlIndexRecommendCommand> l
                 options.TableName,
                 options.MinimumImpact ?? 20,
                 options.Subscription!,
+                options.Tenant,
                 options.RetryPolicy);
 
             var recommendations = serviceRecommendations.Select(r => new Models.Sql.SqlIndexRecommendation
