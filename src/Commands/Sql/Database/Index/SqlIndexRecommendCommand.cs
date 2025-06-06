@@ -1,21 +1,18 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.Text.Json;
-using AzureMcp.Commands.Sql;
 using AzureMcp.Models.Option;
 using AzureMcp.Models.Sql;
-using AzureMcp.Options.Sql.Index;
+using AzureMcp.Options.Sql.Database.Index;
 using AzureMcp.Services.Azure.Sql.Exceptions;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
-using static AzureMcp.Models.Sql.IIndexRecommendCommandResult;
 
-namespace AzureMcp.Commands.Sql.Index;
+namespace AzureMcp.Commands.Sql.Database.Index;
 
 public sealed class SqlIndexRecommendCommand(ILogger<SqlIndexRecommendCommand> logger)
-    : BaseSqlCommand<IndexRecommendOptions>
+    : BaseDatabaseCommand<IndexRecommendOptions>
 {
     private const string _commandTitle = "Get Sql Index Recommendations";
     private readonly ILogger<SqlIndexRecommendCommand> _logger = logger;

@@ -11,9 +11,6 @@ namespace AzureMcp.Options.Sql.Server;
 /// </summary>
 public class BaseServerOptions : BaseSqlOptions
 {
-    /// <summary>
-    /// The name of the Azure SQL Server.
-    /// </summary>
-    [JsonPropertyName("server-name")]
-    public string? Server { get; set; }
+    [JsonPropertyName(OptionDefinitions.Sql.ServerName)]
+    public string? ServerName { get; set; }
 }

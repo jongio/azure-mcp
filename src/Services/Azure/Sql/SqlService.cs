@@ -1,13 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
-using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
 using Azure.ResourceManager.Sql;
@@ -26,9 +19,6 @@ public sealed class SqlService(
     private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
     private readonly ICacheService _cacheService = cacheService ?? throw new ArgumentNullException(nameof(cacheService));
     private readonly ILogger<SqlService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
-
-    private const string CACHE_GROUP = "sql";
-    private const string SQL_SERVERS_CACHE_KEY = "servers";
     private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(1);
 
     private new void ValidateRequiredParameters(params string[] parameters)

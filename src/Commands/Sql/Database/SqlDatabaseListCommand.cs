@@ -1,15 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using System.CommandLine.Parsing;
-using AzureMcp.Models.Command;
+using AzureMcp.Commands.Sql.Server;
 using AzureMcp.Options.Sql.Database;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Sql.Database;
 
-public sealed class SqlDatabaseListCommand(ILogger<SqlDatabaseListCommand> logger) : BaseSqlCommand<DatabaseListOptions>()
+public sealed class SqlDatabaseListCommand(ILogger<SqlDatabaseListCommand> logger) : BaseServerCommand<DatabaseListOptions>()
 {
     private const string _commandTitle = "List SQL Databases";
     private readonly ILogger<SqlDatabaseListCommand> _logger = logger;
@@ -38,7 +37,7 @@ public sealed class SqlDatabaseListCommand(ILogger<SqlDatabaseListCommand> logge
 
             var sqlService = context.GetService<ISqlService>() ?? throw new InvalidOperationException("SQL service is not available.");
             var databases = await sqlService.ListDatabases(
-                options.Server!,
+                options.ServerName!,
                 options.ResourceGroup!,
                 options.Subscription!,
                 options.Tenant,
