@@ -27,34 +27,28 @@ public sealed class SqlService(
         {
             ArgumentException.ThrowIfNullOrEmpty(param, param);
         }
-    }
-
-    public async Task<List<Models.Sql.SqlIndexRecommendation>> GetIndexRecommendationsAsync(
+    }    public async Task<List<Models.Sql.SqlIndexRecommendation>> GetIndexRecommendationsAsync(
         string database,
         string server,
         string resourceGroup,
         string? tableName,
         int? minImpact,
         string subscription,
+        string? tenant = null,
         RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, resourceGroup, server, database);
 
         try
         {
-            // Get subscription info and credentials
-            var credential = await GetCredential();
-            var subscriptionInfo = await _subscriptionService.GetSubscription(subscription);
+            // Get subscription resource using the subscription service
+            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy) 
+                ?? throw new SqlServiceException($"Subscription '{subscription}' not found");
 
-            var clientOptions = new ArmClientOptions();
-            if (retryPolicy != null)
-            {
-                clientOptions.Retry.MaxRetries = retryPolicy.MaxRetries;
-                clientOptions.Retry.Mode = retryPolicy.Mode;
-            }
-
-            var armClient = new ArmClient(credential, subscriptionInfo.Id, clientOptions);
-            var resourceGroupResource = armClient.GetResourceGroupResource(ResourceGroupResource.CreateResourceIdentifier(subscriptionInfo.Id, resourceGroup));
+            // Create ARM client using base service method
+            var armClient = await CreateArmClientAsync(tenant, retryPolicy);
+            var resourceGroupResource = armClient.GetResourceGroupResource(
+                ResourceGroupResource.CreateResourceIdentifier(subscriptionResource.Id, resourceGroup));
 
             // Find the server resource
             var serverResponse = await resourceGroupResource.GetSqlServerAsync(server);
@@ -116,25 +110,13 @@ public sealed class SqlService(
             _logger.LogError(ex, message);
             throw new SqlServiceException(message, ex);
         }
-    }
-
-    public async Task<List<string>> ListServers(string subscription, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
+    }    public async Task<List<string>> ListServers(string subscription, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription);
         try
         {
-            var credential = await GetCredential();
-            var subscriptionInfo = await _subscriptionService.GetSubscription(subscription);
-
-            var clientOptions = new ArmClientOptions();
-            if (retryPolicy != null)
-            {
-                clientOptions.Retry.MaxRetries = retryPolicy.MaxRetries;
-                clientOptions.Retry.Mode = retryPolicy.Mode;
-            }
-
-            var armClient = new ArmClient(credential, subscriptionInfo.Id, clientOptions);
-            var subscriptionResource = armClient.GetSubscriptionResource(subscriptionInfo.Id);
+            // Get subscription resource using the subscription service
+            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy);
             var sqlServers = new List<string>();
 
             foreach (var server in subscriptionResource.GetSqlServers())
@@ -149,25 +131,17 @@ public sealed class SqlService(
             _logger.LogError(ex, "Error listing SQL servers for subscription {Subscription}", subscription);
             throw new SqlServiceException($"Error listing SQL servers: {ex.Message}", ex);
         }
-    }
-
-    public async Task<List<string>> ListDatabases(string server, string resourceGroup, string subscription, string? tenant = null, AuthMethod? authMethod = null, RetryPolicyOptions? retryPolicy = null)
+    }public async Task<List<string>> ListDatabases(string server, string resourceGroup, string subscription, string? tenant = null, AuthMethod? authMethod = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, resourceGroup, server);
         try
         {
-            var credential = await GetCredential();
-            var subscriptionInfo = await _subscriptionService.GetSubscription(subscription);
+            // Get subscription resource using the subscription service
+            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy);
 
-            var clientOptions = new ArmClientOptions();
-            if (retryPolicy != null)
-            {
-                clientOptions.Retry.MaxRetries = retryPolicy.MaxRetries;
-                clientOptions.Retry.Mode = retryPolicy.Mode;
-            }
-
-            var armClient = new ArmClient(credential, subscriptionInfo.Id, clientOptions);
-            var resourceGroupResource = armClient.GetResourceGroupResource(ResourceGroupResource.CreateResourceIdentifier(subscriptionInfo.Id, resourceGroup));
+            // Create ARM client using base service method
+            var armClient = await CreateArmClientAsync(tenant, retryPolicy);
+            var resourceGroupResource = armClient.GetResourceGroupResource(ResourceGroupResource.CreateResourceIdentifier(subscriptionResource.Id, resourceGroup));
             var serverResponse = await resourceGroupResource.GetSqlServerAsync(server);
 
             if (serverResponse?.Value == null)

@@ -39,9 +39,7 @@ public interface ISqlService
         string server,
         string? tenant = null,
         AuthMethod? authMethod = null,
-        RetryPolicyOptions? retryPolicy = null);
-
-    /// <summary>
+        RetryPolicyOptions? retryPolicy = null);    /// <summary>
     /// Gets index recommendations for an Azure SQL database.
     /// </summary>
     /// <param name="database">The database name to get recommendations for.</param>
@@ -50,6 +48,7 @@ public interface ISqlService
     /// <param name="tableName">Optional name of a specific table to get recommendations for.</param>
     /// <param name="minImpact">Optional minimum impact threshold.</param>
     /// <param name="subscription">Azure subscription ID containing the database.</param>
+    /// <param name="tenant">Optional tenant ID.</param>
     /// <param name="retryPolicy">Optional retry policy for the operation.</param>
     /// <returns>A list of index recommendations.</returns>
     Task<List<SqlIndexRecommendation>> GetIndexRecommendationsAsync(
@@ -59,5 +58,6 @@ public interface ISqlService
         string? tableName,
         int? minImpact,
         string subscription,
+        string? tenant = null,
         RetryPolicyOptions? retryPolicy = null);
 }
