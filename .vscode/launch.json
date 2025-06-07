@@ -429,12 +429,11 @@
                 "${input:subscription}",
                 "--database",
                 "${input:sqlDatabaseName}",
-                "--server-name",
+                "--server",
                 "${input:sqlServerName}",
                 "--resource-group",
                 "${input:resourceGroup}",
-                "--table-name",
-                "${input:sqlTableName}",
+
                 "--min-impact",
                 "10"
             ],

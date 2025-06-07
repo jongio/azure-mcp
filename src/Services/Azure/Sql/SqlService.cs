@@ -27,7 +27,9 @@ public sealed class SqlService(
         {
             ArgumentException.ThrowIfNullOrEmpty(param, param);
         }
-    }    public async Task<List<Models.Sql.SqlIndexRecommendation>> GetIndexRecommendationsAsync(
+    }
+
+    public async Task<Models.Sql.SqlIndexAnalysisResult> GetIndexRecommendationsAsync(
         string database,
         string server,
         string resourceGroup,
@@ -39,16 +41,23 @@ public sealed class SqlService(
     {
         ValidateRequiredParameters(subscription, resourceGroup, server, database);
 
+        var analysisResult = new Models.Sql.SqlIndexAnalysisResult
+        {
+            Database = database,
+            Server = server,
+            AnalysisTimestamp = DateTimeOffset.UtcNow
+        };
+
         try
         {
             // Get subscription resource using the subscription service
-            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy) 
+            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy)
                 ?? throw new SqlServiceException($"Subscription '{subscription}' not found");
 
             // Create ARM client using base service method
             var armClient = await CreateArmClientAsync(tenant, retryPolicy);
             var resourceGroupResource = armClient.GetResourceGroupResource(
-                ResourceGroupResource.CreateResourceIdentifier(subscriptionResource.Id, resourceGroup));
+                ResourceGroupResource.CreateResourceIdentifier(subscriptionResource.Data.SubscriptionId, resourceGroup));
 
             // Find the server resource
             var serverResponse = await resourceGroupResource.GetSqlServerAsync(server);
@@ -70,47 +79,250 @@ public sealed class SqlService(
 
             var databaseResource = databaseResponse.Value;
             var recommendations = new List<Models.Sql.SqlIndexRecommendation>();
+            int advisorsChecked = 0;
 
             try
             {
                 // Get the collection of advisors for the database
                 var advisorCollection = databaseResource.GetSqlDatabaseAdvisors();
 
+                var advisorStatuses = new List<Models.Sql.SqlAdvisorStatus>();
+
                 await foreach (var advisor in advisorCollection.GetAllAsync())
                 {
-                    // Only interested in the CreateIndex advisor
-                    if (advisor.Data.Name == "CreateIndex" && advisor.Data.RecommendedActions != null)
+                    advisorsChecked++;
+                    var advisorName = advisor.Data.Name ?? "Unknown";
+                    _logger.LogDebug("Checking advisor: {AdvisorName}", advisorName);
+
+                    // Get advisor status information
+                    var recommendationsStatus = advisor.Data.RecommendationsStatus ?? "Unknown";
+                    var autoExecuteStatus = advisor.Data.AutoExecuteStatus?.ToString() ?? "Not Available";
+                    var recommendedActionsCount = advisor.Data.RecommendedActions?.Count() ?? 0;
+                    var hasRecommendations = recommendedActionsCount > 0;
+                    var isSupported = advisorName == "CreateIndex"; // Only CreateIndex is currently supported
+                    var notes = string.Empty;
+
+                    // Process recommendations if this advisor has them and is supported
+                    if (hasRecommendations && isSupported)
                     {
-                        foreach (var action in advisor.Data.RecommendedActions)
+                        foreach (var action in advisor.Data.RecommendedActions!)
                         {
-                            // Map the recommended action to your SqlIndexRecommendation model as needed
+                            var actionDetails = action.Details?.ToString() ?? string.Empty;
+                            var createIndexSql = action.ImplementationDetails?.Script ?? string.Empty;
+                            var extractedTableName = ExtractTableNameFromDetails(actionDetails) ?? 
+                                                   ExtractTableNameFromSql(createIndexSql);
+
+                            // Apply filters if specified
+                            if (!string.IsNullOrEmpty(tableName))
+                            {
+                                // Skip if tableName filter is specified but this action doesn't match
+                                if (!actionDetails.Contains(tableName, StringComparison.OrdinalIgnoreCase) &&
+                                    !extractedTableName.Contains(tableName, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    continue;
+                                }
+                            }
+
+                            // Extract impact from the estimated impact data if available
+                            var estimatedImpact = 0.0;
+                            if (action.EstimatedImpact != null)
+                            {
+                                // Find the CPU impact record
+                                var cpuImpact = action.EstimatedImpact.FirstOrDefault(i => 
+                                    string.Equals(i.DimensionName, "Cpu", StringComparison.OrdinalIgnoreCase));
+                                if (cpuImpact != null && double.TryParse(cpuImpact.AbsoluteValue?.ToString(), out var cpuValue))
+                                {
+                                    estimatedImpact = cpuValue;
+                                }
+                            }
+
+                            // Generate DROP INDEX statement if we have a CREATE INDEX
+                            var dropIndexSql = string.Empty;
+                            var indexName = ExtractIndexNameFromCreateSql(createIndexSql);
+                            if (!string.IsNullOrEmpty(indexName) && !string.IsNullOrEmpty(extractedTableName))
+                            {
+                                dropIndexSql = $"DROP INDEX IF EXISTS [{indexName}] ON [{extractedTableName}];";
+                            }
+
+                            // Map the recommended action to your SqlIndexRecommendation model
                             recommendations.Add(new Models.Sql.SqlIndexRecommendation
                             {
                                 Name = action.Name ?? string.Empty,
-                                Description = action.Details?.ToString() ?? string.Empty,
-                                Impact = 0, // Set to 0 or map from action if available
-                                TableName = string.Empty // Set to empty or map from action.Details if available
+                                Description = actionDetails,
+                                Impact = (int)Math.Round(estimatedImpact),
+                                TableName = extractedTableName,
+                                CreateIndexSql = createIndexSql,
+                                DropIndexSql = dropIndexSql,
+                                ImplementationDetails = action.ImplementationDetails?.Method?.ToString() ?? "TSql",
+                                ExpectedImprovementPercent = estimatedImpact,
+                                RecommendationStatus = recommendationsStatus
                             });
                         }
+                        notes = $"Processed {advisor.Data.RecommendedActions.Count()} recommendation(s)";
                     }
+                    else if (hasRecommendations && !isSupported)
+                    {
+                        notes = "Recommendations available but not yet supported by this tool";
+                    }
+                    else
+                    {
+                        notes = "No recommendations found";
+                    }
+
+                    // Add advisor status to collection
+                    advisorStatuses.Add(new Models.Sql.SqlAdvisorStatus
+                    {
+                        AdvisorName = advisorName,
+                        RecommendationsStatus = recommendationsStatus,
+                        AutoExecuteStatus = autoExecuteStatus,
+                        RecommendedActionsCount = recommendedActionsCount,
+                        HasRecommendations = hasRecommendations,
+                        IsSupported = isSupported,
+                        Notes = notes
+                    });
                 }
 
-                return recommendations;
+                // Apply minimum impact filter if specified
+                if (minImpact.HasValue && minImpact.Value > 0)
+                {
+                    recommendations = recommendations.Where(r => r.Impact >= minImpact.Value).ToList();
+                }
+
+                // Build analysis summary for JSON output
+                var analysisSummary = string.Empty;
+                if (recommendations.Count > 0)
+                {
+                    analysisSummary = $"Found {recommendations.Count} actionable index recommendation(s). Check the 'CreateIndexSql' property for T-SQL commands.";
+                }
+                else if (advisorStatuses.Any(s => s.HasRecommendations))
+                {
+                    analysisSummary = "Some advisors have recommendations, but none match current filters or are supported yet.";
+                }
+                else
+                {
+                    analysisSummary = "No recommendations found. Database may be well-optimized or needs more query activity.";
+                }
+
+                // Update analysis result with success information
+                analysisResult = analysisResult with 
+                {
+                    AnalysisSuccessful = true,
+                    AdvisorsChecked = advisorsChecked,
+                    Recommendations = recommendations,
+                    AdvisorStatuses = advisorStatuses,
+                    AnalysisSummary = analysisSummary
+                };
+
+                _logger.LogInformation(
+                    "Index analysis completed for database {Database} on server {Server}. Advisors checked: {AdvisorsChecked}, Recommendations found: {RecommendationCount}",
+                    database, server, advisorsChecked, recommendations.Count);
+
+                return analysisResult;
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error retrieving advisor recommendations for database {Database} on server {Server}",
                     database, server);
-                throw new SqlServiceException($"Error retrieving advisor recommendations: {ex.Message}", ex);
+                
+                // Return analysis result with error information
+                return analysisResult with
+                {
+                    AnalysisSuccessful = false,
+                    AdvisorsChecked = advisorsChecked,
+                    AnalysisSummary = $"Error retrieving advisor recommendations: {ex.Message}"
+                };
             }
         }
         catch (Exception ex) when (ex is not SqlServiceException)
         {
             var message = $"Error getting index recommendations for database '{database}' on server '{server}'";
             _logger.LogError(ex, message);
-            throw new SqlServiceException(message, ex);
+            
+            // Return analysis result with error information
+            return analysisResult with
+            {
+                AnalysisSuccessful = false,
+                AnalysisSummary = $"Analysis failed: {ex.Message}"
+            };
         }
-    }    public async Task<List<string>> ListServers(string subscription, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
+    }
+
+    private static string ExtractTableNameFromDetails(string details)
+    {
+        // Simple extraction logic - you may need to enhance this based on actual Azure format
+        // This is a placeholder implementation
+        if (string.IsNullOrEmpty(details))
+            return string.Empty;
+
+        // Look for common patterns like "ON [tableName]" or "table: tableName"
+        var tablePatterns = new[]
+        {
+            @"ON \[([^\]]+)\]",
+            @"table:\s*([^\s,]+)",
+            @"Table:\s*([^\s,]+)"
+        };
+
+        foreach (var pattern in tablePatterns)
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(details, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (match.Success && match.Groups.Count > 1)
+            {
+                return match.Groups[1].Value;
+            }
+        }
+
+        return string.Empty;
+    }
+
+    private static string ExtractTableNameFromSql(string sql)
+    {
+        if (string.IsNullOrEmpty(sql))
+            return string.Empty;
+
+        // Extract table name from CREATE INDEX statements
+        // Pattern: CREATE [NONCLUSTERED] INDEX ... ON [schema].[table] or ON [table]
+        var patterns = new[]
+        {
+            @"ON\s+\[?([^\]\s\[]+)\]?\.\[?([^\]\s\[]+)\]?",  // ON [schema].[table] or ON schema.table
+            @"ON\s+\[?([^\]\s\[]+)\]?(?!\s*\.)",             // ON [table] (without schema)
+        };
+
+        foreach (var pattern in patterns)
+        {
+            var match = System.Text.RegularExpressions.Regex.Match(sql, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                // If we have schema.table format, return the table part (group 2)
+                if (match.Groups.Count > 2 && !string.IsNullOrEmpty(match.Groups[2].Value))
+                {
+                    return match.Groups[2].Value;
+                }
+                // Otherwise return the first capture (table name)
+                return match.Groups[1].Value;
+            }
+        }
+
+        return string.Empty;
+    }
+
+    private static string ExtractIndexNameFromCreateSql(string sql)
+    {
+        if (string.IsNullOrEmpty(sql))
+            return string.Empty;
+
+        // Extract index name from CREATE INDEX statements
+        // Pattern: CREATE [NONCLUSTERED] INDEX [indexName] ON ...
+        var pattern = @"CREATE\s+(?:NONCLUSTERED\s+)?INDEX\s+\[?([^\]\s\[]+)\]?\s+ON";
+        var match = System.Text.RegularExpressions.Regex.Match(sql, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        
+        if (match.Success && match.Groups.Count > 1)
+        {
+            return match.Groups[1].Value;
+        }
+
+        return string.Empty;
+    }
+    public async Task<List<string>> ListServers(string subscription, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription);
         try
@@ -131,7 +343,8 @@ public sealed class SqlService(
             _logger.LogError(ex, "Error listing SQL servers for subscription {Subscription}", subscription);
             throw new SqlServiceException($"Error listing SQL servers: {ex.Message}", ex);
         }
-    }public async Task<List<string>> ListDatabases(string server, string resourceGroup, string subscription, string? tenant = null, AuthMethod? authMethod = null, RetryPolicyOptions? retryPolicy = null)
+    }
+    public async Task<List<string>> ListDatabases(string server, string resourceGroup, string subscription, string? tenant = null, AuthMethod? authMethod = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, resourceGroup, server);
         try
