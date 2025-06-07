@@ -27,4 +27,27 @@ public sealed record SqlIndexRecommendation
     /// Gets or sets the table name for which this index is recommended.
     /// </summary>
     public string TableName { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the SQL command to create the recommended index.
+    /// </summary>
+    public string CreateIndexSql { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets the SQL command to drop the recommended index if it exists.
+    /// </summary>
+    public string DropIndexSql { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Gets or sets additional implementation details from Azure advisor.
+    /// </summary>
+    public string ImplementationDetails { get; init; } = string.Empty;    /// <summary>
+    /// Gets or sets the expected performance improvement percentage.
+    /// </summary>
+    public double? ExpectedImprovementPercent { get; init; }
+
+    /// <summary>
+    /// Gets or sets the current status of this recommendation from Azure advisor.
+    /// </summary>
+    public string RecommendationStatus { get; init; } = string.Empty;
 }

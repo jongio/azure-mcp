@@ -65,7 +65,7 @@ public sealed class SqlIndexRecommendCommand(ILogger<SqlIndexRecommendCommand> l
             {
                 return context.Response;
             }            var service = context.GetService<ISqlService>();
-            var serviceRecommendations = await service.GetIndexRecommendationsAsync(
+            var analysisResult = await service.GetIndexRecommendationsAsync(
                 options.Database!,
                 options.ServerName!,
                 options.ResourceGroup!,
@@ -75,19 +75,23 @@ public sealed class SqlIndexRecommendCommand(ILogger<SqlIndexRecommendCommand> l
                 options.Tenant,
                 options.RetryPolicy);
 
-            var recommendations = serviceRecommendations.Select(r => new Models.Sql.SqlIndexRecommendation
+            // Create response that includes both recommendations and analysis metadata
+            context.Response.Results = ResponseResult.Create<SqlIndexRecommendCommand.IndexRecommendCommandResult>(
+                new IndexRecommendCommandResult(analysisResult),
+                SqlJsonContext.Default.IndexRecommendCommandResult);            // Set appropriate message based on analysis result
+            if (!analysisResult.AnalysisSuccessful)
             {
-                Name = r.Name,
-                Description = r.Description ?? string.Empty,
-                Impact = r.Impact,
-                TableName = r.TableName ?? string.Empty
-            }).ToList();
-
-            context.Response.Results = recommendations?.Count > 0 ?
-                ResponseResult.Create<SqlIndexRecommendCommand.IndexRecommendCommandResult>(
-                    new IndexRecommendCommandResult(recommendations),
-                    SqlJsonContext.Default.IndexRecommendCommandResult) :
-                null;
+                context.Response.Status = 500;
+                context.Response.Message = analysisResult.AnalysisSummary;
+            }
+            else if (analysisResult.HasRecommendations)
+            {
+                context.Response.Message = $"Found {analysisResult.TotalRecommendations} index recommendation(s) for database '{options.Database}' on server '{options.ServerName}'.";
+            }
+            else
+            {
+                context.Response.Message = $"Analysis completed for database '{options.Database}' on server '{options.ServerName}'. {analysisResult.AnalysisSummary}";
+            }
         }
         catch (Exception ex)
         {
@@ -104,5 +108,8 @@ public sealed class SqlIndexRecommendCommand(ILogger<SqlIndexRecommendCommand> l
         SqlException sqlEx => $"Sql error occurred: {sqlEx.Message}",
         DatabaseNotFoundException => "Database not found. Verify the database exists and you have access.",
         _ => base.GetErrorMessage(ex)
-    }; internal record IndexRecommendCommandResult(List<Models.Sql.SqlIndexRecommendation> Recommendations) : IIndexRecommendCommandResult;
+    }; internal record IndexRecommendCommandResult(SqlIndexAnalysisResult Analysis) : IIndexRecommendCommandResult
+{
+    public List<Models.Sql.SqlIndexRecommendation> Recommendations => Analysis.Recommendations;
+}
 }

@@ -50,8 +50,8 @@ public interface ISqlService
     /// <param name="subscription">Azure subscription ID containing the database.</param>
     /// <param name="tenant">Optional tenant ID.</param>
     /// <param name="retryPolicy">Optional retry policy for the operation.</param>
-    /// <returns>A list of index recommendations.</returns>
-    Task<List<SqlIndexRecommendation>> GetIndexRecommendationsAsync(
+    /// <returns>Analysis result containing recommendations and analysis metadata.</returns>
+    Task<SqlIndexAnalysisResult> GetIndexRecommendationsAsync(
         string database,
         string server,
         string resourceGroup,
