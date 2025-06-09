@@ -39,7 +39,8 @@ public sealed class SqlService(
         string? tenant = null,
         RetryPolicyOptions? retryPolicy = null)
     {
-        ValidateRequiredParameters(subscription, resourceGroup, server, database);        var analysisResult = new Models.Sql.SqlAnalysisResult
+        ValidateRequiredParameters(subscription, resourceGroup, server, database);
+        var analysisResult = new Models.Sql.SqlAnalysisResult
         {
             Database = database,
             Server = server,
@@ -196,7 +197,8 @@ public sealed class SqlService(
                 }
 
                 // Build analysis summary for JSON output
-                var analysisSummary = string.Empty;                if (recommendations.Count > 0)
+                var analysisSummary = string.Empty;
+                if (recommendations.Count > 0)
                 {
                     analysisSummary = $"Found {recommendations.Count} actionable recommendation(s). Check the 'ImplementationSql' property for T-SQL commands.";
                 }
@@ -217,7 +219,8 @@ public sealed class SqlService(
                     Recommendations = recommendations,
                     AdvisorStatuses = advisorStatuses,
                     AnalysisSummary = analysisSummary
-                };                _logger.LogInformation(
+                };
+                _logger.LogInformation(
                     "Analysis completed for database {Database} on server {Server}. Advisors checked: {AdvisorsChecked}, Recommendations found: {RecommendationCount}",
                     database, server, advisorsChecked, recommendations.Count);
 
@@ -238,7 +241,8 @@ public sealed class SqlService(
             }
         }
         catch (Exception ex) when (ex is not SqlServiceException)
-        {            var message = $"Error getting recommendations for database '{database}' on server '{server}'";
+        {
+            var message = $"Error getting recommendations for database '{database}' on server '{server}'";
             _logger.LogError(ex, message);
 
             // Return analysis result with error information

@@ -21,7 +21,7 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
     private readonly Option<string> _advisorType = OptionDefinitions.Sql.AdvisorType;
 
     public override string Name => "advise";
-    public override string Title => _commandTitle;    public override string Description =>
+    public override string Title => _commandTitle; public override string Description =>
         """
         Gets advisor recommendations for a SQL database.
         Returns recommendations from Azure SQL Database advisors such as index suggestions, query optimizations, parameterization, and more.
@@ -109,11 +109,12 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
         }
 
         return context.Response;
-    }    protected override string GetErrorMessage(Exception ex) => ex switch
+    }
+    protected override string GetErrorMessage(Exception ex) => ex switch
     {
         DatabaseNotFoundException => "Database not found. Verify the database exists and you have access.",
         _ => base.GetErrorMessage(ex)
-    };internal record DbAdviseCommandResult(SqlAnalysisResult Analysis) : IDbAdviseCommandResult
+    }; internal record DbAdviseCommandResult(SqlAnalysisResult Analysis) : IDbAdviseCommandResult
     {
         public SqlAnalysisResult Analysis { get; init; } = Analysis;
 

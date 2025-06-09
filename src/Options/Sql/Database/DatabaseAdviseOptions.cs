@@ -16,8 +16,8 @@ public sealed class DatabaseAdviseOptions : BaseDatabaseOptions
     /// </summary>
     [JsonPropertyName(OptionDefinitions.Sql.TableName)]
     public string? TableName { get; set; }    /// <summary>
-    /// The minimum impact threshold for recommendations.
-    /// </summary>
+                                              /// The minimum impact threshold for recommendations.
+                                              /// </summary>
     [JsonPropertyName(OptionDefinitions.Sql.MinimumImpactName)]
     public int? MinimumImpact { get; set; }
 

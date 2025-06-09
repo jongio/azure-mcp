@@ -47,7 +47,8 @@ public class DbAdviseCommandTests
         var subscriptionId = "sub123";
         var database = "TestDB";
         var serverName = "TestServer";
-        var resourceGroup = "TestRG";        var recommendations = new List<SqlRecommendation>
+        var resourceGroup = "TestRG";
+        var recommendations = new List<SqlRecommendation>
         {
             new() { TableName = "Users", Name = "IX_Users_Email", Impact = 85, ExpectedImprovementPercent = 85.5 },
             new() { TableName = "Orders", Name = "IX_Orders_Date", Impact = 65, ExpectedImprovementPercent = 65.2 }
@@ -101,7 +102,8 @@ public class DbAdviseCommandTests
     public async Task ExecuteAsync_NoRecommendations_ReturnsSuccess()
     {
         // Arrange
-        var subscriptionId = "sub123";        var database = "TestDB";
+        var subscriptionId = "sub123";
+        var database = "TestDB";
         var serverName = "TestServer";
         var resourceGroup = "TestRG";
         var analysisResult = new SqlAnalysisResult
@@ -244,7 +246,8 @@ public class DbAdviseCommandTests
         Assert.NotNull(response);
         Assert.Equal(500, response.Status);
         Assert.Equal("Analysis failed due to insufficient permissions", response.Message);
-    }    [Fact]
+    }
+    [Fact]
     public async Task ExecuteAsync_SqlException_ReturnsError()
     {
         // Arrange
@@ -337,7 +340,8 @@ public class DbAdviseCommandTests
         Assert.NotNull(response);
         Assert.Equal(400, response.Status);
         Assert.Contains("validation", response.Message.ToLower());
-    }    private class DbAdviseResult
+    }
+    private class DbAdviseResult
     {
         [JsonPropertyName("analysis")]
         public SqlAnalysisResult Analysis { get; set; } = new();
