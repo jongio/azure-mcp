@@ -21,16 +21,31 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
     private readonly Option<string> _advisorType = OptionDefinitions.Sql.AdvisorType;
 
     public override string Name => "advise";
-    public override string Title => _commandTitle; public override string Description =>
+    public override string Title => _commandTitle;    public override string Description =>
         """
-        Gets advisor recommendations for a SQL database.
-        Returns recommendations from Azure SQL Database advisors such as index suggestions, query optimizations, parameterization, and more.
+        Optimize and improve performance of your Azure SQL database by getting intelligent advisor recommendations.
+        This command analyzes your database and provides optimization suggestions to help improve performance, reduce costs, and enhance query efficiency.
+        
+        The Azure SQL Database advisor provides recommendations for:
+        - Index optimization (create/drop suggestions to improve query performance)
+        - Query performance tuning and optimization
+        - Database parameterization for better plan reuse
+        - Force last good execution plans for regression fixes
+        - Performance bottleneck identification and resolution
+        
+        Use this command when you want to:
+        - Optimize database performance
+        - Improve slow running queries
+        - Reduce database costs through better resource utilization
+        - Get AI-powered insights for database tuning
+        - Identify and fix performance regressions
+        
         Required options:
-        - database: The name of the database to analyze
+        - database: The name of the database to analyze and optimize
         - server-name: The name of the SQL server containing the database
         Optional:
-        - table: Filter recommendations to a specific table
-        - minimum-impact: Minimum performance impact threshold
+        - table: Focus optimization recommendations on a specific table
+        - minimum-impact: Set minimum performance impact threshold for recommendations
         - advisor-type: Filter by specific advisor type (CreateIndex, DropIndex, ForceLastGoodPlan, DbParameterization)
         """;
 

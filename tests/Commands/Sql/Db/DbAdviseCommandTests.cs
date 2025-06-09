@@ -75,7 +75,7 @@ public class DbAdviseCommandTests
         var args = _parser.Parse([
             "--subscription", subscriptionId,
             "--database", database,
-            "--server-name", serverName,
+            "--server", serverName,
             "--resource-group", resourceGroup
         ]);
 
@@ -128,7 +128,7 @@ public class DbAdviseCommandTests
         var args = _parser.Parse([
             "--subscription", subscriptionId,
             "--database", database,
-            "--server-name", serverName,
+            "--server", serverName,
             "--resource-group", resourceGroup
         ]);
 
@@ -177,7 +177,7 @@ public class DbAdviseCommandTests
         var args = _parser.Parse([
             "--subscription", subscriptionId,
             "--database", database,
-            "--server-name", serverName,
+            "--server", serverName,
             "--resource-group", resourceGroup,
             "--table", tableName,
             "--minimum-impact", minImpact.ToString(),
@@ -235,7 +235,7 @@ public class DbAdviseCommandTests
         var args = _parser.Parse([
             "--subscription", subscriptionId,
             "--database", database,
-            "--server-name", serverName,
+            "--server", serverName,
             "--resource-group", resourceGroup
         ]);
 
@@ -272,7 +272,7 @@ public class DbAdviseCommandTests
         var args = _parser.Parse([
             "--subscription", subscriptionId,
             "--database", database,
-            "--server-name", serverName,
+            "--server", serverName,
             "--resource-group", resourceGroup
         ]);
 
@@ -309,7 +309,7 @@ public class DbAdviseCommandTests
         var args = _parser.Parse([
             "--subscription", subscriptionId,
             "--database", database,
-            "--server-name", serverName,
+            "--server", serverName,
             "--resource-group", resourceGroup
         ]);
 
