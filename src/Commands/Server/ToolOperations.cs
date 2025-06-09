@@ -62,7 +62,8 @@ public class ToolOperations
         _logger.LogInformation("Listing {NumberOfTools} tools.", tools.Count);
 
         return ValueTask.FromResult(listToolsResult);
-    }    private async ValueTask<CallToolResponse> OnCallTools(RequestContext<CallToolRequestParams> parameters,
+    }
+    private async ValueTask<CallToolResponse> OnCallTools(RequestContext<CallToolRequestParams> parameters,
         CancellationToken cancellationToken)
     {
         if (parameters.Params == null)

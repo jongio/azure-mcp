@@ -3,7 +3,4 @@
 
 namespace AzureMcp.Options.Sql;
 
-public class BaseSqlOptions : SubscriptionOptions
-{
-
-}
+public class BaseSqlOptions : SubscriptionOptions;
