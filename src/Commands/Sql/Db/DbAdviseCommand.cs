@@ -21,7 +21,7 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
     private readonly Option<string> _advisorType = OptionDefinitions.Sql.AdvisorType;
 
     public override string Name => "advise";
-    public override string Title => _commandTitle;    public override string Description =>
+    public override string Title => _commandTitle; public override string Description =>
         """
         Optimize and improve performance of your Azure SQL database by getting intelligent advisor recommendations.
         This command analyzes your database and provides optimization suggestions to help improve performance, reduce costs, and enhance query efficiency.
