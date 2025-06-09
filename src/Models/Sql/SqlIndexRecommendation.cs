@@ -42,8 +42,8 @@ public sealed record SqlIndexRecommendation
     /// Gets or sets additional implementation details from Azure advisor.
     /// </summary>
     public string ImplementationDetails { get; init; } = string.Empty;    /// <summary>
-    /// Gets or sets the expected performance improvement percentage.
-    /// </summary>
+                                                                          /// Gets or sets the expected performance improvement percentage.
+                                                                          /// </summary>
     public double? ExpectedImprovementPercent { get; init; }
 
     /// <summary>

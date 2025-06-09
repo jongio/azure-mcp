@@ -3,7 +3,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Commands.Subscription;
-using AzureMcp.Models.Option;
 using AzureMcp.Options.Sql;
 
 namespace AzureMcp.Commands.Sql;

@@ -6,12 +6,12 @@ using AzureMcp.Options.Sql.Database;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Commands.Sql.Database;
+namespace AzureMcp.Commands.Sql.Db;
 
-public sealed class SqlDatabaseListCommand(ILogger<SqlDatabaseListCommand> logger) : BaseServerCommand<DatabaseListOptions>()
+public sealed class DbListCommand(ILogger<DbListCommand> logger) : BaseServerCommand<DatabaseListOptions>()
 {
     private const string _commandTitle = "List SQL Databases";
-    private readonly ILogger<SqlDatabaseListCommand> _logger = logger;
+    private readonly ILogger<DbListCommand> _logger = logger;
 
     public override string Name => "list";
 
@@ -42,12 +42,10 @@ public sealed class SqlDatabaseListCommand(ILogger<SqlDatabaseListCommand> logge
                 options.Subscription!,
                 options.Tenant,
                 options.AuthMethod,
-                options.RetryPolicy);
-
-            context.Response.Results = databases?.Count > 0 ?
+                options.RetryPolicy);            context.Response.Results = databases?.Count > 0 ?
                 ResponseResult.Create(
-                    new DatabaseListCommandResult(databases),
-                    SqlJsonContext.Default.DatabaseListCommandResult) :
+                    new DbListCommandResult(databases),
+                    SqlJsonContext.Default.DbListCommandResult) :
                 null;
         }
         catch (Exception ex)
@@ -59,5 +57,5 @@ public sealed class SqlDatabaseListCommand(ILogger<SqlDatabaseListCommand> logge
         return context.Response;
     }
 
-    internal record DatabaseListCommandResult(List<string> Databases);
+    internal record DbListCommandResult(List<string> Databases);
 }

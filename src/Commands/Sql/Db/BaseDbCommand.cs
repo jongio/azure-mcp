@@ -6,9 +6,9 @@ using AzureMcp.Commands.Sql.Server;
 using AzureMcp.Models.Option;
 using AzureMcp.Options.Sql.Database;
 
-namespace AzureMcp.Commands.Sql.Database;
+namespace AzureMcp.Commands.Sql.Db;
 
-public abstract class BaseDatabaseCommand<
+public abstract class BaseDbCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
     : BaseServerCommand<TOptions> where TOptions : BaseDatabaseOptions, new()
 {

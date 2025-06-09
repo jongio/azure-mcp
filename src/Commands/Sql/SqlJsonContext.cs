@@ -2,17 +2,14 @@
 // Licensed under the MIT License.
 
 using System.Text.Json.Serialization;
-using AzureMcp.Commands.Sql.Database;
-using AzureMcp.Commands.Sql.Database.Index;
+using AzureMcp.Commands.Sql.Db;
 using AzureMcp.Commands.Sql.Server;
 
 namespace AzureMcp.Commands.Sql;
 
-[JsonSerializable(typeof(SqlIndexRecommendCommand.IndexRecommendCommandResult))]
-[JsonSerializable(typeof(SqlDatabaseListCommand.DatabaseListCommandResult))]
-[JsonSerializable(typeof(SqlServerListCommand.ServerListCommandResult))]
-[JsonSerializable(typeof(Database.SqlDatabaseListCommand.DatabaseListCommandResult))]
-[JsonSerializable(typeof(Server.SqlServerListCommand.ServerListCommandResult))]
+[JsonSerializable(typeof(DbAdviseCommand.DbAdviseCommandResult))]
+[JsonSerializable(typeof(ServerListCommand.ServerListCommandResult))]
+[JsonSerializable(typeof(DbListCommand.DbListCommandResult))]
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
 internal sealed partial class SqlJsonContext : JsonSerializerContext
 {

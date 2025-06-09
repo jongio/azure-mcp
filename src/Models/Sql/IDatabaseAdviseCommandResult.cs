@@ -3,7 +3,7 @@
 
 namespace AzureMcp.Models.Sql;
 
-internal interface IIndexRecommendCommandResult
+internal interface IDatabaseAdviseCommandResult
 {
     List<SqlIndexRecommendation> Recommendations { get; }
     SqlIndexAnalysisResult Analysis { get; }

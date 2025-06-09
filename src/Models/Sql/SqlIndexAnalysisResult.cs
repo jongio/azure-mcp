@@ -33,8 +33,8 @@ public sealed record SqlIndexAnalysisResult
     /// </summary>
     [JsonPropertyName("analysisSuccessful")]
     public bool AnalysisSuccessful { get; init; } = true;    /// <summary>
-    /// Gets or sets any analysis summary message.
-    /// </summary>
+                                                             /// Gets or sets any analysis summary message.
+                                                             /// </summary>
     [JsonPropertyName("analysisSummary")]
     public string AnalysisSummary { get; init; } = string.Empty;
 

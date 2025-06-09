@@ -38,15 +38,17 @@ public interface ISqlService
         string resourceGroup,
         string server,
         string? tenant = null,
-        AuthMethod? authMethod = null,
-        RetryPolicyOptions? retryPolicy = null);    /// <summary>
-    /// Gets index recommendations for an Azure SQL database.
+        AuthMethod? authMethod = null,        RetryPolicyOptions? retryPolicy = null);
+
+    /// <summary>
+    /// Gets recommendations for an Azure SQL database from specified advisor types.
     /// </summary>
     /// <param name="database">The database name to get recommendations for.</param>
     /// <param name="server">The name of the SQL server containing the database.</param>
     /// <param name="resourceGroup">The resource group name.</param>
     /// <param name="tableName">Optional name of a specific table to get recommendations for.</param>
     /// <param name="minImpact">Optional minimum impact threshold.</param>
+    /// <param name="advisorType">Optional advisor type to filter by (CreateIndex, DropIndex, ForceLastGoodPlan, DbParameterization).</param>
     /// <param name="subscription">Azure subscription ID containing the database.</param>
     /// <param name="tenant">Optional tenant ID.</param>
     /// <param name="retryPolicy">Optional retry policy for the operation.</param>
@@ -57,6 +59,7 @@ public interface ISqlService
         string resourceGroup,
         string? tableName,
         int? minImpact,
+        string? advisorType,
         string subscription,
         string? tenant = null,
         RetryPolicyOptions? retryPolicy = null);
