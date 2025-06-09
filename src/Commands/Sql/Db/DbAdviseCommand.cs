@@ -6,7 +6,6 @@ using AzureMcp.Models.Sql;
 using AzureMcp.Options.Sql.Database;
 using AzureMcp.Services.Azure.Sql.Exceptions;
 using AzureMcp.Services.Interfaces;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Sql.Db;
@@ -110,14 +109,11 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
         }
 
         return context.Response;
-    }
-
-    protected override string GetErrorMessage(Exception ex) => ex switch
+    }    protected override string GetErrorMessage(Exception ex) => ex switch
     {
-        SqlException sqlEx => $"Sql error occurred: {sqlEx.Message}",
         DatabaseNotFoundException => "Database not found. Verify the database exists and you have access.",
         _ => base.GetErrorMessage(ex)
-    };    internal record DbAdviseCommandResult(SqlAnalysisResult Analysis) : IDbAdviseCommandResult
+    };internal record DbAdviseCommandResult(SqlAnalysisResult Analysis) : IDbAdviseCommandResult
     {
         public SqlAnalysisResult Analysis { get; init; } = Analysis;
 
