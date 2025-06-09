@@ -75,7 +75,9 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
                 options.AdvisorType,
                 options.Subscription!,
                 options.Tenant,
-                options.RetryPolicy);            // Create response that includes both recommendations and analysis metadata
+                options.RetryPolicy);
+
+            // Create response that includes both recommendations and analysis metadata
             context.Response.Results = ResponseResult.Create<DbAdviseCommandResult>(
                 new DbAdviseCommandResult(analysisResult),
                 SqlJsonContext.Default.DbAdviseCommandResult);
@@ -120,6 +122,4 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
 
         public List<SqlRecommendation> Recommendations => Analysis.Recommendations;
     }
-
-
 }

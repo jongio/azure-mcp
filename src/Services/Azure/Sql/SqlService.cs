@@ -20,14 +20,6 @@ public sealed class SqlService(
     private readonly ILogger<SqlService> _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     private static readonly TimeSpan CACHE_DURATION = TimeSpan.FromHours(1);
 
-    private new void ValidateRequiredParameters(params string[] parameters)
-    {
-        foreach (var param in parameters)
-        {
-            ArgumentException.ThrowIfNullOrEmpty(param, param);
-        }
-    }
-
     public async Task<Models.Sql.SqlAnalysisResult> GetRecommendationsAsync(
         string database,
         string server,
