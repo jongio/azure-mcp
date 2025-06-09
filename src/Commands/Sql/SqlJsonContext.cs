@@ -11,7 +11,4 @@ namespace AzureMcp.Commands.Sql;
 [JsonSerializable(typeof(ServerListCommand.ServerListCommandResult))]
 [JsonSerializable(typeof(DbListCommand.DbListCommandResult))]
 [JsonSourceGenerationOptions(PropertyNamingPolicy = JsonKnownNamingPolicy.CamelCase)]
-internal sealed partial class SqlJsonContext : JsonSerializerContext
-{
-    // This class is generated at runtime by the source generator.
-}
+internal sealed partial class SqlJsonContext : JsonSerializerContext;

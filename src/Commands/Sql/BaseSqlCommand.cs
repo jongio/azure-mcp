@@ -9,7 +9,4 @@ namespace AzureMcp.Commands.Sql;
 
 public abstract class BaseSqlCommand<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
-    : SubscriptionCommand<TOptions> where TOptions : BaseSqlOptions, new()
-{
-
-}
+    : SubscriptionCommand<TOptions> where TOptions : BaseSqlOptions, new();
