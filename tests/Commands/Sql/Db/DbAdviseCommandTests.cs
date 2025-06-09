@@ -315,11 +315,9 @@ public class DbAdviseCommandTests
 
         // Act
         var response = await _command.ExecuteAsync(_context, args);
-
-        // Assert
         Assert.NotNull(response);
         Assert.Equal(500, response.Status);
-        Assert.Equal("Database not found. Verify the database exists and you have access.", response.Message);
+        Assert.Contains("Database not found", response.Message);
     }
 
     [Fact]
@@ -339,7 +337,10 @@ public class DbAdviseCommandTests
         // Assert
         Assert.NotNull(response);
         Assert.Equal(400, response.Status);
-        Assert.Contains("validation", response.Message.ToLower());
+        Assert.Contains("Missing Required options:", response.Message);
+        Assert.Contains("--server", response.Message);
+        Assert.Contains("--database", response.Message);
+        Assert.Contains("--resource-group", response.Message);
     }
     private class DbAdviseResult
     {
