@@ -95,7 +95,7 @@ public sealed class SqlService(
                     _logger.LogDebug("Checking advisor: {AdvisorName}", advisorName);
 
                     // Skip this advisor if advisor type filter is specified and doesn't match
-                    if (!string.IsNullOrEmpty(advisorType) && 
+                    if (!string.IsNullOrEmpty(advisorType) &&
                         !string.Equals(advisorName, advisorType, StringComparison.OrdinalIgnoreCase))
                     {
                         continue;
@@ -106,7 +106,7 @@ public sealed class SqlService(
                     var autoExecuteStatus = advisor.Data.AutoExecuteStatus?.ToString() ?? "Not Available";
                     var recommendedActionsCount = advisor.Data.RecommendedActions?.Count() ?? 0;
                     var hasRecommendations = recommendedActionsCount > 0;
-                    
+
                     // Determine which advisor types are supported
                     var supportedAdvisors = new[] { "CreateIndex", "DropIndex", "ForceLastGoodPlan", "DbParameterization" };
                     var isSupported = supportedAdvisors.Contains(advisorName, StringComparer.OrdinalIgnoreCase);
