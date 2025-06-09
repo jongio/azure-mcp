@@ -415,7 +415,8 @@
             "env": {
                 "DOTNET_ENVIRONMENT": "Development"
             }
-        },        {
+        },
+        {
             "name": "Debug SQL DB Advise",
             "type": "coreclr",
             "request": "launch",
