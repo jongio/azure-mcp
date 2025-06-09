@@ -41,16 +41,14 @@ public class SqlServiceTests
 
         // Since Azure SDK resource classes are not virtual, we cannot directly mock them
         // For this test to work properly, we would need integration testing or
-        // a different mocking approach. Skipping complex Azure SDK mocking for now.
-
-        // This test demonstrates the challenge of unit testing Azure SDK code
+        // a different mocking approach. Skipping complex Azure SDK mocking for now.        // This test demonstrates the challenge of unit testing Azure SDK code
         // In practice, consider using integration tests or abstracting the Azure SDK calls
 
         // For now, just test that we don't throw on valid parameters
         try
         {
             await _sqlService.GetIndexRecommendationsAsync(
-                database, server, resourceGroup, null, null, subscriptionId);
+                database, server, resourceGroup, null, null, null, subscriptionId);
         }
         catch (Exception)
         {
@@ -68,15 +66,14 @@ public class SqlServiceTests
         var subscriptionId = "test-sub";
         var resourceGroup = "test-rg";
         var server = "test-server";
-        var database = "test-db";
-
-        // Since Azure SDK resources are not virtual and cannot be mocked,
+        var database = "test-db";        // Since Azure SDK resources are not virtual and cannot be mocked,
         // this test would require integration testing with real Azure resources
         // For now, we'll test that the method accepts the correct parameters
 
         try
         {
-            await _sqlService.GetIndexRecommendationsAsync(database, server, resourceGroup, null, null, subscriptionId);
+            await _sqlService.GetIndexRecommendationsAsync(
+                database, server, resourceGroup, null, null, null, subscriptionId);
         }
         catch (Exception)
         {

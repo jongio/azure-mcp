@@ -1,6 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using System.CommandLine;
+
 namespace AzureMcp.Models.Option;
 
 public static partial class OptionDefinitions
@@ -9,12 +11,13 @@ public static partial class OptionDefinitions
     {
         public const string TableName = "table";
         public const string MinimumImpactName = "minimum-impact";
+        public const string AdvisorTypeName = "advisor-type";
         public const string DatabaseName = "database";
         public const string ServerName = "server";
 
         public static readonly Option<string> Table = new(
             $"--{TableName}",
-            "The name of the SQL table to analyze for index recommendations."
+            "The name of the SQL table to analyze for recommendations."
         )
         {
             IsRequired = false
@@ -23,7 +26,15 @@ public static partial class OptionDefinitions
         public static readonly Option<int> MinimumImpact = new(
             $"--{MinimumImpactName}",
             () => 0,
-            "The minimum impact threshold for index recommendations."
+            "The minimum impact threshold for recommendations."
+        )
+        {
+            IsRequired = false
+        };
+
+        public static readonly Option<string> AdvisorType = new(
+            $"--{AdvisorTypeName}",
+            "The type of advisor to filter recommendations by. Valid values: CreateIndex, DropIndex, ForceLastGoodPlan, DbParameterization. If not specified, all advisor types will be checked."
         )
         {
             IsRequired = false

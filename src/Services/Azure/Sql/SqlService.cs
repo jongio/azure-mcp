@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Azure.ResourceManager;
 using Azure.ResourceManager.Resources;
 using Azure.ResourceManager.Sql;
 using AzureMcp.Options;
@@ -35,6 +34,7 @@ public sealed class SqlService(
         string resourceGroup,
         string? tableName,
         int? minImpact,
+        string? advisorType,
         string subscription,
         string? tenant = null,
         RetryPolicyOptions? retryPolicy = null)
@@ -94,12 +94,22 @@ public sealed class SqlService(
                     var advisorName = advisor.Data.Name ?? "Unknown";
                     _logger.LogDebug("Checking advisor: {AdvisorName}", advisorName);
 
+                    // Skip this advisor if advisor type filter is specified and doesn't match
+                    if (!string.IsNullOrEmpty(advisorType) && 
+                        !string.Equals(advisorName, advisorType, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
                     // Get advisor status information
                     var recommendationsStatus = advisor.Data.RecommendationsStatus ?? "Unknown";
                     var autoExecuteStatus = advisor.Data.AutoExecuteStatus?.ToString() ?? "Not Available";
                     var recommendedActionsCount = advisor.Data.RecommendedActions?.Count() ?? 0;
                     var hasRecommendations = recommendedActionsCount > 0;
-                    var isSupported = advisorName == "CreateIndex"; // Only CreateIndex is currently supported
+                    
+                    // Determine which advisor types are supported
+                    var supportedAdvisors = new[] { "CreateIndex", "DropIndex", "ForceLastGoodPlan", "DbParameterization" };
+                    var isSupported = supportedAdvisors.Contains(advisorName, StringComparer.OrdinalIgnoreCase);
                     var notes = string.Empty;
 
                     // Process recommendations if this advisor has them and is supported
@@ -109,7 +119,7 @@ public sealed class SqlService(
                         {
                             var actionDetails = action.Details?.ToString() ?? string.Empty;
                             var createIndexSql = action.ImplementationDetails?.Script ?? string.Empty;
-                            var extractedTableName = ExtractTableNameFromDetails(actionDetails) ?? 
+                            var extractedTableName = ExtractTableNameFromDetails(actionDetails) ??
                                                    ExtractTableNameFromSql(createIndexSql);
 
                             // Apply filters if specified
@@ -128,7 +138,7 @@ public sealed class SqlService(
                             if (action.EstimatedImpact != null)
                             {
                                 // Find the CPU impact record
-                                var cpuImpact = action.EstimatedImpact.FirstOrDefault(i => 
+                                var cpuImpact = action.EstimatedImpact.FirstOrDefault(i =>
                                     string.Equals(i.DimensionName, "Cpu", StringComparison.OrdinalIgnoreCase));
                                 if (cpuImpact != null && double.TryParse(cpuImpact.AbsoluteValue?.ToString(), out var cpuValue))
                                 {
@@ -204,7 +214,7 @@ public sealed class SqlService(
                 }
 
                 // Update analysis result with success information
-                analysisResult = analysisResult with 
+                analysisResult = analysisResult with
                 {
                     AnalysisSuccessful = true,
                     AdvisorsChecked = advisorsChecked,
@@ -223,7 +233,7 @@ public sealed class SqlService(
             {
                 _logger.LogError(ex, "Error retrieving advisor recommendations for database {Database} on server {Server}",
                     database, server);
-                
+
                 // Return analysis result with error information
                 return analysisResult with
                 {
@@ -237,7 +247,7 @@ public sealed class SqlService(
         {
             var message = $"Error getting index recommendations for database '{database}' on server '{server}'";
             _logger.LogError(ex, message);
-            
+
             // Return analysis result with error information
             return analysisResult with
             {
@@ -314,7 +324,7 @@ public sealed class SqlService(
         // Pattern: CREATE [NONCLUSTERED] INDEX [indexName] ON ...
         var pattern = @"CREATE\s+(?:NONCLUSTERED\s+)?INDEX\s+\[?([^\]\s\[]+)\]?\s+ON";
         var match = System.Text.RegularExpressions.Regex.Match(sql, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-        
+
         if (match.Success && match.Groups.Count > 1)
         {
             return match.Groups[1].Value;

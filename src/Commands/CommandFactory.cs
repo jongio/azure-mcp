@@ -5,9 +5,6 @@ using System.Reflection;
 using System.Text.Encodings.Web;
 using System.Text.Json.Serialization;
 using AzureMcp.Commands.Server;
-using AzureMcp.Commands.Sql.Database;
-using AzureMcp.Commands.Sql.Database.Index;
-using AzureMcp.Commands.Sql.Server;
 using AzureMcp.Commands.Storage.Blob;
 using AzureMcp.Commands.Subscription;
 using Microsoft.Extensions.DependencyInjection;
@@ -424,29 +421,23 @@ public class CommandFactory
         cluster.AddSubGroup(database);
 
         database.AddCommand("list", new Redis.ManagedRedis.DatabaseListCommand(GetLogger<Redis.ManagedRedis.DatabaseListCommand>()));
-    }
-
-    private void RegisterSqlCommands()
-    {        // Create Sql command group
+    }    private void RegisterSqlCommands()
+    {
+        // Create Sql command group
         var sql = new CommandGroup("sql", "Sql operations - Commands for managing and querying Azure Sql resources.");
         _rootGroup.AddSubGroup(sql);
-
+        
         // Create Sql database subgroups
-        var databases = new CommandGroup("database", "Sql database operations - Commands for listing, creating, and managing Sql databases in your Azure subscription.");
+        var databases = new CommandGroup("db", "Sql database operations - Commands for listing, creating, and managing Sql databases in your Azure subscription.");
         sql.AddSubGroup(databases);
 
         var sqlServer = new CommandGroup("server", "Sql server operations - Commands for listing and managing Sql servers in your Azure subscription.");
         sql.AddSubGroup(sqlServer);
 
-        var index = new CommandGroup("index",
-            "Sql index operations");
-        sql.AddSubGroup(index);
-
         // Register SQL commands
-        databases.AddCommand("list", new Sql.Database.SqlDatabaseListCommand(GetLogger<SqlDatabaseListCommand>()));
-        sqlServer.AddCommand("list", new Sql.Server.SqlServerListCommand(GetLogger<SqlServerListCommand>()));
-        index.AddCommand("recommend", new Sql.Database.Index.SqlIndexRecommendCommand(
-            GetLogger<SqlIndexRecommendCommand>()));
+        databases.AddCommand("list", new Sql.Db.DbListCommand(GetLogger<Sql.Db.DbListCommand>()));
+        databases.AddCommand("advise", new Sql.Db.DbAdviseCommand(GetLogger<Sql.Db.DbAdviseCommand>()));
+        sqlServer.AddCommand("list", new Sql.Server.ServerListCommand(GetLogger<Sql.Server.ServerListCommand>()));
     }
 
     private void ConfigureCommands(CommandGroup group)
