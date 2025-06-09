@@ -28,7 +28,7 @@ public sealed class SqlService(
         }
     }
 
-    public async Task<Models.Sql.SqlIndexAnalysisResult> GetIndexRecommendationsAsync(
+    public async Task<Models.Sql.SqlAnalysisResult> GetRecommendationsAsync(
         string database,
         string server,
         string resourceGroup,
@@ -39,9 +39,7 @@ public sealed class SqlService(
         string? tenant = null,
         RetryPolicyOptions? retryPolicy = null)
     {
-        ValidateRequiredParameters(subscription, resourceGroup, server, database);
-
-        var analysisResult = new Models.Sql.SqlIndexAnalysisResult
+        ValidateRequiredParameters(subscription, resourceGroup, server, database);        var analysisResult = new Models.Sql.SqlAnalysisResult
         {
             Database = database,
             Server = server,
@@ -78,7 +76,7 @@ public sealed class SqlService(
             }
 
             var databaseResource = databaseResponse.Value;
-            var recommendations = new List<Models.Sql.SqlIndexRecommendation>();
+            var recommendations = new List<Models.Sql.SqlRecommendation>();
             int advisorsChecked = 0;
 
             try
@@ -152,20 +150,19 @@ public sealed class SqlService(
                             if (!string.IsNullOrEmpty(indexName) && !string.IsNullOrEmpty(extractedTableName))
                             {
                                 dropIndexSql = $"DROP INDEX IF EXISTS [{indexName}] ON [{extractedTableName}];";
-                            }
-
-                            // Map the recommended action to your SqlIndexRecommendation model
-                            recommendations.Add(new Models.Sql.SqlIndexRecommendation
+                            }                            // Map the recommended action to your SqlRecommendation model
+                            recommendations.Add(new Models.Sql.SqlRecommendation
                             {
                                 Name = action.Name ?? string.Empty,
                                 Description = actionDetails,
                                 Impact = (int)Math.Round(estimatedImpact),
                                 TableName = extractedTableName,
-                                CreateIndexSql = createIndexSql,
-                                DropIndexSql = dropIndexSql,
+                                ImplementationSql = createIndexSql,
+                                RevertSql = dropIndexSql,
                                 ImplementationDetails = action.ImplementationDetails?.Method?.ToString() ?? "TSql",
                                 ExpectedImprovementPercent = estimatedImpact,
-                                RecommendationStatus = recommendationsStatus
+                                RecommendationStatus = recommendationsStatus,
+                                RecommendationType = advisorName
                             });
                         }
                         notes = $"Processed {advisor.Data.RecommendedActions.Count()} recommendation(s)";
@@ -199,10 +196,9 @@ public sealed class SqlService(
                 }
 
                 // Build analysis summary for JSON output
-                var analysisSummary = string.Empty;
-                if (recommendations.Count > 0)
+                var analysisSummary = string.Empty;                if (recommendations.Count > 0)
                 {
-                    analysisSummary = $"Found {recommendations.Count} actionable index recommendation(s). Check the 'CreateIndexSql' property for T-SQL commands.";
+                    analysisSummary = $"Found {recommendations.Count} actionable recommendation(s). Check the 'ImplementationSql' property for T-SQL commands.";
                 }
                 else if (advisorStatuses.Any(s => s.HasRecommendations))
                 {
@@ -221,10 +217,8 @@ public sealed class SqlService(
                     Recommendations = recommendations,
                     AdvisorStatuses = advisorStatuses,
                     AnalysisSummary = analysisSummary
-                };
-
-                _logger.LogInformation(
-                    "Index analysis completed for database {Database} on server {Server}. Advisors checked: {AdvisorsChecked}, Recommendations found: {RecommendationCount}",
+                };                _logger.LogInformation(
+                    "Analysis completed for database {Database} on server {Server}. Advisors checked: {AdvisorsChecked}, Recommendations found: {RecommendationCount}",
                     database, server, advisorsChecked, recommendations.Count);
 
                 return analysisResult;
@@ -244,8 +238,7 @@ public sealed class SqlService(
             }
         }
         catch (Exception ex) when (ex is not SqlServiceException)
-        {
-            var message = $"Error getting index recommendations for database '{database}' on server '{server}'";
+        {            var message = $"Error getting recommendations for database '{database}' on server '{server}'";
             _logger.LogError(ex, message);
 
             // Return analysis result with error information

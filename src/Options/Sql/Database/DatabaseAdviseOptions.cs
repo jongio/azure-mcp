@@ -7,18 +7,16 @@ using AzureMcp.Models.Option;
 namespace AzureMcp.Options.Sql.Database;
 
 /// <summary>
-/// Options for getting SQL index recommendations for tables in a database.
+/// Options for getting SQL advisor recommendations for a database.
 /// </summary>
 public sealed class DatabaseAdviseOptions : BaseDatabaseOptions
 {
     /// <summary>
-    /// The name of the table to get index recommendations for.
+    /// The name of the table to get recommendations for.
     /// </summary>
     [JsonPropertyName(OptionDefinitions.Sql.TableName)]
-    public string? TableName { get; set; }
-
-    /// <summary>
-    /// The minimum impact threshold for index recommendations.
+    public string? TableName { get; set; }    /// <summary>
+    /// The minimum impact threshold for recommendations.
     /// </summary>
     [JsonPropertyName(OptionDefinitions.Sql.MinimumImpactName)]
     public int? MinimumImpact { get; set; }
