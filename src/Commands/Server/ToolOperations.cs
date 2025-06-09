@@ -13,7 +13,7 @@ public class ToolOperations
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly CommandFactory _commandFactory;
-    private IReadOnlyDictionary<string, IBaseCommand> _toolCommands;
+    private IReadOnlyDictionary<string, IBaseCommand>? _toolCommands;
     private readonly ILogger<ToolOperations> _logger;
     private string _commandGroup = string.Empty;
 
@@ -62,9 +62,7 @@ public class ToolOperations
         _logger.LogInformation("Listing {NumberOfTools} tools.", tools.Count);
 
         return ValueTask.FromResult(listToolsResult);
-    }
-
-    private async ValueTask<CallToolResponse> OnCallTools(RequestContext<CallToolRequestParams> parameters,
+    }    private async ValueTask<CallToolResponse> OnCallTools(RequestContext<CallToolRequestParams> parameters,
         CancellationToken cancellationToken)
     {
         if (parameters.Params == null)
@@ -72,6 +70,22 @@ public class ToolOperations
             var content = new Content
             {
                 Text = "Cannot call tools with null parameters.",
+            };
+
+            _logger.LogWarning(content.Text);
+
+            return new CallToolResponse
+            {
+                Content = [content],
+                IsError = true,
+            };
+        }
+
+        if (_toolCommands == null)
+        {
+            var content = new Content
+            {
+                Text = "Tool commands not initialized. Call list tools first.",
             };
 
             _logger.LogWarning(content.Text);
