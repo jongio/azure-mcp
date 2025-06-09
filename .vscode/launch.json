@@ -416,25 +416,24 @@
                 "DOTNET_ENVIRONMENT": "Development"
             }
         },        {
-            "name": "Debug SQL Index Recommend",
+            "name": "Debug SQL DB Advise",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
             "args": [
                 "sql",
-                "index",
-                "recommend",
+                "db",
+                "advise",
                 "--subscription",
                 "${input:subscription}",
                 "--database",
                 "${input:sqlDatabaseName}",
-                "--server",
+                "--server-name",
                 "${input:sqlServerName}",
                 "--resource-group",
                 "${input:resourceGroup}",
-
-                "--min-impact",
+                "--minimum-impact",
                 "10"
             ],
             "cwd": "${workspaceFolder}",

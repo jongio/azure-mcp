@@ -10,7 +10,6 @@ using AzureMcp.Models.Sql;
 using AzureMcp.Options;
 using AzureMcp.Services.Azure.Sql.Exceptions;
 using AzureMcp.Services.Interfaces;
-using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
@@ -245,9 +244,7 @@ public class DbAdviseCommandTests
         Assert.NotNull(response);
         Assert.Equal(500, response.Status);
         Assert.Equal("Analysis failed due to insufficient permissions", response.Message);
-    }
-
-    [Fact]
+    }    [Fact]
     public async Task ExecuteAsync_SqlException_ReturnsError()
     {
         // Arrange
@@ -282,7 +279,7 @@ public class DbAdviseCommandTests
         // Assert
         Assert.NotNull(response);
         Assert.Equal(500, response.Status);
-        Assert.StartsWith("Sql error occurred:", response.Message);
+        Assert.Contains("SQL error occurred", response.Message);
     }
 
     [Fact]

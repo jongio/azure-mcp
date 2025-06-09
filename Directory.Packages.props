@@ -26,7 +26,6 @@
     <PackageVersion Include="Azure.ResourceManager.Storage" Version="1.4.2" />
     <PackageVersion Include="JsonSchema.Net" Version="7.3.4" />
     <PackageVersion Include="Microsoft.Azure.Kusto.Data" Version="13.0.2" />
-    <PackageVersion Include="Microsoft.Data.SqlClient" Version="6.0.2" />
     <PackageVersion Include="Microsoft.Identity.Client.Broker" Version="4.72.1" />
     <PackageVersion Include="ModelContextProtocol" Version="0.2.0-preview.2" />
     <PackageVersion Include="ModelContextProtocol.AspNetCore" Version="0.2.0-preview.2" />
