@@ -49,20 +49,16 @@ public class DbAdviseCommandTests
         var database = "TestDB";
         var serverName = "TestServer";
         var resourceGroup = "TestRG";
-        
         var recommendations = new List<SqlIndexRecommendation>
         {
-            new() { TableName = "Users", IndexName = "IX_Users_Email", Impact = 85.5, EstimatedGain = "High" },
-            new() { TableName = "Orders", IndexName = "IX_Orders_Date", Impact = 65.2, EstimatedGain = "Medium" }
+            new() { TableName = "Users", Name = "IX_Users_Email", Impact = 85, ExpectedImprovementPercent = 85.5 },
+            new() { TableName = "Orders", Name = "IX_Orders_Date", Impact = 65, ExpectedImprovementPercent = 65.2 }
         };
-
         var analysisResult = new SqlIndexAnalysisResult
         {
             AnalysisSuccessful = true,
             Recommendations = recommendations,
-            AnalysisSummary = "Analysis completed successfully",
-            TotalRecommendations = 2,
-            HasRecommendations = true
+            AnalysisSummary = "Analysis completed successfully"
         };
 
         _sqlService.GetIndexRecommendationsAsync(
@@ -111,14 +107,11 @@ public class DbAdviseCommandTests
         var database = "TestDB";
         var serverName = "TestServer";
         var resourceGroup = "TestRG";
-
         var analysisResult = new SqlIndexAnalysisResult
         {
             AnalysisSuccessful = true,
             Recommendations = [],
-            AnalysisSummary = "No recommendations found",
-            TotalRecommendations = 0,
-            HasRecommendations = false
+            AnalysisSummary = "No recommendations found"
         };
 
         _sqlService.GetIndexRecommendationsAsync(
@@ -167,9 +160,7 @@ public class DbAdviseCommandTests
         {
             AnalysisSuccessful = true,
             Recommendations = [],
-            AnalysisSummary = "Analysis completed",
-            TotalRecommendations = 0,
-            HasRecommendations = false
+            AnalysisSummary = "Analysis completed"
         };
 
         _sqlService.GetIndexRecommendationsAsync(
@@ -227,9 +218,7 @@ public class DbAdviseCommandTests
         {
             AnalysisSuccessful = false,
             Recommendations = [],
-            AnalysisSummary = "Analysis failed due to insufficient permissions",
-            TotalRecommendations = 0,
-            HasRecommendations = false
+            AnalysisSummary = "Analysis failed due to insufficient permissions"
         };
 
         _sqlService.GetIndexRecommendationsAsync(
@@ -268,7 +257,7 @@ public class DbAdviseCommandTests
         var database = "TestDB";
         var serverName = "TestServer";
         var resourceGroup = "TestRG";
-        var sqlException = new SqlException();
+        var sqlException = new Exception("SQL error occurred");
 
         _sqlService.GetIndexRecommendationsAsync(
             Arg.Is(database),

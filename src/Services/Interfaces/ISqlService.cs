@@ -38,7 +38,7 @@ public interface ISqlService
         string resourceGroup,
         string server,
         string? tenant = null,
-        AuthMethod? authMethod = null,        RetryPolicyOptions? retryPolicy = null);
+        AuthMethod? authMethod = null, RetryPolicyOptions? retryPolicy = null);
 
     /// <summary>
     /// Gets recommendations for an Azure SQL database from specified advisor types.

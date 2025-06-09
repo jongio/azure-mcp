@@ -22,7 +22,7 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
     private readonly Option<string> _advisorType = OptionDefinitions.Sql.AdvisorType;
 
     public override string Name => "advise";
-    public override string Title => _commandTitle;    public override string Description =>
+    public override string Title => _commandTitle; public override string Description =>
         """
         Gets advisor recommendations for a SQL database.
         Returns recommendations from Azure SQL Database advisors such as index suggestions, query optimizations, and more.
@@ -66,7 +66,8 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
             {
                 return context.Response;
             }
-            var service = context.GetService<ISqlService>();            var analysisResult = await service.GetIndexRecommendationsAsync(
+            var service = context.GetService<ISqlService>();
+            var analysisResult = await service.GetIndexRecommendationsAsync(
                 options.Database!,
                 options.ServerName!,
                 options.ResourceGroup!,
@@ -88,16 +89,17 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
             }
             else if (analysisResult.HasRecommendations)
             {
-                var advisorContext = !string.IsNullOrEmpty(options.AdvisorType) 
-                    ? $" from {options.AdvisorType} advisor" 
+                var advisorContext = !string.IsNullOrEmpty(options.AdvisorType)
+                    ? $" from {options.AdvisorType} advisor"
                     : " from all supported advisors";
                 context.Response.Message = $"Found {analysisResult.TotalRecommendations} recommendation(s){advisorContext} for database '{options.Database}' on server '{options.ServerName}'.";
             }
             else
             {
-                var advisorContext = !string.IsNullOrEmpty(options.AdvisorType) 
-                    ? $" for {options.AdvisorType} advisor" 
-                    : "";                context.Response.Message = $"Analysis completed{advisorContext} for database '{options.Database}' on server '{options.ServerName}'. {analysisResult.AnalysisSummary}";
+                var advisorContext = !string.IsNullOrEmpty(options.AdvisorType)
+                    ? $" for {options.AdvisorType} advisor"
+                    : "";
+                context.Response.Message = $"Analysis completed{advisorContext} for database '{options.Database}' on server '{options.ServerName}'. {analysisResult.AnalysisSummary}";
             }
         }
         catch (Exception ex)

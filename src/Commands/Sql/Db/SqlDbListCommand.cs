@@ -42,7 +42,8 @@ public sealed class DbListCommand(ILogger<DbListCommand> logger) : BaseServerCom
                 options.Subscription!,
                 options.Tenant,
                 options.AuthMethod,
-                options.RetryPolicy);            context.Response.Results = databases?.Count > 0 ?
+                options.RetryPolicy);
+            context.Response.Results = databases?.Count > 0 ?
                 ResponseResult.Create(
                     new DbListCommandResult(databases),
                     SqlJsonContext.Default.DbListCommandResult) :

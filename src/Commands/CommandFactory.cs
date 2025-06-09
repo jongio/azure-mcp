@@ -421,12 +421,13 @@ public class CommandFactory
         cluster.AddSubGroup(database);
 
         database.AddCommand("list", new Redis.ManagedRedis.DatabaseListCommand(GetLogger<Redis.ManagedRedis.DatabaseListCommand>()));
-    }    private void RegisterSqlCommands()
+    }
+    private void RegisterSqlCommands()
     {
         // Create Sql command group
         var sql = new CommandGroup("sql", "Sql operations - Commands for managing and querying Azure Sql resources.");
         _rootGroup.AddSubGroup(sql);
-        
+
         // Create Sql database subgroups
         var databases = new CommandGroup("db", "Sql database operations - Commands for listing, creating, and managing Sql databases in your Azure subscription.");
         sql.AddSubGroup(databases);
