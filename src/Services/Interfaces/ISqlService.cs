@@ -38,9 +38,7 @@ public interface ISqlService
         string resourceGroup,
         string server,
         string? tenant = null,
-        AuthMethod? authMethod = null, RetryPolicyOptions? retryPolicy = null);
-
-    /// <summary>
+        AuthMethod? authMethod = null, RetryPolicyOptions? retryPolicy = null);    /// <summary>
     /// Gets recommendations for an Azure SQL database from specified advisor types.
     /// </summary>
     /// <param name="database">The database name to get recommendations for.</param>
@@ -53,7 +51,7 @@ public interface ISqlService
     /// <param name="tenant">Optional tenant ID.</param>
     /// <param name="retryPolicy">Optional retry policy for the operation.</param>
     /// <returns>Analysis result containing recommendations and analysis metadata.</returns>
-    Task<SqlIndexAnalysisResult> GetIndexRecommendationsAsync(
+    Task<SqlAnalysisResult> GetRecommendationsAsync(
         string database,
         string server,
         string resourceGroup,

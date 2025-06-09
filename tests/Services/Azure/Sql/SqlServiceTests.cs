@@ -29,7 +29,7 @@ public class SqlServiceTests
     }
 
     [Fact]
-    public async Task GetIndexRecommendationsAsync_ReturnsRecommendations()
+    public async Task GetRecommendationsAsync_ReturnsRecommendations()
     {
         // Arrange
         var subscriptionId = "test-sub";
@@ -47,7 +47,7 @@ public class SqlServiceTests
         // For now, just test that we don't throw on valid parameters
         try
         {
-            await _sqlService.GetIndexRecommendationsAsync(
+            await _sqlService.GetRecommendationsAsync(
                 database, server, resourceGroup, null, null, null, subscriptionId);
         }
         catch (Exception)
@@ -60,7 +60,7 @@ public class SqlServiceTests
         Assert.True(true);
     }
     [Fact]
-    public async Task GetIndexRecommendationsAsync_ThrowsWhenServerNotFound()
+    public async Task GetRecommendationsAsync_ThrowsWhenServerNotFound()
     {
         // Arrange
         var subscriptionId = "test-sub";
@@ -72,7 +72,7 @@ public class SqlServiceTests
 
         try
         {
-            await _sqlService.GetIndexRecommendationsAsync(
+            await _sqlService.GetRecommendationsAsync(
                 database, server, resourceGroup, null, null, null, subscriptionId);
         }
         catch (Exception)

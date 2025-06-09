@@ -22,10 +22,10 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
     private readonly Option<string> _advisorType = OptionDefinitions.Sql.AdvisorType;
 
     public override string Name => "advise";
-    public override string Title => _commandTitle; public override string Description =>
+    public override string Title => _commandTitle;    public override string Description =>
         """
         Gets advisor recommendations for a SQL database.
-        Returns recommendations from Azure SQL Database advisors such as index suggestions, query optimizations, and more.
+        Returns recommendations from Azure SQL Database advisors such as index suggestions, query optimizations, parameterization, and more.
         Required options:
         - database: The name of the database to analyze
         - server-name: The name of the SQL server containing the database
@@ -67,7 +67,7 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
                 return context.Response;
             }
             var service = context.GetService<ISqlService>();
-            var analysisResult = await service.GetIndexRecommendationsAsync(
+            var analysisResult = await service.GetRecommendationsAsync(
                 options.Database!,
                 options.ServerName!,
                 options.ResourceGroup!,
@@ -117,13 +117,11 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
         SqlException sqlEx => $"Sql error occurred: {sqlEx.Message}",
         DatabaseNotFoundException => "Database not found. Verify the database exists and you have access.",
         _ => base.GetErrorMessage(ex)
-    };
-
-    internal record DbAdviseCommandResult(SqlIndexAnalysisResult Analysis) : IDatabaseAdviseCommandResult
+    };    internal record DbAdviseCommandResult(SqlAnalysisResult Analysis) : IDbAdviseCommandResult
     {
-        public SqlIndexAnalysisResult Analysis { get; init; } = Analysis;
+        public SqlAnalysisResult Analysis { get; init; } = Analysis;
 
-        public List<SqlIndexRecommendation> Recommendations => Analysis.Recommendations;
+        public List<SqlRecommendation> Recommendations => Analysis.Recommendations;
     }
 
 
