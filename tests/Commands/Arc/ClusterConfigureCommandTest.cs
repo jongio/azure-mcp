@@ -5,6 +5,7 @@ using System.CommandLine.Parsing;
 using AzureMcp.Commands.Arc;
 using AzureMcp.Models.Arc;
 using AzureMcp.Models.Command;
+using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
