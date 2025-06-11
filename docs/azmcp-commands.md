@@ -304,23 +304,23 @@ azmcp sql db advise --subscription <subscription> \
 # Examples:
 # Get all recommendations for a database
 azmcp sql db advise --subscription <subscription> \
-                    --server "myserver" \
-                    --resource-group "myrg" \
-                    --database "mydatabase"
+                    --server <server-name> \
+                    --resource-group <resource-group> \
+                    --database <database-name>
 
 # Get CreateIndex recommendations with minimum impact of 50
 azmcp sql db advise --subscription <subscription> \
-                    --server "myserver" \
-                    --resource-group "myrg" \
-                    --database "mydatabase" \
+                    --server <server-name> \
+                    --resource-group <resource-group> \
+                    --database <database-name> \
                     --advisor-type "CreateIndex" \
                     --minimum-impact 50
 
 # Get recommendations for a specific table
 azmcp sql db advise --subscription <subscription> \
-                    --server "myserver" \
-                    --resource-group "myrg" \
-                    --database "mydatabase" \
+                    --server <server-name> \
+                    --resource-group <resource-group> \
+                    --database <database-name> \
                     --table "Users"
 ```
 
