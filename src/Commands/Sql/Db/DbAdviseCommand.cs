@@ -39,14 +39,6 @@ public sealed class DbAdviseCommand(ILogger<DbAdviseCommand> logger)
         - Reduce database costs through better resource utilization
         - Get AI-powered insights for database tuning
         - Identify and fix performance regressions
-        
-        Required options:
-        - database: The name of the database to analyze and optimize
-        - server-name: The name of the SQL server containing the database
-        Optional:
-        - table: Focus optimization recommendations on a specific table
-        - minimum-impact: Set minimum performance impact threshold for recommendations
-        - advisor-type: Filter by specific advisor type (CreateIndex, DropIndex, ForceLastGoodPlan, DbParameterization)
         """;
 
     protected override void RegisterOptions(Command command)
