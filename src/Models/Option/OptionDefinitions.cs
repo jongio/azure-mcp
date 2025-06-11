@@ -679,12 +679,32 @@ public static class OptionDefinitions
         )
         {
             IsRequired = true
-        };
-
-        public static readonly Option<int> MaxMessages = new(
+        }; public static readonly Option<int> MaxMessages = new(
             $"--{MaxMessagesName}",
             () => 1,
             "The maximum number of messages to return."
+        )
+        {
+            IsRequired = false
+        };
+    }
+
+    public static class Arc
+    {
+        public const string ClusterName = "cluster-name";
+        public const string ConfigurationPath = "configuration-path";
+
+        public static readonly Option<string> Cluster = new(
+            $"--{ClusterName}",
+            "The name of the Azure Arc-enabled Kubernetes cluster."
+        )
+        {
+            IsRequired = true
+        };
+
+        public static readonly Option<string> ConfigPath = new(
+            $"--{ConfigurationPath}",
+            "Path to the Kubernetes configuration file."
         )
         {
             IsRequired = false

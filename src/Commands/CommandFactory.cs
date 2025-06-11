@@ -96,6 +96,7 @@ public class CommandFactory
         RegisterMcpServerCommands();
         RegisterServiceBusCommands();
         RegisterRedisCommands();
+        RegisterArcCommands();
     }
 
     private void RegisterBestPracticesCommand()
@@ -407,6 +408,21 @@ public class CommandFactory
         cluster.AddSubGroup(database);
 
         database.AddCommand("list", new Redis.ManagedRedis.DatabaseListCommand(GetLogger<Redis.ManagedRedis.DatabaseListCommand>()));
+    }
+    private void RegisterArcCommands()
+    {
+        // Create Arc command group
+        var arc = new CommandGroup("arc", "Azure Arc operations - Commands for managing Azure Arc-enabled Kubernetes clusters and configurations.");
+        _rootGroup.AddSubGroup(arc);
+
+        // Create Arc cluster subgroup
+        var cluster = new CommandGroup("cluster", "Arc cluster operations - Commands for configuring and managing Azure Arc-enabled Kubernetes clusters.");
+        arc.AddSubGroup(cluster);
+
+        // Register Arc commands
+        cluster.AddCommand("configure", new Arc.ClusterConfigureCommand(GetLogger<Arc.ClusterConfigureCommand>()));
+        cluster.AddCommand("list", new Arc.ClusterListCommand(GetLogger<Arc.ClusterListCommand>()));
+        cluster.AddCommand("get", new Arc.ClusterGetCommand(GetLogger<Arc.ClusterGetCommand>()));
     }
 
     private void ConfigureCommands(CommandGroup group)
