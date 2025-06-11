@@ -321,6 +321,7 @@ public sealed class SqlService(
 
         return string.Empty;
     }
+
     public async Task<List<string>> ListServers(string subscription, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription);
@@ -343,6 +344,7 @@ public sealed class SqlService(
             throw new SqlServiceException($"Error listing SQL servers: {ex.Message}", ex);
         }
     }
+    
     public async Task<List<string>> ListDatabases(string server, string resourceGroup, string subscription, string? tenant = null, AuthMethod? authMethod = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, resourceGroup, server);
