@@ -3,6 +3,7 @@
 
 using Azure.ResourceManager.Resources;
 using Azure.ResourceManager.Sql;
+using AzureMcp.Helpers;
 using AzureMcp.Options;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -110,8 +111,11 @@ public sealed class SqlService(
                         {
                             var actionDetails = action.Details?.ToString() ?? string.Empty;
                             var createIndexSql = action.ImplementationDetails?.Script ?? string.Empty;
-                            var extractedTableName = ExtractTableNameFromDetails(actionDetails) ??
-                                                   ExtractTableNameFromSql(createIndexSql);
+                            var extractedTableName = SqlStatementParser.ExtractTableNameFromDetails(actionDetails);
+                            if (string.IsNullOrEmpty(extractedTableName))
+                            {
+                                extractedTableName = SqlStatementParser.ExtractTableNameFromSql(createIndexSql);
+                            }
 
                             // Apply filters if specified
                             if (!string.IsNullOrEmpty(tableName))
@@ -136,14 +140,9 @@ public sealed class SqlService(
                                     estimatedImpact = cpuValue;
                                 }
                             }
-
                             // Generate DROP INDEX statement if we have a CREATE INDEX
-                            var dropIndexSql = string.Empty;
-                            var indexName = ExtractIndexNameFromCreateSql(createIndexSql);
-                            if (!string.IsNullOrEmpty(indexName) && !string.IsNullOrEmpty(extractedTableName))
-                            {
-                                dropIndexSql = $"DROP INDEX IF EXISTS [{indexName}] ON [{extractedTableName}];";
-                            }                            // Map the recommended action to your SqlRecommendation model
+                            var indexName = SqlStatementParser.ExtractIndexNameFromCreateSql(createIndexSql);
+                            var dropIndexSql = SqlStatementParser.GenerateDropIndexSql(indexName, extractedTableName);// Map the recommended action to your SqlRecommendation model
                             recommendations.Add(new Models.Sql.SqlRecommendation
                             {
                                 Name = action.Name ?? string.Empty,
@@ -246,82 +245,6 @@ public sealed class SqlService(
         }
     }
 
-    private static string ExtractTableNameFromDetails(string details)
-    {
-        // Simple extraction logic - you may need to enhance this based on actual Azure format
-        // This is a placeholder implementation
-        if (string.IsNullOrEmpty(details))
-            return string.Empty;
-
-        // Look for common patterns like "ON [tableName]" or "table: tableName"
-        var tablePatterns = new[]
-        {
-            @"ON \[([^\]]+)\]",
-            @"table:\s*([^\s,]+)",
-            @"Table:\s*([^\s,]+)"
-        };
-
-        foreach (var pattern in tablePatterns)
-        {
-            var match = System.Text.RegularExpressions.Regex.Match(details, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-            if (match.Success && match.Groups.Count > 1)
-            {
-                return match.Groups[1].Value;
-            }
-        }
-
-        return string.Empty;
-    }
-
-    private static string ExtractTableNameFromSql(string sql)
-    {
-        if (string.IsNullOrEmpty(sql))
-            return string.Empty;
-
-        // Extract table name from CREATE INDEX statements
-        // Pattern: CREATE [NONCLUSTERED] INDEX ... ON [schema].[table] or ON [table]
-        var patterns = new[]
-        {
-            @"ON\s+\[?([^\]\s\[]+)\]?\.\[?([^\]\s\[]+)\]?",  // ON [schema].[table] or ON schema.table
-            @"ON\s+\[?([^\]\s\[]+)\]?(?!\s*\.)",             // ON [table] (without schema)
-        };
-
-        foreach (var pattern in patterns)
-        {
-            var match = System.Text.RegularExpressions.Regex.Match(sql, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-            if (match.Success)
-            {
-                // If we have schema.table format, return the table part (group 2)
-                if (match.Groups.Count > 2 && !string.IsNullOrEmpty(match.Groups[2].Value))
-                {
-                    return match.Groups[2].Value;
-                }
-                // Otherwise return the first capture (table name)
-                return match.Groups[1].Value;
-            }
-        }
-
-        return string.Empty;
-    }
-
-    private static string ExtractIndexNameFromCreateSql(string sql)
-    {
-        if (string.IsNullOrEmpty(sql))
-            return string.Empty;
-
-        // Extract index name from CREATE INDEX statements
-        // Pattern: CREATE [NONCLUSTERED] INDEX [indexName] ON ...
-        var pattern = @"CREATE\s+(?:NONCLUSTERED\s+)?INDEX\s+\[?([^\]\s\[]+)\]?\s+ON";
-        var match = System.Text.RegularExpressions.Regex.Match(sql, pattern, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
-
-        if (match.Success && match.Groups.Count > 1)
-        {
-            return match.Groups[1].Value;
-        }
-
-        return string.Empty;
-    }
-
     public async Task<List<string>> ListServers(string subscription, string? tenant = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription);
@@ -344,7 +267,7 @@ public sealed class SqlService(
             throw new SqlServiceException($"Error listing SQL servers: {ex.Message}", ex);
         }
     }
-    
+
     public async Task<List<string>> ListDatabases(string server, string resourceGroup, string subscription, string? tenant = null, AuthMethod? authMethod = null, RetryPolicyOptions? retryPolicy = null)
     {
         ValidateRequiredParameters(subscription, resourceGroup, server);
