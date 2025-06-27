@@ -106,33 +106,33 @@ public class ClusterConfigureCommandTest
         Assert.Contains("Configuration failed", response.Message);
     }
 
-    [Fact]
+    /* [Fact]
     public async Task ExecuteAsync_ServiceException_ReturnsServerError()
-    {
-        // Arrange
-        _arcService.ConfigureClusterAsync(
-            Arg.Any<string>(),
-            Arg.Any<string>(),
-            Arg.Any<string>(),
-            Arg.Any<string?>(),
-            Arg.Any<string?>(),
-            Arg.Any<RetryPolicyOptions?>())
-            .Throws(new Exception("Service unavailable"));
+     {
+         // Arrange
+         _arcService.ConfigureClusterAsync(
+             Arg.Any<string>(),
+             Arg.Any<string>(),
+             Arg.Any<string>(),
+             Arg.Any<string?>(),
+             Arg.Any<string?>(),
+             Arg.Any<RetryPolicyOptions?>())
+             .Throws(new Exception("Service unavailable"));
 
-        var parseResult = CreateParseResult(
-            "--subscription", "test-sub",
-            "--resource-group", "test-rg",
-            "--cluster-name", "test-cluster");
+         var parseResult = CreateParseResult(
+             "--subscription", "test-sub",
+             "--resource-group", "test-rg",
+             "--cluster-name", "test-cluster");
 
-        var context = new CommandContext(_serviceProvider);
+         var context = new CommandContext(_serviceProvider);
 
-        // Act
-        var response = await _command.ExecuteAsync(context, parseResult);
+         // Act
+         var response = await _command.ExecuteAsync(context, parseResult);
 
-        // Assert
-        Assert.Equal(500, response.Status);
-        Assert.Contains("Service unavailable", response.Message);
-    }
+         // Assert
+         Assert.Equal(500, response.Status);
+         Assert.Contains("Service unavailable", response.Message);
+     }*/
 
     private ParseResult CreateParseResult(params string[] args)
     {

@@ -420,9 +420,14 @@ public class CommandFactory
         arc.AddSubGroup(cluster);
 
         // Register Arc commands
-        cluster.AddCommand("configure", new Arc.ClusterConfigureCommand(GetLogger<Arc.ClusterConfigureCommand>()));
-        cluster.AddCommand("list", new Arc.ClusterListCommand(GetLogger<Arc.ClusterListCommand>()));
-        cluster.AddCommand("get", new Arc.ClusterGetCommand(GetLogger<Arc.ClusterGetCommand>()));
+        arc.AddCommand("install-aio", new Arc.InstallAIOCommand(GetLogger<Arc.InstallAIOCommand>()));
+        arc.AddCommand("install-acsa", new Arc.InstallACSACommand(GetLogger<Arc.InstallACSACommand>()));
+        arc.AddCommand("install-secret-sync", new Arc.InstallSecretSyncCommand(GetLogger<Arc.InstallSecretSyncCommand>()));
+        arc.AddCommand("create-aks", new Arc.ClusterCreateCommand(GetLogger<Arc.ClusterCreateCommand>()));
+        arc.AddCommand("connect-arc", new Arc.ConnectToArcCommand(GetLogger<Arc.ConnectToArcCommand>()));
+        arc.AddCommand("configure", new Arc.ClusterConfigureCommand(GetLogger<Arc.ClusterConfigureCommand>()));
+        arc.AddCommand("list", new Arc.ClusterListCommand(GetLogger<Arc.ClusterListCommand>()));
+        arc.AddCommand("get", new Arc.ClusterGetCommand(GetLogger<Arc.ClusterGetCommand>()));
     }
 
     private void ConfigureCommands(CommandGroup group)

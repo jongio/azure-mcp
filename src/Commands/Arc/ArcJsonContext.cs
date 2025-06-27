@@ -1,6 +1,3 @@
-// Copyright (c) Microsoft Corporation.
-// Licensed under the MIT License.
-
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
 using AzureMcp.Models.Arc;
@@ -12,6 +9,11 @@ namespace AzureMcp.Commands.Arc;
 [JsonSerializable(typeof(ClusterConfigureCommand.ClusterConfigureCommandResult))]
 [JsonSerializable(typeof(ClusterListCommand.ClusterListCommandResult))]
 [JsonSerializable(typeof(ClusterGetCommand.ClusterGetCommandResult))]
+[JsonSerializable(typeof(ClusterCreateCommand.ClusterCreateCommandResult))]
+[JsonSerializable(typeof(ConnectToArcCommand.ConnectToArcCommandResult))]
+[JsonSerializable(typeof(InstallAIOCommand.InstallAIOCommandResult))]
+[JsonSerializable(typeof(InstallACSACommand.InstallACSACommandResult))]
+[JsonSerializable(typeof(InstallSecretSyncCommand.InstallSecretSyncCommandResult))]
 [JsonSerializable(typeof(ConfigurationResult))]
 [JsonSerializable(typeof(Cluster))]
 [JsonSerializable(typeof(List<Cluster>))]

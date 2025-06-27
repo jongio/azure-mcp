@@ -15,7 +15,7 @@
                 "${input:subscription}",
                 "--account-name",
                 "${input:cosmosAccountName}",
-                "--retry-max-retries", 
+                "--retry-max-retries",
                 "0"
             ],
             "cwd": "${workspaceFolder}",
@@ -315,7 +315,7 @@
                 "DOTNET_ENVIRONMENT": "Development"
             }
         },
-        {            
+        {
             "name": "Debug Monitor Log Query",
             "type": "coreclr",
             "request": "launch",
@@ -333,6 +333,194 @@
                 "recent",
                 "--table-name",
                 "${input:monitorTableName}",
+                "--resource-group",
+                "${input:resourceGroup}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Debug Arc Cluster List",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
+            "args": [
+                "arc",
+                "list",
+                "--subscription",
+                "${input:subscription}",
+                "--cluster-name",
+                "${input:arcClusterName}",
+                "--resource-group",
+                "${input:resourceGroup}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Debug Arc Cluster Get",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
+            "args": [
+                "arc",
+                "get",
+                "--subscription",
+                "${input:subscription}",
+                "--cluster-name",
+                "${input:arcClusterName}",
+                "--resource-group",
+                "${input:resourceGroup}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Debug Arc Cluster Configure",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
+            "args": [
+                "arc",
+                "configure",
+                "--subscription",
+                "${input:subscription}",
+                "--cluster-name",
+                "${input:arcClusterName}",
+                "--resource-group",
+                "${input:resourceGroup}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Debug Arc Create AKS",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
+            "args": [
+                "arc",
+                "create-aks",
+                "--subscription",
+                "${input:subscription}",
+                "--cluster-name",
+                "${input:arcClusterName}",
+                "--resource-group",
+                "${input:resourceGroup}",
+                "--region",
+                "${input:azureRegion}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Debug Arc Connect to Arc",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
+            "args": [
+                "arc",
+                "connect-arc",
+                "--subscription",
+                "${input:subscription}",
+                "--cluster-name",
+                "${input:arcClusterName}",
+                "--resource-group",
+                "${input:resourceGroup}",
+                "--location",
+                "${input:azureRegion}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Debug Arc Install ACSA",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
+            "args": [
+                "arc",
+                "install-acsa",
+                "--subscription",
+                "${input:subscription}",
+                "--cluster-name",
+                "${input:arcClusterName}",
+                "--resource-group",
+                "${input:resourceGroup}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Debug Arc Install AIO",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
+            "args": [
+                "arc",
+                "install-aio",
+                "--subscription",
+                "${input:subscription}",
+                "--cluster-name",
+                "${input:arcClusterName}",
+                "--resource-group",
+                "${input:resourceGroup}"
+            ],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "env": {
+                "DOTNET_ENVIRONMENT": "Development"
+            }
+        },
+        {
+            "name": "Debug Arc Install Secret Sync",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/bin/Debug/net9.0/azmcp.exe",
+            "args": [
+                "arc",
+                "install-secret-sync",
+                "--subscription",
+                "${input:subscription}",
+                "--cluster-name",
+                "${input:arcClusterName}",
                 "--resource-group",
                 "${input:resourceGroup}"
             ],
@@ -420,7 +608,10 @@
     "compounds": [
         {
             "name": "Debug MCP Server",
-            "configurations": ["Launch MCP Server", "Attach to MCP Server"]
+            "configurations": [
+                "Launch MCP Server",
+                "Attach to MCP Server"
+            ]
         }
     ],
     "inputs": [
@@ -487,7 +678,8 @@
             "type": "promptString",
             "description": "Cosmos DB Container Name",
             "default": ""
-        },        {
+        },
+        {
             "id": "resourceGroup",
             "type": "promptString",
             "description": "Azure Resource Group",
@@ -498,6 +690,18 @@
             "type": "promptString",
             "description": "Monitor Table Name",
             "default": ""
+        },
+        {
+            "id": "arcClusterName",
+            "type": "promptString",
+            "description": "Azure Arc Cluster Name",
+            "default": ""
+        },
+        {
+            "id": "azureRegion",
+            "type": "promptString",
+            "description": "Azure Region (e.g., eastus2)",
+            "default": "eastus2"
         }
     ]
 }
