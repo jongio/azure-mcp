@@ -32,7 +32,7 @@ if(!$ResourceGroupName) {
 
 Push-Location $RepoRoot
 try {
-    $armParameters = @{ areas=$areas }
+    $armParameters = @{ areas = ($Areas ?? @()) }
 
     Write-Host "Deploying:`n  ResourceGroupName: `"$ResourceGroupName`"`n  BaseName: `"$BaseName`"`n  DeleteAfterHours: $DeleteAfterHours`n  ArmTemplateParameters: $(ConvertTo-Json $armParameters -Compress)"
 
