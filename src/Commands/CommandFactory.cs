@@ -9,6 +9,8 @@ using AzureMcp.Commands.Storage.Blob;
 using AzureMcp.Commands.Subscription;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using AzureMcp.Commands.Arc;
+using AzureMcp.Services.Interfaces;
 
 namespace AzureMcp.Commands;
 
@@ -96,6 +98,7 @@ public class CommandFactory
         RegisterMcpServerCommands();
         RegisterServiceBusCommands();
         RegisterRedisCommands();
+        RegisterArcCommands();
     }
 
     private void RegisterBestPracticesCommand()
@@ -408,6 +411,24 @@ public class CommandFactory
 
         database.AddCommand("list", new Redis.ManagedRedis.DatabaseListCommand(GetLogger<Redis.ManagedRedis.DatabaseListCommand>()));
     }
+
+    private void RegisterArcCommands()
+    {
+        // Create Arc command group
+        var arc = new CommandGroup("arc", "Azure Arc operations - Commands for managing and deploying Azure Arc resources.");
+        _rootGroup.AddSubGroup(arc);
+
+        var arcService = _serviceProvider.GetRequiredService<IArcService>();
+        arc.AddCommand("connect-cluster-arc", new Arc.ConnectClusterToArcCommand(
+            GetLogger<Arc.ConnectClusterToArcCommand>()));
+        arc.AddCommand("install-aksee-cluster", new Arc.DeployAksEdgeEssentialClusterCommand(
+       GetLogger<Arc.DeployAksEdgeEssentialClusterCommand>(),
+       arcService));
+        arc.AddCommand("remove-cluster-installation", new Arc.RemoveAksEdgeCommand(
+            GetLogger<Arc.RemoveAksEdgeCommand>(), arcService));
+    }
+
+
 
     private void ConfigureCommands(CommandGroup group)
     {

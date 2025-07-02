@@ -1,0 +1,35 @@
+I can help you set up a fully deployed AKS Edge Essentials cluster.
+I can help you connect this to Azure Arc and in troubleshooting.
+
+We have to do the following steps:
+
+0. **Delete Any existing Installations**:
+   - Ensures that any existing installation is removed and settings are preset for new installation.
+
+1. **Validate Prerequisites**:
+   - Ensures the virtual switch and network configuration are correct.
+
+2. **Install aksedgeessentials.msi**:
+
+3. **Setup AKS Edge Repository**:
+   - Downloads and extracts the AKS Edge repository from GitHub.
+
+4. **Create Deployment Configuration**:
+   - Generates a JSON file with deployment settings.
+
+5. **Deploy AKS Edge Essentials**:
+   - Deploys the cluster using the generated configuration file.
+
+6. **Connect to Azure Arc** (Optional):
+   - Registers Azure providers and connects the cluster to Azure Arc.
+
+7. **Post-Deployment**:
+   - Sets up `kubectl` for cluster management.
+   - Provides useful commands for interacting with the cluster.
+
+---
+
+### **Output**
+- A fully deployed AKS Edge Essentials cluster.
+- Optional Azure Arc connection.
+- Log file for troubleshooting (`aksedge-deploy-<timestamp>.txt`).
