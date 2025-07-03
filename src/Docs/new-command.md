@@ -81,11 +81,57 @@ A complete command requires:
 5. Unit test: `tests/Areas/{Area}/UnitTests/{Resource}/{Resource}{Operation}CommandTests.cs`
 6. Integration test: `tests/Areas/{Area}/LiveTests/{Area}CommandTests.cs`
 7. Command registration in RegisterCommands(): `src/Areas/{Area}/{Area}Setup.cs`
-9. Area registration in RegisterAreas(): `src/Program.cs`
+8. Area registration in RegisterAreas(): `src/Program.cs`
+
+**IMPORTANT**: If implementing a new area, you must also ensure:
+- The Azure Resource Manager package is added to `Directory.Packages.props` first
+- The package reference is added to `src/AzureMcp.csproj`
+- Models, base commands, and option definitions follow the established patterns
+- JSON serialization context includes all new model types
+- Service registration in the area setup ConfigureServices method
 
 ## Implementation Guidelines
 
-### 1. Options Class
+### 1. Azure Resource Manager Integration
+
+When creating commands that interact with Azure services, you'll need to:
+
+**Package Management:**
+- Add the appropriate Azure Resource Manager package to both `Directory.Packages.props` and `AzureMcp.csproj`
+- Example: `<PackageVersion Include="Azure.ResourceManager.Sql" Version="1.3.0" />`
+
+**API Pattern Discovery:**
+- Study existing services (e.g., Postgres, Redis) to understand resource access patterns
+- Use resource collections correctly: `.GetSqlServers().GetAsync(serverName)` not `.GetSqlServerAsync(serverName, cancellationToken)`
+- Check Azure SDK documentation for correct method signatures and property names
+
+**Common Azure Resource Manager Patterns:**
+```csharp
+// Correct pattern for accessing resources through collections
+var resourceGroupResource = await subscriptionResource
+    .GetResourceGroupAsync(resourceGroup, cancellationToken);
+
+var sqlServerResource = await resourceGroupResource.Value
+    .GetSqlServers()
+    .GetAsync(serverName);
+
+var databaseResource = await sqlServerResource.Value
+    .GetSqlDatabases()
+    .GetAsync(databaseName);
+```
+
+**Property Access Issues:**
+- Azure SDK property names may differ from expected names (e.g., `CreatedOn` not `CreationDate`)
+- Check actual property availability using IntelliSense or SDK documentation
+- Some properties are objects that need `.ToString()` conversion (e.g., `Location.ToString()`)
+- Be aware of nullable properties and use appropriate null checks
+
+**Compilation Error Resolution:**
+- When you see `cannot convert from 'System.Threading.CancellationToken' to 'string'`, check method parameter order
+- For `'SqlDatabaseData' does not contain a definition for 'X'`, verify property names in the actual SDK types
+- Use existing service implementations as reference for correct property access patterns
+
+### 2. Options Class
 
 ```csharp
 public class {Resource}{Operation}Options : Base{Service}Options
@@ -193,18 +239,17 @@ public sealed class {Resource}{Operation}Command(ILogger<{Resource}{Operation}Co
     // Implementation-specific error handling
     protected override string GetErrorMessage(Exception ex) => ex switch
     {
-        ResourceNotFoundException => "Resource not found. Verify the resource exists and you have access.",
-        AuthorizationException authEx =>
-            $"Authorization failed accessing the resource. Details: {authEx.Message}",
-        ServiceException svcEx => svcEx.Message,
+        Azure.RequestFailedException reqEx when reqEx.Status == 404 =>
+            "Resource not found. Verify the resource exists and you have access.",
+        Azure.RequestFailedException reqEx when reqEx.Status == 403 =>
+            $"Authorization failed accessing the resource. Details: {reqEx.Message}",
+        Azure.RequestFailedException reqEx => reqEx.Message,
         _ => base.GetErrorMessage(ex)
     };
 
     protected override int GetStatusCode(Exception ex) => ex switch
     {
-        ResourceNotFoundException => 404,
-        AuthorizationException => 403,
-        ServiceException svcEx => svcEx.Status,
+        Azure.RequestFailedException reqEx => reqEx.Status,
         _ => base.GetStatusCode(ex)
     };
 
@@ -707,6 +752,55 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
    - Use primary constructors
    - Make command classes sealed
 
+## Troubleshooting Common Issues
+
+### Azure Resource Manager Compilation Errors
+
+**Issue: `cannot convert from 'System.Threading.CancellationToken' to 'string'`**
+- **Cause**: Wrong parameter order in resource manager method calls
+- **Solution**: Check method signatures; many Azure SDK methods don't take CancellationToken as second parameter
+- **Fix**: Use `.GetAsync(resourceName)` instead of `.GetAsync(resourceName, cancellationToken)`
+
+**Issue: `'SqlDatabaseData' does not contain a definition for 'CreationDate'`**
+- **Cause**: Property names in Azure SDK differ from expected/documented names
+- **Solution**: Use IntelliSense to explore actual property names
+- **Common fixes**:
+  - `CreationDate` → `CreatedOn`
+  - `EarliestRestoreDate` → `EarliestRestoreOn`
+  - `Edition` → `CurrentSku?.Name`
+
+**Issue: `Operator '?' cannot be applied to operand of type 'AzureLocation'`**
+- **Cause**: Some Azure SDK types are structs, not nullable reference types
+- **Solution**: Convert to string: `Location.ToString()` instead of `Location?.Name`
+
+**Issue: Wrong resource access pattern**
+- **Problem**: Using `.GetSqlServerAsync(name, cancellationToken)` 
+- **Solution**: Use resource collections: `.GetSqlServers().GetAsync(name)`
+- **Pattern**: Always access through collections, not direct async methods
+
+### Service Implementation Issues
+
+**Issue: HandleException parameter mismatch**
+- **Cause**: Different base classes have different HandleException signatures
+- **Solution**: Check base class implementation; use `HandleException(context.Response, ex)` not `HandleException(context, ex)`
+
+**Issue: Missing AddSubscriptionInformation**
+- **Cause**: Subscription commands need telemetry context
+- **Solution**: Add `context.Activity?.WithSubscriptionTag(options);` or use `AddSubscriptionInformation(context.Activity, options);`
+
+**Issue: Service not registered in DI**
+- **Cause**: Forgot to register service in area setup
+- **Solution**: Add `services.AddSingleton<IServiceInterface, ServiceImplementation>();` in ConfigureServices
+
+### Base Command Class Issues
+
+**Issue: Wrong logger type in base command constructor**
+- **Example**: `ILogger<BaseSqlCommand<TOptions>>` in `BaseDatabaseCommand`
+- **Solution**: Use correct generic type: `ILogger<BaseDatabaseCommand<TOptions>>`
+
+**Issue: Missing using statements for TrimAnnotations**
+- **Solution**: Add `using AzureMcp.Commands;` for `TrimAnnotations.CommandAnnotations`
+
 ## Checklist
 
 Before submitting:
@@ -723,3 +817,8 @@ Before submitting:
 - [ ] Documentation complete
 - [ ] No compiler warnings
 - [ ] Tests pass
+- [ ] Build succeeds with `dotnet build`
+- [ ] Azure Resource Manager package added to both Directory.Packages.props and AzureMcp.csproj
+- [ ] All Azure SDK property names verified and correct
+- [ ] Resource access patterns use collections (e.g., `.GetSqlServers().GetAsync()`)
+- [ ] JSON serialization context includes all new model types
