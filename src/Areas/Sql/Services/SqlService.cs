@@ -3,6 +3,7 @@
 
 using AzureMcp.Areas.Sql.Models;
 using AzureMcp.Services.Azure;
+using AzureMcp.Services.Azure.Subscription;
 using AzureMcp.Services.Azure.Tenant;
 using AzureMcp.Options;
 using Azure.Core;
@@ -12,8 +13,9 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Areas.Sql.Services;
 
-public class SqlService(ITenantService tenantService, ILogger<SqlService> logger) : BaseAzureService(tenantService), ISqlService
+public class SqlService(ISubscriptionService subscriptionService, ITenantService tenantService, ILogger<SqlService> logger) : BaseAzureService(tenantService), ISqlService
 {
+    private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
     private readonly ILogger<SqlService> _logger = logger;
 
     public async Task<SqlDatabase?> GetDatabaseAsync(
@@ -26,10 +28,7 @@ public class SqlService(ITenantService tenantService, ILogger<SqlService> logger
     {
         try
         {
-            var armClient = await CreateArmClientAsync(null, retryPolicy);
-
-            var subscriptionResource = armClient.GetSubscriptionResource(
-                new Azure.Core.ResourceIdentifier($"/subscriptions/{subscription}"));
+            var subscriptionResource = await _subscriptionService.GetSubscription(subscription, null, retryPolicy);
 
             var resourceGroupResource = await subscriptionResource
                 .GetResourceGroupAsync(resourceGroup, cancellationToken);
