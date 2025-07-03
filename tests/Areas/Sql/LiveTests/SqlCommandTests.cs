@@ -20,7 +20,7 @@ public class SqlCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper 
         // Use the deployed test SQL server and database
         var serverName = $"{Settings.ResourceBaseName}-sql";
         var databaseName = "testdb";
-        
+
         var result = await CallToolAsync(
             "azmcp-sql-db-show",
             new()
@@ -34,11 +34,11 @@ public class SqlCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper 
         // Should successfully retrieve the database
         var database = result.AssertProperty("database");
         Assert.Equal(JsonValueKind.Object, database.ValueKind);
-        
+
         // Verify database properties
         var dbName = database.GetProperty("name").GetString();
         Assert.Equal(databaseName, dbName);
-        
+
         var dbType = database.GetProperty("type").GetString();
         Assert.Equal("Microsoft.Sql/servers/databases", dbType);
     }
@@ -52,7 +52,7 @@ public class SqlCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper 
     {
         var allArgs = new[] { firstArg }.Concat(remainingArgs);
         var argsString = string.Join(" ", allArgs);
-        
+
         var result = await CallToolAsync(
             "azmcp-sql-db-show",
             new()
