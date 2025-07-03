@@ -1,14 +1,14 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Areas.Sql.Models;
-using AzureMcp.Services.Azure;
-using AzureMcp.Services.Azure.Subscription;
-using AzureMcp.Services.Azure.Tenant;
-using AzureMcp.Options;
 using Azure.Core;
 using Azure.ResourceManager;
 using Azure.ResourceManager.Sql;
+using AzureMcp.Areas.Sql.Models;
+using AzureMcp.Options;
+using AzureMcp.Services.Azure;
+using AzureMcp.Services.Azure.Subscription;
+using AzureMcp.Services.Azure.Tenant;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Areas.Sql.Services;
@@ -69,7 +69,7 @@ public class SqlService(ISubscriptionService subscriptionService, ITenantService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, 
+            _logger.LogError(ex,
                 "Error getting SQL database. Server: {Server}, Database: {Database}, ResourceGroup: {ResourceGroup}, Subscription: {Subscription}",
                 serverName, databaseName, resourceGroup, subscription);
             throw;

@@ -1121,6 +1121,7 @@ Before submitting:
 - [ ] No compiler warnings
 - [ ] Tests pass
 - [ ] Build succeeds with `dotnet build`
+- [ ] Code formatting applied with `dotnet format`
 - [ ] Azure Resource Manager package added to both Directory.Packages.props and AzureMcp.csproj
 - [ ] All Azure SDK property names verified and correct
 - [ ] Resource access patterns use collections (e.g., `.GetSqlServers().GetAsync()`)
