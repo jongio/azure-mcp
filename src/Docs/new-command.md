@@ -95,7 +95,7 @@ A complete command requires:
 - Service registration in the area setup ConfigureServices method
 - **Live test infrastructure**: Add Bicep template to `/infra/services/` and module to `/infra/test-resources.bicep`
 - **Test resource deployment**: Ensure resources are properly configured with RBAC for test application
-- **Resource naming**: Follow `{baseName}-{service}` pattern for consistent naming across environments
+- **Resource naming**: Follow consistent naming patterns - many services use just `baseName`, while others may need suffixes for disambiguation (e.g., `{baseName}-suffix`)
 
 ## Implementation Guidelines
 
@@ -447,6 +447,8 @@ public class {Resource}{Operation}CommandTests
 Integration tests inherit from `CommandTestsBase` and use test fixtures:
 
 ```csharp
+[Trait("Area", "{Service}")]
+[Trait("Category", "Live")]
 public class {Service}CommandTests : CommandTestsBase, IClassFixture<LiveTestFixture>
 {
     protected const string TenantNameReason = "Service principals cannot use TenantName for lookup";
@@ -466,7 +468,6 @@ public class {Service}CommandTests : CommandTestsBase, IClassFixture<LiveTestFix
     [Theory]
     [InlineData(AuthMethod.Credential)]
     [InlineData(AuthMethod.Key)]
-    [Trait("Category", "Live")]
     public async Task Should_{Operation}_{Resource}_WithAuth(AuthMethod authMethod)
     {
         // Arrange
@@ -494,7 +495,6 @@ public class {Service}CommandTests : CommandTestsBase, IClassFixture<LiveTestFix
     [Theory]
     [InlineData("--invalid-param")]
     [InlineData("--subscription invalidSub")]
-    [Trait("Category", "Live")]
     public async Task Should_Return400_WithInvalidInput(string args)
     {
         var result = await CallToolAsync(
@@ -711,7 +711,7 @@ param adminPassword string = newGuid()
 
 // Main service resource
 resource serviceResource 'Microsoft.{Provider}/{resourceType}@{apiVersion}' = {
-  name: '${baseName}-{service}'
+  name: baseName
   location: location
   properties: {
     // Service-specific properties
@@ -765,10 +765,11 @@ output testResourceName string = serviceResource::testResource.name
 - Use resource naming that clearly identifies test purposes
 
 **Common Resource Naming Patterns:**
-- Main service: `{baseName}-{service}` (e.g., `mcp12345-sql`)
+- Main service: `baseName` (most common, e.g., `mcp12345`) or `{baseName}-{service}` if disambiguation needed
 - Child resources: `test{resource}` (e.g., `testdb`, `testcontainer`)
 - Follow Azure naming conventions and length limits
 - Ensure names are unique within resource group scope
+- Check existing services in `/infra/services/` for consistent patterns
 
 **2. Add Module to Main Template (`/infra/test-resources.bicep`)**
 
@@ -833,15 +834,15 @@ Integration tests should use the deployed infrastructure:
 
 ```csharp
 [Trait("Area", "{Service}")]
+[Trait("Category", "Live")]
 public class {Service}CommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper output)
     : CommandTestsBase(liveTestFixture, output), IClassFixture<LiveTestFixture>
 {
     [Fact]
-    [Trait("Category", "Live")]
     public async Task Should_Get{Resource}_Successfully()
     {
         // Use the deployed test resources
-        var serviceName = $"{Settings.ResourceBaseName}-{service}";
+        var serviceName = Settings.ResourceBaseName;
         var resourceName = "test{resource}";
         
         var result = await CallToolAsync(
@@ -867,7 +868,6 @@ public class {Service}CommandTests(LiveTestFixture liveTestFixture, ITestOutputH
     [InlineData("--invalid-param", new string[0])]
     [InlineData("--subscription", new[] { "invalidSub" })]
     [InlineData("--subscription", new[] { "sub", "--resource-group", "rg" })]  // Missing required params
-    [Trait("Category", "Live")]
     public async Task Should_Return400_WithInvalidInput(string firstArg, string[] remainingArgs)
     {
         var allArgs = new[] { firstArg }.Concat(remainingArgs);
@@ -972,7 +972,7 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
 
 5. Live Test Infrastructure:
    - Use minimal resource configurations for cost efficiency
-   - Follow naming conventions: `{baseName}-{service}`
+   - Follow naming conventions: `baseName` (most common) or `{baseName}-{service}` if needed
    - Include proper RBAC assignments for test application
    - Output all necessary identifiers for test consumption
    - Use appropriate Azure service API versions
@@ -1003,7 +1003,7 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
    - Use primary constructors
    - Make command classes sealed
    - Include live test infrastructure for Azure services
-   - Use `{baseName}-{service}` naming pattern for test resources
+   - Use consistent resource naming patterns (check existing services in `/infra/services/`)
    - Output resource identifiers from Bicep templates
 
 ## Troubleshooting Common Issues
@@ -1056,7 +1056,7 @@ var subscriptionResource = await _subscriptionService.GetSubscription(subscripti
 **Issue: Live tests fail with "Resource not found"**
 - **Cause**: Test resources not deployed or wrong naming pattern used
 - **Solution**: Verify resource deployment and naming in Azure portal
-- **Fix**: Ensure live tests use `$"{Settings.ResourceBaseName}-{service}"` pattern for resource names
+- **Fix**: Ensure live tests use `Settings.ResourceBaseName` pattern for resource names (or appropriate service-specific pattern)
 
 **Issue: Permission denied errors in live tests**
 - **Cause**: Missing or incorrect RBAC assignments in Bicep template
