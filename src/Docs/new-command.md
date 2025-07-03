@@ -82,6 +82,10 @@ A complete command requires:
 6. Integration test: `tests/Areas/{Area}/LiveTests/{Area}CommandTests.cs`
 7. Command registration in RegisterCommands(): `src/Areas/{Area}/{Area}Setup.cs`
 8. Area registration in RegisterAreas(): `src/Program.cs`
+9. **Live test infrastructure** (if needed):
+   - Bicep template: `/infra/services/{area}.bicep`
+   - Module registration in: `/infra/test-resources.bicep`
+   - Optional post-deployment script: `/infra/services/{area}-post.ps1`
 
 **IMPORTANT**: If implementing a new area, you must also ensure:
 - The Azure Resource Manager package is added to `Directory.Packages.props` first
@@ -89,6 +93,9 @@ A complete command requires:
 - Models, base commands, and option definitions follow the established patterns
 - JSON serialization context includes all new model types
 - Service registration in the area setup ConfigureServices method
+- **Live test infrastructure**: Add Bicep template to `/infra/services/` and module to `/infra/test-resources.bicep`
+- **Test resource deployment**: Ensure resources are properly configured with RBAC for test application
+- **Resource naming**: Follow `{baseName}-{service}` pattern for consistent naming across environments
 
 ## Implementation Guidelines
 
@@ -100,6 +107,25 @@ When creating commands that interact with Azure services, you'll need to:
 - Add the appropriate Azure Resource Manager package to both `Directory.Packages.props` and `AzureMcp.csproj`
 - Example: `<PackageVersion Include="Azure.ResourceManager.Sql" Version="1.3.0" />`
 
+**Subscription Resolution:**
+- Always use `ISubscriptionService.GetSubscription()` to resolve subscription ID or name
+- Inject `ISubscriptionService` into your service constructor
+- This handles both subscription IDs and subscription names automatically
+- Example pattern:
+```csharp
+public class MyService(ISubscriptionService subscriptionService, ITenantService tenantService) 
+    : BaseAzureService(tenantService), IMyService
+{
+    private readonly ISubscriptionService _subscriptionService = subscriptionService;
+    
+    public async Task<MyResource> GetResourceAsync(string subscription, ...)
+    {
+        var subscriptionResource = await _subscriptionService.GetSubscription(subscription, null, retryPolicy);
+        // Use subscriptionResource instead of creating one manually
+    }
+}
+```
+
 **API Pattern Discovery:**
 - Study existing services (e.g., Postgres, Redis) to understand resource access patterns
 - Use resource collections correctly: `.GetSqlServers().GetAsync(serverName)` not `.GetSqlServerAsync(serverName, cancellationToken)`
@@ -107,7 +133,9 @@ When creating commands that interact with Azure services, you'll need to:
 
 **Common Azure Resource Manager Patterns:**
 ```csharp
-// Correct pattern for accessing resources through collections
+// Correct pattern for subscription resolution and resource access
+var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy);
+
 var resourceGroupResource = await subscriptionResource
     .GetResourceGroupAsync(resourceGroup, cancellationToken);
 
@@ -259,7 +287,7 @@ public sealed class {Resource}{Operation}Command(ILogger<{Resource}{Operation}Co
 
 ### 3. Base Service Command Classes
 
-Each service has its own hierarchy of base command classes that inherit from `GlobalCommand` or `SubscriptionCommand`. For example:
+Each service has its own hierarchy of base command classes that inherit from `GlobalCommand` or `SubscriptionCommand`. Services that work with Azure resources should inject `ISubscriptionService` for subscription resolution. For example:
 
 ```csharp
 // Copyright (c) Microsoft Corporation.
@@ -310,25 +338,20 @@ public abstract class Base{Service}Command<
     }
 }
 
-// Base command for resource-specific commands
-public abstract class Base{Resource}Command<
-    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
-    : Base{Service}Command<TOptions>
-    where TOptions : Base{Resource}Options, new()
+// Service implementation example with subscription resolution
+public class {Service}Service(ISubscriptionService subscriptionService, ITenantService tenantService) 
+    : BaseAzureService(tenantService), I{Service}Service
 {
-    protected readonly Option<string> _resourceOption = OptionDefinitions.Service.Resource;
+    private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
 
-    protected override void RegisterOptions(Command command)
+    public async Task<{Resource}> GetResourceAsync(string subscription, string resourceGroup, string resourceName, RetryPolicyOptions? retryPolicy)
     {
-        base.RegisterOptions(command);
-        command.AddOption(_resourceOption);
-    }
-
-    protected override TOptions BindOptions(ParseResult parseResult)
-    {
-        var options = base.BindOptions(parseResult);
-        options.Resource = parseResult.GetValueForOption(_resourceOption);
-        return options;
+        // Always use subscription service for resolution
+        var subscriptionResource = await _subscriptionService.GetSubscription(subscription, null, retryPolicy);
+        
+        var resourceGroupResource = await subscriptionResource
+            .GetResourceGroupAsync(resourceGroup, cancellationToken);
+        // Continue with resource access...
     }
 }
 ```
@@ -658,6 +681,223 @@ public async Task ExecuteAsync_HandlesServiceError()
 ### Integration Tests
 Services requiring test resource deployment should add a bicep template to `/infra/services/` and import that template as a module in `/infra/test-resources.bicep`. If additional logic needs to be performed after resource deployment, but before any live tests are run, add a `{service}-post.ps1` script to the `/infra/services/` folder. See `/infra/services/storage.bicep` and `/infra/services/storage-post.ps1` for canonical examples.
 
+#### Live Test Resource Infrastructure
+
+**1. Create Service Bicep Template (`/infra/services/{service}.bicep`)**
+
+Follow this pattern for your service's infrastructure:
+
+```bicep
+targetScope = 'resourceGroup'
+
+@minLength(3)
+@maxLength(17)  // Adjust based on service naming limits
+@description('The base resource name. {Service} names have specific length restrictions.')
+param baseName string = resourceGroup().name
+
+@description('The location of the resource. By default, this is the same as the resource group.')
+param location string = resourceGroup().location
+
+@description('The client OID to grant access to test resources.')
+param testApplicationOid string
+
+// Optional: Additional service-specific parameters
+@description('Service-specific configuration parameter.')
+param serviceSpecificParam string = 'defaultValue'
+
+@description('Service administrator password.')
+@secure()
+param adminPassword string = newGuid()
+
+// Main service resource
+resource serviceResource 'Microsoft.{Provider}/{resourceType}@{apiVersion}' = {
+  name: '${baseName}-{service}'
+  location: location
+  properties: {
+    // Service-specific properties
+  }
+
+  // Child resources (databases, containers, etc.)
+  resource testResource 'childResourceType@{apiVersion}' = {
+    name: 'test{resource}'
+    properties: {
+      // Test resource properties
+    }
+  }
+}
+
+// Role assignment for test application
+resource serviceRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  // Use appropriate built-in role for your service
+  // See https://learn.microsoft.com/azure/role-based-access-control/built-in-roles
+  name: '{role-guid}'
+}
+
+resource appServiceRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(serviceRoleDefinition.id, testApplicationOid, serviceResource.id)
+  scope: serviceResource
+  properties: {
+    principalId: testApplicationOid
+    roleDefinitionId: serviceRoleDefinition.id
+    description: '{Role Name} for testApplicationOid'
+  }
+}
+
+// Outputs for test consumption
+output serviceResourceName string = serviceResource.name
+output testResourceName string = serviceResource::testResource.name
+// Add other outputs as needed for tests
+```
+
+**Key Bicep Template Requirements:**
+- Use `baseName` parameter with appropriate length restrictions
+- Include `testApplicationOid` for RBAC assignments
+- Deploy test resources (databases, containers, etc.) needed for integration tests
+- Assign appropriate built-in roles to the test application
+- Output resource names and identifiers for test consumption
+
+**Cost and Resource Considerations:**
+- Use minimal SKUs (Basic, Standard S0, etc.) for cost efficiency
+- Deploy only resources needed for command testing
+- Consider using shared resources where possible
+- Set appropriate retention policies and limits
+- Use resource naming that clearly identifies test purposes
+
+**Common Resource Naming Patterns:**
+- Main service: `{baseName}-{service}` (e.g., `mcp12345-sql`)
+- Child resources: `test{resource}` (e.g., `testdb`, `testcontainer`)
+- Follow Azure naming conventions and length limits
+- Ensure names are unique within resource group scope
+
+**2. Add Module to Main Template (`/infra/test-resources.bicep`)**
+
+```bicep
+module {service} 'services/{service}.bicep' = if (empty(areas) || contains(areas, '{Service}')) {
+  name: '${deploymentName}-{service}'
+  params: {
+    baseName: baseName
+    location: location
+    testApplicationOid: testApplicationOid
+    // Add service-specific parameters if needed
+  }
+}
+```
+
+**3. Optional: Post-Deployment Script (`/infra/services/{service}-post.ps1`)**
+
+Create if additional setup is needed after resource deployment:
+
+```powershell
+#!/usr/bin/env pwsh
+
+# Copyright (c) Microsoft Corporation.
+# Licensed under the MIT License.
+
+#Requires -Version 6.0
+#Requires -PSEdition Core
+
+[CmdletBinding()]
+param (
+    [Parameter(Mandatory)]
+    [hashtable] $DeploymentOutputs,
+    
+    [Parameter(Mandatory)]
+    [hashtable] $AdditionalParameters
+)
+
+Write-Host "Running {Service} post-deployment setup..."
+
+try {
+    # Extract outputs from deployment
+    $serviceName = $DeploymentOutputs['{service}']['serviceResourceName']['value']
+    $resourceGroup = $AdditionalParameters['ResourceGroupName']
+    
+    # Perform additional setup (e.g., create sample data, configure settings)
+    Write-Host "Setting up test data for $serviceName..."
+    
+    # Example: Run Azure CLI commands for additional setup
+    # az {service} {operation} --name $serviceName --resource-group $resourceGroup
+    
+    Write-Host "{Service} post-deployment setup completed successfully."
+}
+catch {
+    Write-Error "Failed to complete {Service} post-deployment setup: $_"
+    throw
+}
+```
+
+**4. Update Live Tests to Use Deployed Resources**
+
+Integration tests should use the deployed infrastructure:
+
+```csharp
+[Trait("Area", "{Service}")]
+public class {Service}CommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper output)
+    : CommandTestsBase(liveTestFixture, output), IClassFixture<LiveTestFixture>
+{
+    [Fact]
+    [Trait("Category", "Live")]
+    public async Task Should_Get{Resource}_Successfully()
+    {
+        // Use the deployed test resources
+        var serviceName = $"{Settings.ResourceBaseName}-{service}";
+        var resourceName = "test{resource}";
+        
+        var result = await CallToolAsync(
+            "azmcp-{service}-{resource}-show",
+            new()
+            {
+                { "subscription", Settings.SubscriptionId },
+                { "resource-group", Settings.ResourceGroupName },
+                { "service-name", serviceName },
+                { "resource-name", resourceName }
+            });
+
+        // Verify successful response
+        var resource = result.AssertProperty("{resource}");
+        Assert.Equal(JsonValueKind.Object, resource.ValueKind);
+        
+        // Verify resource properties
+        var name = resource.GetProperty("name").GetString();
+        Assert.Equal(resourceName, name);
+    }
+
+    [Theory]
+    [InlineData("--invalid-param", new string[0])]
+    [InlineData("--subscription", new[] { "invalidSub" })]
+    [InlineData("--subscription", new[] { "sub", "--resource-group", "rg" })]  // Missing required params
+    [Trait("Category", "Live")]
+    public async Task Should_Return400_WithInvalidInput(string firstArg, string[] remainingArgs)
+    {
+        var allArgs = new[] { firstArg }.Concat(remainingArgs);
+        var argsString = string.Join(" ", allArgs);
+        
+        var result = await CallToolAsync(
+            "azmcp-{service}-{resource}-show",
+            new()
+            {
+                { "args", argsString }
+            });
+
+        // Should return validation error
+        Assert.NotEqual(200, result.Status);
+    }
+}
+```
+
+**5. Deploy and Test Resources**
+
+Use the deployment script with your service area:
+
+```powershell
+# Deploy test resources for your service
+./eng/scripts/Deploy-TestResources.ps1 -Areas "{Service}" -Location "East US"
+
+# Run live tests
+dotnet test --filter "Category=Live&Area={Service}"
+```
+
 Live test scenarios should include:
 ```csharp
 [Theory]
@@ -730,6 +970,14 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
    - Describe return format
    - Include examples in description
 
+5. Live Test Infrastructure:
+   - Use minimal resource configurations for cost efficiency
+   - Follow naming conventions: `{baseName}-{service}`
+   - Include proper RBAC assignments for test application
+   - Output all necessary identifiers for test consumption
+   - Use appropriate Azure service API versions
+   - Consider resource location constraints and availability
+
 ## Common Pitfalls to Avoid
 
 1. Do not:
@@ -741,6 +989,9 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
    - Leave command unregistered
    - Skip error handling
    - Miss required tests
+   - Deploy overly expensive test resources
+   - Forget to assign RBAC permissions to test application
+   - Hard-code resource names in live tests
 
 2. Always:
    - Use OptionDefinitions for options
@@ -751,10 +1002,27 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
    - Handle all error cases
    - Use primary constructors
    - Make command classes sealed
+   - Include live test infrastructure for Azure services
+   - Use `{baseName}-{service}` naming pattern for test resources
+   - Output resource identifiers from Bicep templates
 
 ## Troubleshooting Common Issues
 
 ### Azure Resource Manager Compilation Errors
+
+**Issue: Subscription not properly resolved**
+- **Cause**: Using direct ARM client creation instead of subscription service
+- **Solution**: Always inject and use `ISubscriptionService.GetSubscription()`
+- **Fix**: Replace manual subscription resource creation with service call
+- **Pattern**:
+```csharp
+// Wrong - manual creation
+var armClient = await CreateArmClientAsync(null, retryPolicy);
+var subscriptionResource = armClient.GetSubscriptionResource(new ResourceIdentifier($"/subscriptions/{subscription}"));
+
+// Correct - use service
+var subscriptionResource = await _subscriptionService.GetSubscription(subscription, null, retryPolicy);
+```
 
 **Issue: `cannot convert from 'System.Threading.CancellationToken' to 'string'`**
 - **Cause**: Wrong parameter order in resource manager method calls
@@ -777,6 +1045,41 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
 - **Problem**: Using `.GetSqlServerAsync(name, cancellationToken)` 
 - **Solution**: Use resource collections: `.GetSqlServers().GetAsync(name)`
 - **Pattern**: Always access through collections, not direct async methods
+
+### Live Test Infrastructure Issues
+
+**Issue: Bicep template validation fails**
+- **Cause**: Invalid parameter constraints, missing required properties, or API version issues
+- **Solution**: Use `az bicep build --file infra/services/{service}.bicep` to validate template
+- **Fix**: Check Azure Resource Manager template reference for correct syntax and required properties
+
+**Issue: Live tests fail with "Resource not found"**
+- **Cause**: Test resources not deployed or wrong naming pattern used
+- **Solution**: Verify resource deployment and naming in Azure portal
+- **Fix**: Ensure live tests use `$"{Settings.ResourceBaseName}-{service}"` pattern for resource names
+
+**Issue: Permission denied errors in live tests**
+- **Cause**: Missing or incorrect RBAC assignments in Bicep template
+- **Solution**: Verify role assignment scope and principal ID
+- **Fix**: Check that `testApplicationOid` is correctly passed and role definition GUID is valid
+
+**Issue: Deployment fails with template validation errors**
+- **Cause**: Parameter constraints, resource naming conflicts, or invalid configurations
+- **Solution**: Review deployment logs and error messages
+- **Common fixes**:
+  - Adjust `@minLength`/`@maxLength` for service naming limits
+  - Ensure unique resource names within scope
+  - Use supported API versions for resource types
+  - Verify location support for specific resource types
+
+**Issue: High deployment costs during testing**
+- **Cause**: Using expensive SKUs or resource configurations
+- **Solution**: Use minimal configurations for test resources
+- **Best practices**:
+  - SQL: Use Basic tier with small capacity
+  - Storage: Use Standard LRS with minimal replication
+  - Cosmos: Use serverless or minimal RU/s allocation
+  - Always specify cost-effective options in Bicep templates
 
 ### Service Implementation Issues
 
@@ -821,4 +1124,11 @@ Before submitting:
 - [ ] Azure Resource Manager package added to both Directory.Packages.props and AzureMcp.csproj
 - [ ] All Azure SDK property names verified and correct
 - [ ] Resource access patterns use collections (e.g., `.GetSqlServers().GetAsync()`)
+- [ ] Subscription resolution uses `ISubscriptionService.GetSubscription()`
+- [ ] Service constructor includes `ISubscriptionService` injection for Azure resources
 - [ ] JSON serialization context includes all new model types
+- [ ] Live test infrastructure created (Bicep template in `/infra/services/`)
+- [ ] Test resources module added to `/infra/test-resources.bicep`
+- [ ] RBAC permissions configured for test application in Bicep template
+- [ ] Live tests use deployed resources via `Settings.ResourceBaseName` pattern
+- [ ] Resource outputs defined in Bicep template for test consumption
