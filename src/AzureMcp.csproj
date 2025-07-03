@@ -83,6 +83,13 @@
     <EmbeddedResource Include="Resources\azure-best-practices.txt" />
     <EmbeddedResource Include="Resources\azd-best-practices.txt" />
     <EmbeddedResource Include="Resources\aks_edge_essentials_steps.txt" />
+    <EmbeddedResource Include="Resources\prerequisites_aksee_installation.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\RemoveAksEdgeCompletely.ps1" />
+    <EmbeddedResource Include="Resources\ConfirmAksEdgeDeletion.ps1" />
+    <EmbeddedResource Include="Resources\ValidateSystemRequirements.ps1" />
   </ItemGroup>
 
   <!-- TODO: Remove after 5/19/25 -->

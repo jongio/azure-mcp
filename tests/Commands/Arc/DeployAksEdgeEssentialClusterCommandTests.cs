@@ -51,10 +51,10 @@ public class DeployAksEdgeEssentialClusterCommandTests
     {
         // Arrange
         var mockService = new Mock<IArcService>();
-        mockService.Setup(s => s.LoadDeploymentSteps()).Returns("Sample deployment steps");
+        mockService.Setup(s => s.LoadResourceFiles(It.IsAny<string>())).Returns("Sample deployment steps");
 
         // Act
-        var deploymentSteps = mockService.Object.LoadDeploymentSteps();
+        var deploymentSteps = mockService.Object.LoadResourceFiles("AzureMcp.Resources.aks_edge_essentials_steps.txt");
 
         // Assert
         Assert.NotNull(deploymentSteps);

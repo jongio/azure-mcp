@@ -104,3 +104,4 @@ foreach ($serviceName in $services) {
 }
 
 Write-Host "\nDeletion confirmation completed." -ForegroundColor Cyan
+Start-Sleep -Seconds 15

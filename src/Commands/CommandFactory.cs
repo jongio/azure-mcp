@@ -426,6 +426,10 @@ public class CommandFactory
        arcService));
         arc.AddCommand("remove-cluster-installation", new Arc.RemoveAksEdgeCommand(
             GetLogger<Arc.RemoveAksEdgeCommand>(), arcService));
+        arc.AddCommand("validate-prerequisites-aksee-cluster", new Arc.ValidatePrerequisitesForAksEdgeClusterCommand(
+            GetLogger<Arc.ValidatePrerequisitesForAksEdgeClusterCommand>(), arcService));
+        arc.AddCommand("validate-system-requirements-hyperv", new Arc.ValidateSystemRequirementsAndSetupHyperVCommand(
+            GetLogger<Arc.ValidateSystemRequirementsAndSetupHyperVCommand>(), arcService));
     }
 
 

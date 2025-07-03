@@ -11,8 +11,10 @@ namespace AzureMcp.Services.Azure.Arc
 {
     public class ArcService : BaseAzureService, IArcService
     {
-        private const string ResourceName = "AzureMcp.Resources.aks_edge_essentials_steps.txt";
+        private const string EdgeEssentialsDeploymentSteps = "AzureMcp.Resources.aks_edge_essentials_steps.txt";
+        private const string PrerequisitesAksEdgeInstallationSteps = "AzureMcp.Resources.prerequisites_aksee_installation.txt";
         private const string RemoveAksEdgeClusterScript = "AzureMcp.Resources.RemoveAksEdgeCompletely.ps1";
+        private const string ValidateSystemRequirements = "AzureMcp.Resources.ValidateSystemRequirements.ps1";
 
         private const string ConfirmAksEdgeClusterRemovalScript = "AzureMcp.Resources.ConfirmAksEdgeDeletion.ps1";
         private readonly Assembly _assembly;
@@ -22,30 +24,20 @@ namespace AzureMcp.Services.Azure.Arc
             _assembly = typeof(ArcService).Assembly;
         }
 
-        public Task<DeploymentResult> DeployAksEdgeEssentialClusterAsync()
+        public async Task<DeploymentResult> DeployAksEdgeEssentialClusterAsync()
         {
-            string deploymentSteps = LoadDeploymentSteps();
-            return Task.FromResult(new DeploymentResult
+            string deploymentSteps = await Task.Run(() => LoadResourceFiles(EdgeEssentialsDeploymentSteps));
+            return new DeploymentResult
             {
                 Success = true,
                 Steps = deploymentSteps
-            });
+            };
         }
 
         public async Task<bool> DeployAksClusterToArcAsync(string resourceGroup, string clusterName, string location)
         {
-            try
-            {
-                string deploymentSteps = await Task.Run(() => LoadDeploymentSteps());
-                Console.WriteLine($"Deploying AKS cluster '{clusterName}' to resource group '{resourceGroup}' in location '{location}'...");
-                Console.WriteLine(deploymentSteps);
-                return true;
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error during deployment: {ex.Message}");
-                return false;
-            }
+            await Task.Delay(0); // Placeholder for async operation
+            return false;
         }
 
 
@@ -148,20 +140,20 @@ namespace AzureMcp.Services.Azure.Arc
         {
             try
             {
-                var scriptPath = RemoveAksEdgeClusterScript;
+                // Extract the embedded script to a temporary file
+                string tempScriptPath = Path.Combine(Path.GetTempPath(), "RemoveAksEdgeCompletely.ps1");
+                File.WriteAllText(tempScriptPath, LoadResourceFiles(RemoveAksEdgeClusterScript));
+
                 var processStartInfo = new ProcessStartInfo
                 {
                     FileName = "powershell.exe",
-                    Arguments = $"-ExecutionPolicy Bypass -File \"{scriptPath}\" -Force",
+                    Arguments = $"-ExecutionPolicy Bypass -File \"{tempScriptPath}\" -Force",
                     UseShellExecute = true,
                     Verb = "runas"
                 };
 
-                using var process = Process.Start(processStartInfo);
-                if (process != null)
-                {
-                    await process.WaitForExitAsync();
-                }
+                using var process = StartProcess(tempScriptPath, processStartInfo);
+                await process.WaitForExitAsync();
             }
             catch (Exception ex)
             {
@@ -170,21 +162,20 @@ namespace AzureMcp.Services.Azure.Arc
 
             try
             {
-                // Execute ConfirmAksEdgeDeletion.ps1 irrespective of exception
-                var confirmScriptPath = ConfirmAksEdgeClusterRemovalScript;
+                // Extract the confirmation script to a temporary file
+                string tempConfirmScriptPath = Path.Combine(Path.GetTempPath(), "ConfirmAksEdgeDeletion.ps1");
+                File.WriteAllText(tempConfirmScriptPath, LoadResourceFiles(ConfirmAksEdgeClusterRemovalScript));
+
                 var confirmProcessStartInfo = new ProcessStartInfo
                 {
                     FileName = "powershell.exe",
-                    Arguments = $"-ExecutionPolicy Bypass -File \"{confirmScriptPath}\"",
+                    Arguments = $"-ExecutionPolicy Bypass -File \"{tempConfirmScriptPath}\" -Force",
                     UseShellExecute = true,
                     Verb = "runas"
                 };
 
-                using var confirmProcess = Process.Start(confirmProcessStartInfo);
-                if (confirmProcess != null)
-                {
-                    await confirmProcess.WaitForExitAsync();
-                }
+                using var confirmProcess = StartProcess(tempConfirmScriptPath, confirmProcessStartInfo);
+                await confirmProcess.WaitForExitAsync();
             }
             catch (Exception ex)
             {
@@ -194,9 +185,73 @@ namespace AzureMcp.Services.Azure.Arc
             return true;
         }
 
-        public string LoadDeploymentSteps()
+        /** public string LoadDeploymentSteps()
+         {
+             return EmbeddedResourceHelper.ReadEmbeddedResource(_assembly, ResourceName);
+         }**/
+        public string LoadResourceFiles(string resourceName)
         {
-            return EmbeddedResourceHelper.ReadEmbeddedResource(_assembly, ResourceName);
+            return EmbeddedResourceHelper.ReadEmbeddedResource(_assembly, resourceName);
+        }
+
+        public async Task<DeploymentResult> ValidatePrerequisitesForAksEdgeClusterAsync()
+        {
+            string prerequisiteSteps = await Task.Run(() => LoadResourceFiles(PrerequisitesAksEdgeInstallationSteps));
+            return new DeploymentResult
+            {
+                Success = true,
+                Steps = prerequisiteSteps
+            };
+        }
+
+        public async Task<DeploymentResult> ValidateSystemRequirementsAndSetupHyperVAsync()
+        {
+            // Extract the confirmation script to a temporary file
+            string tempConfirmScriptPath = Path.Combine(Path.GetTempPath(), "ValidateSystemRequirements.ps1");
+            File.WriteAllText(tempConfirmScriptPath, LoadResourceFiles(ValidateSystemRequirements));
+
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = "powershell.exe",
+                Arguments = $"-ExecutionPolicy Bypass -File \"{tempConfirmScriptPath}\" -Force",
+                UseShellExecute = true,
+                Verb = "runas"
+            };
+
+            using var process = StartProcess(tempConfirmScriptPath, processStartInfo);
+            if (process == null)
+            {
+                throw new InvalidOperationException("Failed to start the system requirements validation script.");
+            }
+
+            await process.WaitForExitAsync();
+
+            if (process.ExitCode != 0)
+            {
+                throw new InvalidOperationException($"Script execution failed with exit code {process.ExitCode}.");
+            }
+
+            return new DeploymentResult
+            {
+                Success = true,
+                Steps = "System requirements validated and Hyper-V setup successfully."
+            };
+        }
+
+        public Process StartProcess(string scriptPath, ProcessStartInfo processInfo)
+        {
+            if (!File.Exists(scriptPath))
+            {
+                throw new FileNotFoundException("The specified script file was not found.", scriptPath);
+            }
+
+            var process = Process.Start(processInfo);
+            if (process == null)
+            {
+                throw new InvalidOperationException("Failed to start the process.");
+            }
+
+            return process;
         }
     }
 

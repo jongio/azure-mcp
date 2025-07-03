@@ -245,4 +245,4 @@ Write-Host "`nRecommended next steps:" -ForegroundColor Yellow
 Write-Host "  1. Restart your computer to ensure all changes take effect" -ForegroundColor Gray
 Write-Host "  2. If you plan to reinstall, download the latest version from:" -ForegroundColor Gray
 Write-Host "     https://aka.ms/aks-edge/msi" -ForegroundColor Blue
-
+Start-Sleep -Seconds 15
