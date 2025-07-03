@@ -21,7 +21,7 @@ function New-StringHash($string) {
     return [BitConverter]::ToString($hashBytes) -replace '-', ''
 }
 
-$suffix = if ($Unique) { [guid]::NewGuid().ToString() } else { New-StringHash $account.Id }
+$suffix = ($Unique ? [guid]::NewGuid().ToString() : (New-StringHash $account.Id)).ToLower().Substring(0, 8)
 $suffix = $suffix.ToLower().Substring(0, 8)
 
 if(!$BaseName) {
@@ -35,7 +35,7 @@ if(!$ResourceGroupName) {
 
 Push-Location $RepoRoot
 try {
-    $armParameters = @{ areas = $Areas }
+    $armParameters = @{ areas = ($Areas ?? @()) }
 
     Write-Host "Deploying:`n  ResourceGroupName: `"$ResourceGroupName`"`n  BaseName: `"$BaseName`"`n  DeleteAfterHours: $DeleteAfterHours`n  Location: `"$(if ($Location) { $Location } else { 'default' })`"`n  ArmTemplateParameters: $(ConvertTo-Json $armParameters -Compress)"
 

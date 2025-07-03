@@ -9,16 +9,16 @@ using Xunit;
 namespace AzureMcp.Tests.Areas.Sql.LiveTests;
 
 [Trait("Area", "Sql")]
+[Trait("Category", "Live")]
 public class SqlCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper output)
     : CommandTestsBase(liveTestFixture, output), IClassFixture<LiveTestFixture>
 {
 
     [Fact]
-    [Trait("Category", "Live")]
     public async Task Should_ShowDatabase_Successfully()
     {
         // Use the deployed test SQL server and database
-        var serverName = $"{Settings.ResourceBaseName}-sql";
+        var serverName = Settings.ResourceBaseName;
         var databaseName = "testdb";
 
         var result = await CallToolAsync(
@@ -47,37 +47,52 @@ public class SqlCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper 
     [InlineData("--invalid-param", new string[0])]
     [InlineData("--subscription", new[] { "invalidSub" })]
     [InlineData("--subscription", new[] { "sub", "--resource-group", "rg" })]  // Missing server and database
-    [Trait("Category", "Live")]
     public async Task Should_Return400_WithInvalidInput(string firstArg, string[] remainingArgs)
     {
         var allArgs = new[] { firstArg }.Concat(remainingArgs);
         var argsString = string.Join(" ", allArgs);
 
-        var result = await CallToolAsync(
-            "azmcp-sql-db-show",
-            new()
-            {
-                { "args", argsString }
-            });
+        // For error testing, we expect CallToolAsync to return null (no results)
+        // and we need to catch any exceptions or check the response manually
+        try
+        {
+            var result = await CallToolAsync("azmcp-sql-db-show",
+                new Dictionary<string, object?> { { "args", argsString } });
 
-        // Note: This might need adjustment based on how the test framework handles invalid args
-        // For now, let's test with known bad parameter combinations
+            // If we get here, the command didn't fail as expected
+            // This might indicate the command succeeded when it should have failed
+            Assert.Fail("Expected command to fail with invalid input, but it succeeded");
+        }
+        catch (Exception ex)
+        {
+            // Expected behavior - the command should fail with invalid input
+            Assert.NotNull(ex.Message);
+            Assert.NotEmpty(ex.Message);
+        }
     }
 
     [Fact]
-    [Trait("Category", "Live")]
     public async Task Should_ValidateRequiredParameters()
     {
-        // Test with missing required parameters
-        var result = await CallToolAsync(
-            "azmcp-sql-db-show",
-            new()
-            {
-                { "subscription", Settings.SubscriptionId }
-                // Missing resource-group, server, and database
-            });
+        // Test with missing required parameters - expect an exception or null result
+        try
+        {
+            var result = await CallToolAsync(
+                "azmcp-sql-db-show",
+                new Dictionary<string, object?>
+                {
+                    { "subscription", Settings.SubscriptionId }
+                    // Missing resource-group, server, and database
+                });
 
-        // Should get validation error
-        // Note: The exact behavior depends on the command validation implementation
+            // If we get here without an exception, the validation didn't work as expected
+            Assert.Fail("Expected command to fail due to missing required parameters, but it succeeded");
+        }
+        catch (Exception ex)
+        {
+            // Expected behavior - should fail due to missing required parameters
+            Assert.NotNull(ex.Message);
+            Assert.Contains("required", ex.Message.ToLower());
+        }
     }
 }

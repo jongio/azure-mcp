@@ -20,7 +20,7 @@ param sqlAdminPassword string = newGuid()
 
 // SQL Server resource
 resource sqlServer 'Microsoft.Sql/servers@2023-05-01-preview' = {
-  name: '${baseName}-sql'
+  name: baseName
   location: location
   properties: {
     administratorLogin: sqlAdminLogin

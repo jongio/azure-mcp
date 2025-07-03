@@ -7,7 +7,7 @@ $ErrorActionPreference = "Stop"
 
 . "$PSScriptRoot/../../eng/common/scripts/common.ps1"
 
-$sqlServerName = "$BaseName-sql"
+$sqlServerName = $BaseName
 
 Write-Host "Verifying SQL Server deployment: $sqlServerName" -ForegroundColor Yellow
 
