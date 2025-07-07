@@ -30,24 +30,6 @@ resource sqlServer 'Microsoft.Sql/servers@2023-05-01-preview' = {
     publicNetworkAccess: 'Enabled'
   }
 
-  // Firewall rule to allow Azure services
-  resource allowAzureServices 'firewallRules@2023-05-01-preview' = {
-    name: 'AllowAllWindowsAzureIps'
-    properties: {
-      startIpAddress: '0.0.0.0'
-      endIpAddress: '0.0.0.0'
-    }
-  }
-
-  // Firewall rule to allow all IPs for testing (not recommended for production)
-  resource allowAllIPs 'firewallRules@2023-05-01-preview' = {
-    name: 'AllowAllIPs'
-    properties: {
-      startIpAddress: '0.0.0.0'
-      endIpAddress: '255.255.255.255'
-    }
-  }
-
   // Test database
   resource testDatabase 'databases@2023-05-01-preview' = {
     name: 'testdb'
