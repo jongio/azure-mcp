@@ -1141,9 +1141,11 @@ Before submitting:
 - [ ] **CHANGELOG.md**: Add entry under "Unreleased" section describing the new command(s)
 - [ ] **docs/azmcp-commands.md**: Add command documentation with description, syntax, parameters, and examples
 - [ ] **README.md**: Update the supported services table and add example prompts demonstrating the new command(s)
+- [ ] **e2eTests/e2eTestPrompts.md**: Add test prompts for end-to-end validation of the new command(s)
 
 **Documentation Standards**:
 - Use consistent command paths in all documentation (e.g., `azmcp sql db show`, not `azmcp sql database show`)
 - Provide clear, actionable examples in README.md that users can run
 - Include parameter descriptions and required vs optional indicators in azmcp-commands.md
 - Keep CHANGELOG.md entries concise but descriptive of the capability added
+- Add test prompts to e2eTestPrompts.md following the established naming convention and provide multiple prompt variations
