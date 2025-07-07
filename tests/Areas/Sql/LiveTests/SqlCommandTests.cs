@@ -123,7 +123,7 @@ public class SqlCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper 
             {
                 var firstAdmin = admins.EnumerateArray().First();
                 Assert.Equal(JsonValueKind.Object, firstAdmin.ValueKind);
-                
+
                 // Verify required properties exist
                 Assert.True(firstAdmin.TryGetProperty("administratorType", out _));
                 Assert.True(firstAdmin.TryGetProperty("login", out _));
