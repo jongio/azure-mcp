@@ -25,4 +25,20 @@ public interface ISqlService
         string subscription,
         RetryPolicyOptions? retryPolicy,
         CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets a list of Azure Active Directory administrators for a SQL server.
+    /// </summary>
+    /// <param name="serverName">The name of the SQL server</param>
+    /// <param name="resourceGroup">The resource group name</param>
+    /// <param name="subscription">The subscription ID or name</param>
+    /// <param name="retryPolicy">Optional retry policy options</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>A list of SQL server AD administrators</returns>
+    Task<List<SqlServerAdAdministrator>> GetAdAdministratorsAsync(
+        string serverName,
+        string resourceGroup,
+        string subscription,
+        RetryPolicyOptions? retryPolicy,
+        CancellationToken cancellationToken = default);
 }
