@@ -107,7 +107,7 @@ module sql 'services/sql.bicep' = if (empty(areas) || contains(areas, 'Sql')) {
   name: '${deploymentName}-sql'
   params: {
     baseName: baseName
-    location: location
+    location: 'westus2'
     testApplicationOid: testApplicationOid
   }
 }
