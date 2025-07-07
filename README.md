@@ -50,22 +50,16 @@ Here's a short (16 seconds) video to help you get the Azure MCP Server installed
 
 The Azure MCP Server supercharges your agents with Azure context. Here are some cool prompts you can try:
 
-### �️ Azure SQL Database
-- "Show me details about my Azure SQL database 'mydb'"
-- "List Active Directory administrators for my SQL server 'myserver'"
+### 🔎 Azure AI Search
+- "What indexes do I have in my Azure AI Search service 'mysvc'?"
+- "Let's search this index for 'my search query'"
 
-### 💾 Azure Storage  
-- "List my Azure storage accounts"
-- "Show me the tables in my Storage account"
-- "Get details about my Storage container"
+### ⚙️ Azure App Configuration
+- "List my App Configuration stores"
 
 ### 📊 Azure Cosmos DB
 - "Show me all my Cosmos DB databases"
 - "List containers in my Cosmos DB database"
-
-### 🔎 Azure AI Search
-- "What indexes do I have in my Azure AI Search service 'mysvc'?"
-- "Let's search this index for 'my search query'"
 
 ### 🧮 Azure Data Explorer
 - "Get Azure Data Explorer databases in cluster 'mycluster'"
@@ -74,8 +68,14 @@ The Azure MCP Server supercharges your agents with Azure context. Here are some 
 ### 📊 Azure Monitor
 - "Query my Log Analytics workspace"
 
-### ⚙️ Azure App Configuration
-- "List my App Configuration stores"
+### �️ Azure SQL Database
+- "Show me details about my Azure SQL database 'mydb'"
+- "List Active Directory administrators for my SQL server 'myserver'"
+
+### 💾 Azure Storage  
+- "List my Azure storage accounts"
+- "Show me the tables in my Storage account"
+- "Get details about my Storage container"
 - "Show my key-value pairs in App Config"
 
 ### 🔧 Azure Resource Management
@@ -93,19 +93,23 @@ The Azure MCP Server supercharges your agents with Azure context. Here are some 
 - List indexes and look at their schema and configuration
 - Query search indexes
 
-### 📊 Azure Cosmos DB (NoSQL Databases)
+### ⚙️ Azure App Configuration
+- List App Configuration stores
+- Manage key-value pairs
+- Handle labeled configurations
+- Lock/unlock configuration settings
+
+### � Azure CLI Extension
+- Execute Azure CLI commands directly
+- Support for all Azure CLI functionality
+- JSON output formatting
+- Cross-platform compatibility
+
+### �📊 Azure Cosmos DB (NoSQL Databases)
 - List Cosmos DB accounts
 - List and query databases
 - Manage containers and items
 - Execute SQL queries against containers
-
-### 🐘 Azure Database for PostgreSQL - Flexible Server
-- List and query databases.
-- List and get schema for tables.
-- List, get configuration and get parameters for servers.
-
-### 🗄️ Azure SQL Database
-- Show database details and properties
 
 ### 🧮 Azure Data Explorer
 - List Azure Data Explorer clusters
@@ -115,16 +119,23 @@ The Azure MCP Server supercharges your agents with Azure context. Here are some 
 - Sample rows from a table
 - Query using KQL
 
-- ### 🧮 Azure Foundry
+### 🐘 Azure Database for PostgreSQL - Flexible Server
+- List and query databases.
+- List and get schema for tables.
+- List, get configuration and get parameters for servers.
+
+### � Azure Developer CLI (azd) Extension
+- Execute Azure Developer CLI commands directly
+- Support for template discovery, template initialization, provisioning and deployment
+- Cross-platform compatibility
+
+### 🧮 Azure Foundry
 - List Azure Foundry models
 - Deploy foundry models
 - List foundry model deployments
 
-### 💾 Azure Storage
-- List Storage accounts
-- Manage blob containers and blobs
-- List and query Storage tables
-- Get container properties and metadata
+### � Azure Key Vault
+- List, create, and get keys
 
 ### 📈 Azure Monitor
 #### Log Analytics
@@ -139,37 +150,26 @@ The Azure MCP Server supercharges your agents with Azure context. Here are some 
 - Query Azure Monitor metrics for resources with time series data
 - List available metric definitions for resources
 
-### ⚙️ Azure App Configuration
-- List App Configuration stores
-- Manage key-value pairs
-- Handle labeled configurations
-- Lock/unlock configuration settings
+### ⚙️ Azure Native ISV Services
+- List Monitored Resources in a Datadog Monitor
 
-### 🔑 Azure Key Vault
-- List, create, and get keys
+### � Azure Resource Groups
+- List resource groups
 
 ### 🎭 Azure Role-Based Access Control (RBAC)
 - List role assignments
 
-### 📦 Azure Resource Groups
-- List resource groups
-
 ### 🚌 Azure Service Bus
 - Examine properties and runtime information about queues, topics, and subscriptions
 
-### ⚙️ Azure Native ISV Services
-- List Monitored Resources in a Datadog Monitor
+### 🗄️ Azure SQL Database
+- Show database details and properties
 
-### 🔧 Azure CLI Extension
-- Execute Azure CLI commands directly
-- Support for all Azure CLI functionality
-- JSON output formatting
-- Cross-platform compatibility
-
-### 🚀 Azure Developer CLI (azd) Extension
-- Execute Azure Developer CLI commands directly
-- Support for template discovery, template initialization, provisioning and deployment
-- Cross-platform compatibility
+### � Azure Storage
+- List Storage accounts
+- Manage blob containers and blobs
+- List and query Storage tables
+- Get container properties and metadata
 
 Agents and models can discover and learn best practices and usage guidelines for the `azd` MCP tool. For more information, see [AZD Best Practices](https://github.com/Azure/azure-mcp/tree/main/src/Areas/Extension/Resources/azd-best-practices.txt).
 
