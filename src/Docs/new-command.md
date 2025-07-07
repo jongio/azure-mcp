@@ -1146,6 +1146,7 @@ Before submitting:
 - [ ] Tests pass (run specific tests: `dotnet test --filter "FullyQualifiedName~YourCommandTests"`)
 - [ ] Build succeeds with `dotnet build`
 - [ ] Code formatting applied with `dotnet format`
+- [ ] Spelling check passes with `.\eng\common\spelling\Invoke-Cspell.ps1`
 - [ ] **Remove unnecessary using statements from all C# files** (use IDE cleanup or `dotnet format analyzers`)
 - [ ] Azure Resource Manager package added to both Directory.Packages.props and AzureMcp.csproj
 - [ ] All Azure SDK property names verified and correct
