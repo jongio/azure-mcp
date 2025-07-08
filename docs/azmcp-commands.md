@@ -505,8 +505,8 @@ azmcp sql db show --subscription <subscription> \
 
 ### Azure SQL Server Operations
 ```bash
-# List Active Directory administrators for a SQL server
-azmcp sql server adadmin list --subscription <subscription> \
+# List Microsoft Entra ID administrators for a SQL server
+azmcp sql server entraadmin list --subscription <subscription> \
                               --resource-group <resource-group> \
                               --server <server-name>
 ```

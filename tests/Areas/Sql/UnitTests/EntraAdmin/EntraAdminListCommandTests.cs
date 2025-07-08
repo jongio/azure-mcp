@@ -2,7 +2,7 @@
 // Licensed under the MIT License.
 
 using System.CommandLine.Parsing;
-using AzureMcp.Areas.Sql.Commands.AdAdmin;
+using AzureMcp.Areas.Sql.Commands.EntraAdmin;
 using AzureMcp.Areas.Sql.Models;
 using AzureMcp.Areas.Sql.Services;
 using AzureMcp.Models.Command;
@@ -11,22 +11,22 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Xunit;
 
-namespace AzureMcp.Tests.Areas.Sql.UnitTests.AdAdmin;
+namespace AzureMcp.Tests.Areas.Sql.UnitTests.EntraAdmin;
 
 [Trait("Area", "Sql")]
-public class AdAdminListCommandTests
+public class EntraAdminListCommandTests
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ISqlService _service;
-    private readonly ILogger<AdAdminListCommand> _logger;
-    private readonly AdAdminListCommand _command;
+    private readonly ILogger<EntraAdminListCommand> _logger;
+    private readonly EntraAdminListCommand _command;
     private readonly CommandContext _context;
     private readonly Parser _parser;
 
-    public AdAdminListCommandTests()
+    public EntraAdminListCommandTests()
     {
         _service = Substitute.For<ISqlService>();
-        _logger = Substitute.For<ILogger<AdAdminListCommand>>();
+        _logger = Substitute.For<ILogger<EntraAdminListCommand>>();
 
         var collection = new ServiceCollection();
         collection.AddSingleton(_service);
@@ -57,13 +57,13 @@ public class AdAdminListCommandTests
         // Arrange
         if (shouldSucceed)
         {
-            _service.GetAdAdministratorsAsync(
+            _service.GetEntraAdministratorsAsync(
                 Arg.Any<string>(),
                 Arg.Any<string>(),
                 Arg.Any<string>(),
                 Arg.Any<AzureMcp.Options.RetryPolicyOptions?>(),
                 Arg.Any<CancellationToken>())
-                .Returns(new List<SqlServerAdAdministrator>());
+                .Returns(new List<SqlServerEntraAdministrator>());
         }
 
         var context = new CommandContext(_serviceProvider);
@@ -88,14 +88,14 @@ public class AdAdminListCommandTests
     public async Task ExecuteAsync_ReturnsAdministratorsSuccessfully()
     {
         // Arrange
-        var administrators = new List<SqlServerAdAdministrator>
+        var administrators = new List<SqlServerEntraAdministrator>
         {
             new("ActiveDirectory", "/subscriptions/sub/resourceGroups/rg/providers/Microsoft.Sql/servers/server/administrators/ActiveDirectory",
                 "Microsoft.Sql/servers/administrators", "ActiveDirectory", "admin@domain.com", "12345678-1234-1234-1234-123456789012",
                 "87654321-4321-4321-4321-210987654321", false)
         };
 
-        _service.GetAdAdministratorsAsync(
+        _service.GetEntraAdministratorsAsync(
             "testserver",
             "testrg",
             "testsub",
@@ -119,13 +119,13 @@ public class AdAdminListCommandTests
     public async Task ExecuteAsync_ReturnsEmptyListWhenNoAdministrators()
     {
         // Arrange
-        _service.GetAdAdministratorsAsync(
+        _service.GetEntraAdministratorsAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<AzureMcp.Options.RetryPolicyOptions?>(),
             Arg.Any<CancellationToken>())
-            .Returns(new List<SqlServerAdAdministrator>());
+            .Returns(new List<SqlServerEntraAdministrator>());
 
         var context = new CommandContext(_serviceProvider);
         var parseResult = _parser.Parse("--subscription testsub --resource-group testrg --server testserver");
@@ -143,13 +143,13 @@ public class AdAdminListCommandTests
     public async Task ExecuteAsync_HandlesServiceErrors()
     {
         // Arrange
-        _service.GetAdAdministratorsAsync(
+        _service.GetEntraAdministratorsAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<AzureMcp.Options.RetryPolicyOptions?>(),
             Arg.Any<CancellationToken>())
-            .Returns(Task.FromException<List<SqlServerAdAdministrator>>(new Exception("Test error")));
+            .Returns(Task.FromException<List<SqlServerEntraAdministrator>>(new Exception("Test error")));
 
         var context = new CommandContext(_serviceProvider);
         var parseResult = _parser.Parse("--subscription testsub --resource-group testrg --server testserver");
@@ -168,13 +168,13 @@ public class AdAdminListCommandTests
     {
         // Arrange
         var requestException = new Azure.RequestFailedException(404, "Server not found");
-        _service.GetAdAdministratorsAsync(
+        _service.GetEntraAdministratorsAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<AzureMcp.Options.RetryPolicyOptions?>(),
             Arg.Any<CancellationToken>())
-            .Returns(Task.FromException<List<SqlServerAdAdministrator>>(requestException));
+            .Returns(Task.FromException<List<SqlServerEntraAdministrator>>(requestException));
 
         var context = new CommandContext(_serviceProvider);
         var parseResult = _parser.Parse("--subscription testsub --resource-group testrg --server testserver");
@@ -192,13 +192,13 @@ public class AdAdminListCommandTests
     {
         // Arrange
         var requestException = new Azure.RequestFailedException(403, "Access denied");
-        _service.GetAdAdministratorsAsync(
+        _service.GetEntraAdministratorsAsync(
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<string>(),
             Arg.Any<AzureMcp.Options.RetryPolicyOptions?>(),
             Arg.Any<CancellationToken>())
-            .Returns(Task.FromException<List<SqlServerAdAdministrator>>(requestException));
+            .Returns(Task.FromException<List<SqlServerEntraAdministrator>>(requestException));
 
         var context = new CommandContext(_serviceProvider);
         var parseResult = _parser.Parse("--subscription testsub --resource-group testrg --server testserver");

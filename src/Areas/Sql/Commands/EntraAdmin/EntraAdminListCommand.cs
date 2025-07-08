@@ -2,25 +2,25 @@
 // Licensed under the MIT License.
 
 using AzureMcp.Areas.Sql.Models;
-using AzureMcp.Areas.Sql.Options.AdAdmin;
+using AzureMcp.Areas.Sql.Options.EntraAdmin;
 using AzureMcp.Areas.Sql.Services;
 using AzureMcp.Services.Telemetry;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Areas.Sql.Commands.AdAdmin;
+namespace AzureMcp.Areas.Sql.Commands.EntraAdmin;
 
-public sealed class AdAdminListCommand(ILogger<AdAdminListCommand> logger)
-    : BaseSqlCommand<AdAdminListOptions>(logger)
+public sealed class EntraAdminListCommand(ILogger<EntraAdminListCommand> logger)
+    : BaseSqlCommand<EntraAdminListOptions>(logger)
 {
-    private const string CommandTitle = "List SQL Server AD Administrators";
+    private const string CommandTitle = "List SQL Server Entra ID Administrators";
 
     public override string Name => "list";
 
     public override string Description =>
         """
-        Gets a list of Azure Active Directory administrators for a SQL server. This command retrieves all 
-        AD administrators configured for the specified SQL server, including their display names, object IDs, 
-        and tenant information. Returns an array of AD administrator objects with their properties.
+        Gets a list of Microsoft Entra ID administrators for a SQL server. This command retrieves all 
+        Entra ID administrators configured for the specified SQL server, including their display names, object IDs, 
+        and tenant information. Returns an array of Entra ID administrator objects with their properties.
         """;
 
     public override string Title => CommandTitle;
@@ -44,7 +44,7 @@ public sealed class AdAdminListCommand(ILogger<AdAdminListCommand> logger)
 
             var sqlService = context.GetService<ISqlService>();
 
-            var administrators = await sqlService.GetAdAdministratorsAsync(
+            var administrators = await sqlService.GetEntraAdministratorsAsync(
                 options.Server!,
                 options.ResourceGroup!,
                 options.Subscription!,
@@ -52,14 +52,14 @@ public sealed class AdAdminListCommand(ILogger<AdAdminListCommand> logger)
 
             context.Response.Results = administrators?.Count > 0
                 ? ResponseResult.Create(
-                    new AdAdminListResult(administrators),
-                    SqlJsonContext.Default.AdAdminListResult)
+                    new EntraAdminListResult(administrators),
+                    SqlJsonContext.Default.EntraAdminListResult)
                 : null;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex,
-                "Error listing SQL server AD administrators. Server: {Server}, ResourceGroup: {ResourceGroup}, Options: {@Options}",
+                "Error listing SQL server Entra ID administrators. Server: {Server}, ResourceGroup: {ResourceGroup}, Options: {@Options}",
                 options.Server, options.ResourceGroup, options);
             HandleException(context, ex);
         }
@@ -83,5 +83,5 @@ public sealed class AdAdminListCommand(ILogger<AdAdminListCommand> logger)
         _ => base.GetStatusCode(ex)
     };
 
-    internal record AdAdminListResult(List<SqlServerAdAdministrator> Administrators);
+    internal record EntraAdminListResult(List<SqlServerEntraAdministrator> Administrators);
 }

@@ -1,12 +1,12 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-namespace AzureMcp.Areas.Sql.Options.AdAdmin;
+namespace AzureMcp.Areas.Sql.Options.EntraAdmin;
 
 /// <summary>
-/// Options for the SQL Server AD Admin List command.
+/// Options for the SQL Server Entra ID Admin List command.
 /// </summary>
-public class AdAdminListOptions : BaseSqlOptions
+public class EntraAdminListOptions : BaseSqlOptions
 {
     // No additional options needed - inherits subscription, resource group, and server from BaseSqlOptions
 }

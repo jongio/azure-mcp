@@ -27,15 +27,15 @@ public interface ISqlService
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Gets a list of Azure Active Directory administrators for a SQL server.
+    /// Gets a list of Microsoft Entra ID administrators for a SQL server.
     /// </summary>
     /// <param name="serverName">The name of the SQL server</param>
-    /// <param name="resourceGroup">The resource group name</param>
+    /// <param name="resourceGroup">The name of the resource group</param>
     /// <param name="subscription">The subscription ID or name</param>
     /// <param name="retryPolicy">Optional retry policy options</param>
     /// <param name="cancellationToken">Cancellation token</param>
-    /// <returns>A list of SQL server AD administrators</returns>
-    Task<List<SqlServerAdAdministrator>> GetAdAdministratorsAsync(
+    /// <returns>A list of SQL server Entra administrators</returns>
+    Task<List<SqlServerEntraAdministrator>> GetEntraAdministratorsAsync(
         string serverName,
         string resourceGroup,
         string subscription,

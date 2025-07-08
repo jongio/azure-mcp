@@ -216,9 +216,9 @@ This file contains prompts used for end-to-end testing to ensure each tool is in
 |:----------|:----------|
 | azmcp-sql-db-show | Show me the details of SQL database <database_name> in server <server_name> |
 | azmcp-sql-db-show | Get the configuration details for the SQL database <database_name> on server <server_name> |
-| azmcp-sql-server-adadmin-list | List Active Directory administrators for SQL server <server_name> |
-| azmcp-sql-server-adadmin-list | Show me the AD administrators configured for SQL server <server_name> |
-| azmcp-sql-server-adadmin-list | What Azure Active Directory administrators are set up for my SQL server <server_name>? |
+| azmcp-sql-server-entraadmin-list | List Microsoft Entra ID administrators for SQL server <server_name> |
+| azmcp-sql-server-entraadmin-list | Show me the Entra ID administrators configured for SQL server <server_name> |
+| azmcp-sql-server-entraadmin-list | What Microsoft Entra ID administrators are set up for my SQL server <server_name>? |
 
 ## Azure Storage
 

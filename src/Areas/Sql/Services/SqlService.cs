@@ -74,7 +74,7 @@ public class SqlService(ISubscriptionService subscriptionService, ITenantService
         }
     }
 
-    public async Task<List<SqlServerAdAdministrator>> GetAdAdministratorsAsync(
+    public async Task<List<SqlServerEntraAdministrator>> GetEntraAdministratorsAsync(
         string serverName,
         string resourceGroup,
         string subscription,
@@ -92,12 +92,12 @@ public class SqlService(ISubscriptionService subscriptionService, ITenantService
                 .GetSqlServers()
                 .GetAsync(serverName);
 
-            var adAdministrators = new List<SqlServerAdAdministrator>();
+            var entraAdministrators = new List<SqlServerEntraAdministrator>();
 
             await foreach (var adminResource in sqlServerResource.Value.GetSqlServerAzureADAdministrators().GetAllAsync(cancellationToken))
             {
                 var admin = adminResource.Data;
-                adAdministrators.Add(new SqlServerAdAdministrator(
+                entraAdministrators.Add(new SqlServerEntraAdministrator(
                     Name: admin.Name,
                     Id: admin.Id.ToString(),
                     Type: admin.ResourceType.ToString(),
@@ -109,12 +109,12 @@ public class SqlService(ISubscriptionService subscriptionService, ITenantService
                 ));
             }
 
-            return adAdministrators;
+            return entraAdministrators;
         }
         catch (Exception ex)
         {
             _logger.LogError(ex,
-                "Error getting SQL server AD administrators. Server: {Server}, ResourceGroup: {ResourceGroup}, Subscription: {Subscription}",
+                "Error getting SQL server Entra ID administrators. Server: {Server}, ResourceGroup: {ResourceGroup}, Subscription: {Subscription}",
                 serverName, resourceGroup, subscription);
             throw;
         }

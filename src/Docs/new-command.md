@@ -67,7 +67,7 @@ This keeps all code, options, models, and tests for a service together. See `src
    - Returns a standardized response format
 
    **IMPORTANT**: Command group names cannot contain dashes. Use camelCase or concatenated names instead:
-   - ✅ Good: `new CommandGroup("adadmin", "AD admin operations")`
+   - ✅ Good: `new CommandGroup("entraadmin", "Entra admin operations")`
    - ❌ Bad: `new CommandGroup("ad-admin", "AD admin operations")`
 
 
@@ -532,8 +532,8 @@ private void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFacto
 ```
 
 **IMPORTANT**: Command group names cannot contain dashes or special characters. Use camelCase or concatenated names:
-- ✅ Good: `"adadmin"`, `"resourcegroup"`, `"storageaccount"`
-- ❌ Bad: `"ad-admin"`, `"resource-group"`, `"storage-account"`
+- ✅ Good: `"entraadmin"`, `"resourcegroup"`, `"storageaccount"`
+- ❌ Bad: `"entra-admin"`, `"resource-group"`, `"storage-account"`
 
 ### 7. Area registration
 ```csharp
@@ -694,7 +694,7 @@ When developing new commands, run only your specific tests to save time:
 dotnet test --filter "FullyQualifiedName~YourCommandNameTests" --verbosity normal
 
 # Example: Run only SQL AD Admin tests
-dotnet test --filter "FullyQualifiedName~AdAdminListCommandTests" --verbosity normal
+dotnet test --filter "FullyQualifiedName~EntraAdminListCommandTests" --verbosity normal
 
 # Run all tests for a specific area
 dotnet test --filter "Area=Sql" --verbosity normal

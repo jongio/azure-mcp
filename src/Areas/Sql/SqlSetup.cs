@@ -1,8 +1,8 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using AzureMcp.Areas.Sql.Commands.AdAdmin;
 using AzureMcp.Areas.Sql.Commands.Database;
+using AzureMcp.Areas.Sql.Commands.EntraAdmin;
 using AzureMcp.Areas.Sql.Services;
 using AzureMcp.Commands;
 using Microsoft.Extensions.DependencyInjection;
@@ -30,9 +30,9 @@ public class SqlSetup : IAreaSetup
         var server = new CommandGroup("server", "SQL server operations");
         sql.AddSubGroup(server);
 
-        var adAdmin = new CommandGroup("adadmin", "SQL server Active Directory administrator operations");
-        server.AddSubGroup(adAdmin);
+        var entraAdmin = new CommandGroup("entraadmin", "SQL server Microsoft Entra ID administrator operations");
+        server.AddSubGroup(entraAdmin);
 
-        adAdmin.AddCommand("list", new AdAdminListCommand(loggerFactory.CreateLogger<AdAdminListCommand>()));
+        entraAdmin.AddCommand("list", new EntraAdminListCommand(loggerFactory.CreateLogger<EntraAdminListCommand>()));
     }
 }

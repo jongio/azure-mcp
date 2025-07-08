@@ -6,9 +6,9 @@ using System.Text.Json.Serialization;
 namespace AzureMcp.Areas.Sql.Models;
 
 /// <summary>
-/// Represents an Azure SQL Server Active Directory administrator.
+/// Represents an Azure SQL Server Microsoft Entra ID administrator.
 /// </summary>
-public record SqlServerAdAdministrator(
+public record SqlServerEntraAdministrator(
     [property: JsonPropertyName("name")] string Name,
     [property: JsonPropertyName("id")] string Id,
     [property: JsonPropertyName("type")] string Type,

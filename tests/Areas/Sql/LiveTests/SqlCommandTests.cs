@@ -97,13 +97,13 @@ public class SqlCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper 
     }
 
     [Fact]
-    public async Task Should_ListSqlServerAdAdmins_Successfully()
+    public async Task Should_ListSqlServerEntraAdmins_Successfully()
     {
         // Use the deployed test SQL server
         var serverName = Settings.ResourceBaseName;
 
         var result = await CallToolAsync(
-            "azmcp-sql-server-adadmin-list",
+            "azmcp-sql-server-entraadmin-list",
             new()
             {
                 { "subscription", Settings.SubscriptionId },
@@ -111,7 +111,7 @@ public class SqlCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper 
                 { "server", serverName }
             });
 
-        // The command should succeed, but results may be null if no AD admins are configured
+        // The command should succeed, but results may be null if no Entra admins are configured
         if (result.HasValue)
         {
             // If there are results, verify the structure
