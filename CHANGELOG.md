@@ -8,6 +8,7 @@
 ### Breaking Changes
 
 ### Bugs Fixed
+- Updated README table with --namespace and update descriptions. [#551](https://github.com/Azure/azure-mcp/pull/551)
 
 ### Other Changes
 
