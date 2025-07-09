@@ -15,6 +15,8 @@ namespace AzureMcp.Services.Azure.Arc
         private const string PrerequisitesAksEdgeInstallationSteps = "AzureMcp.Resources.prerequisites_aksee_installation.txt";
         private const string RemoveAksEdgeClusterScript = "AzureMcp.Resources.RemoveAksEdgeCompletely.ps1";
         private const string ValidateSystemRequirements = "AzureMcp.Resources.ValidateSystemRequirements.ps1";
+        private const string ValidateAndInstallSwRequirementScript = "AzureMcp.Resources.Arc.ValidateAndInstallSoftwarerequirements.ps1";
+        private const string AksEdgeQuickDeployScript = "AzureMcp.Resources.Arc.AksEdgeQuickDeploy.ps1";
 
         private const string ConfirmAksEdgeClusterRemovalScript = "AzureMcp.Resources.ConfirmAksEdgeDeletion.ps1";
         private readonly Assembly _assembly;
@@ -136,12 +138,12 @@ namespace AzureMcp.Services.Azure.Arc
                 return false;
             }
         }
-        public async Task<bool> RemoveAksEdgeAsync()
+        public async Task<bool> RemoveAksEdgeAsync(string userProvidedPath)
         {
             try
             {
                 // Extract the embedded script to a temporary file
-                string tempScriptPath = Path.Combine(Path.GetTempPath(), "RemoveAksEdgeCompletely.ps1");
+                string tempScriptPath = Path.Combine(userProvidedPath, "RemoveAksEdgeCompletely.ps1");
                 File.WriteAllText(tempScriptPath, LoadResourceFiles(RemoveAksEdgeClusterScript));
 
                 var processStartInfo = new ProcessStartInfo
@@ -163,7 +165,7 @@ namespace AzureMcp.Services.Azure.Arc
             try
             {
                 // Extract the confirmation script to a temporary file
-                string tempConfirmScriptPath = Path.Combine(Path.GetTempPath(), "ConfirmAksEdgeDeletion.ps1");
+                string tempConfirmScriptPath = Path.Combine(userProvidedPath, "ConfirmAksEdgeDeletion.ps1");
                 File.WriteAllText(tempConfirmScriptPath, LoadResourceFiles(ConfirmAksEdgeClusterRemovalScript));
 
                 var confirmProcessStartInfo = new ProcessStartInfo
@@ -204,21 +206,26 @@ namespace AzureMcp.Services.Azure.Arc
             };
         }
 
-        public async Task<DeploymentResult> ValidateSystemRequirementsAndSetupHyperVAsync()
+        public async Task<DeploymentResult> ValidateSystemRequirementsAndSetupHyperVAsync(string userProvidedPath)
         {
-            // Extract the confirmation script to a temporary file
-            string tempConfirmScriptPath = Path.Combine(Path.GetTempPath(), "ValidateSystemRequirements.ps1");
-            File.WriteAllText(tempConfirmScriptPath, LoadResourceFiles(ValidateSystemRequirements));
+            // Ensure the directory exists
+            if (!Directory.Exists(userProvidedPath))
+            {
+                Directory.CreateDirectory(userProvidedPath);
+            }
+
+            string tempScriptPath = Path.Combine(userProvidedPath, "ValidateSystemRequirements.ps1");
+            File.WriteAllText(tempScriptPath, LoadResourceFiles(ValidateSystemRequirements));
 
             var processStartInfo = new ProcessStartInfo
             {
                 FileName = "powershell.exe",
-                Arguments = $"-ExecutionPolicy Bypass -File \"{tempConfirmScriptPath}\" -Force",
+                Arguments = $"-ExecutionPolicy Bypass -File \"{tempScriptPath}\" -Force",
                 UseShellExecute = true,
                 Verb = "runas"
             };
 
-            using var process = StartProcess(tempConfirmScriptPath, processStartInfo);
+            using var process = StartProcess(tempScriptPath, processStartInfo);
             if (process == null)
             {
                 throw new InvalidOperationException("Failed to start the system requirements validation script.");
@@ -238,6 +245,86 @@ namespace AzureMcp.Services.Azure.Arc
             };
         }
 
+        public async Task<DeploymentResult> ValidateAndInstallSwRequirementAsync(string userProvidedPath)
+        {
+            // Ensure the directory exists
+            if (!Directory.Exists(userProvidedPath))
+            {
+                Directory.CreateDirectory(userProvidedPath);
+            }
+
+            string tempScriptPath = Path.Combine(userProvidedPath, "ValidateAndInstallSoftwarerequirements.ps1");
+            File.WriteAllText(tempScriptPath, LoadResourceFiles(ValidateAndInstallSwRequirementScript));
+
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = "powershell.exe",
+                Arguments = $"-ExecutionPolicy Bypass -File \"{tempScriptPath}\" -Force",
+                UseShellExecute = true,
+                Verb = "runas"
+            };
+
+            using var process = StartProcess(tempScriptPath, processStartInfo);
+            if (process == null)
+            {
+                throw new InvalidOperationException("Failed to start the software requirements validation and installation script.");
+            }
+
+            await process.WaitForExitAsync();
+
+            if (process.ExitCode != 0)
+            {
+                throw new InvalidOperationException($"Script execution failed with exit code {process.ExitCode}.");
+            }
+
+            return new DeploymentResult
+            {
+                Success = true,
+                Steps = "Software requirements validated and installed successfully."
+            };
+        }
+
+        public async Task<DeploymentResult> QuickDeployAksEdgeEssentialsAsync(string clusterName, string resourceGroupName, string subscriptionId, string tenantId, string location, string userProvidedPath)
+        {
+            // Ensure the directory exists
+            if (!Directory.Exists(userProvidedPath))
+            {
+                Directory.CreateDirectory(userProvidedPath);
+            }
+
+            string tempScriptPath = Path.Combine(userProvidedPath, "AksEdgeQuickDeploy.ps1");
+            File.WriteAllText(tempScriptPath, LoadResourceFiles(AksEdgeQuickDeployScript));
+
+            var arguments = $"-ExecutionPolicy Bypass -File \"{tempScriptPath}\" -Force";
+
+            if (!string.IsNullOrEmpty(clusterName))
+                arguments += $" -ClusterName {clusterName}";
+            if (!string.IsNullOrEmpty(resourceGroupName))
+                arguments += $" -ResourceGroupName {resourceGroupName}";
+            if (!string.IsNullOrEmpty(subscriptionId))
+                arguments += $" -SubscriptionId {subscriptionId}";
+            if (!string.IsNullOrEmpty(tenantId))
+                arguments += $" -TenantId {tenantId}";
+            if (!string.IsNullOrEmpty(location))
+                arguments += $" -Location {location}";
+
+            var processStartInfo = new ProcessStartInfo
+            {
+                FileName = "powershell.exe",
+                Arguments = arguments,
+                UseShellExecute = true,
+                Verb = "runas"
+            };
+
+            Process process = StartProcess(tempScriptPath, processStartInfo);
+            await Task.Run(() => process.WaitForExit());
+
+            return new DeploymentResult
+            {
+                Success = process.ExitCode == 0,
+                Steps = process.ExitCode == 0 ? "Deployment completed successfully." : "Deployment failed."
+            };
+        }
         public Process StartProcess(string scriptPath, ProcessStartInfo processInfo)
         {
             if (!File.Exists(scriptPath))

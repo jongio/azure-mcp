@@ -28,7 +28,10 @@ The prerequisites for installing an AKS Edge Essentials cluster are as follows:
 
 ### **Follow below steps to start installing Aks Edge Essential Cluster**. 
 1. **Validate System Requirements and set up Hyper-v** if needed.
-2. **Validate Network Requirements and set up switch, IPv4** if needed.
-3. **Validate Software Requirements and download and install AKS Edge Essentials MSI** if needed.
+2. **Validate Software Requirements and download and install AKS Edge Essentials MSI** if needed.
+3. **Quick Deploy Aks Edge Essentials (switch and IPv4 will be created if not there already).
+4. **Quick Remove all Edge Essential related installations.
+5. **Connect to arc, if you already deployed Edge Essentials.
+6. **Disconnect to arc, if Aks Cluster is already arc connected.
  
 Let me know if you need to run any of the commands above!

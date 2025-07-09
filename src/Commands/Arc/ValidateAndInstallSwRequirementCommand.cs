@@ -1,5 +1,6 @@
 using AzureMcp.Commands.Subscription;
 using AzureMcp.Options.Arc;
+using AzureMcp.Services.Azure.Arc;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.Logging;
 using System.CommandLine;
@@ -8,28 +9,28 @@ using System.Threading.Tasks;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class RemoveAksEdgeCommand : BaseCommand
+public sealed class ValidateAndInstallSwRequirementCommand : BaseSubscriptionCommand<AkseeDeploymentOptions>
 {
-    private const string _commandTitle = "Remove installation for existing cluster";
-    private readonly ILogger<RemoveAksEdgeCommand> _logger;
+    private const string _commandTitle = "Validate and Install Software Requirements";
+    private readonly ILogger<ValidateAndInstallSwRequirementCommand> _logger;
     private readonly IArcService _arcService;
 
-    public RemoveAksEdgeCommand(
-        ILogger<RemoveAksEdgeCommand> logger,
+    private readonly Option<string> _pathOption = new Option<string>("--path", "The path to use for script execution") { IsRequired = true };
+
+    public ValidateAndInstallSwRequirementCommand(
+        ILogger<ValidateAndInstallSwRequirementCommand> logger,
         IArcService arcService)
     {
         _logger = logger;
         _arcService = arcService;
     }
 
-    public override string Name => "remove-cluster-installation";
+    public override string Name => "validate-and-install-sw-requirements";
 
     public override string Description =>
-        "Completely removes AKS Edge Essentials from the machine. Ensures that any existing installation is removed and settings are preset for new installation.";
+        "Validates and installs software requirements for AKS Edge Essentials or Aksee cluster installation.";
 
     public override string Title => _commandTitle;
-
-    private readonly Option<string> _pathOption = new Option<string>("--path", "The path to use for script execution") { IsRequired = true };
 
     protected override void RegisterOptions(Command command)
     {
@@ -38,39 +39,30 @@ public sealed class RemoveAksEdgeCommand : BaseCommand
     }
 
     [McpServerTool(
-        Destructive = true,
-        ReadOnly = false,
+        Destructive = false,
+        ReadOnly = true,
         Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
         try
         {
+            // Retrieve the user-provided path from the command options
             var userProvidedPath = parseResult.GetValueForOption(_pathOption);
             if (string.IsNullOrEmpty(userProvidedPath))
             {
                 throw new ArgumentException("The path parameter is required.");
             }
 
-            _logger.LogInformation("Starting AKS Edge Essentials removal.");
-
-            var removalSuccess = await _arcService.RemoveAksEdgeAsync(userProvidedPath);
-
-            if (removalSuccess)
-            {
-                context.Response.Status = 200;
-                context.Response.Message = "AKS Edge Essentials removed successfully.";
-            }
-            else
-            {
-                context.Response.Status = 500;
-                context.Response.Message = "Failed to remove AKS Edge Essentials.";
-            }
+            var result = await _arcService.ValidateAndInstallSwRequirementAsync(userProvidedPath);
+            context.Response.Status = 200;
+            context.Response.Message = result.Steps;
+            context.Response.Results = ResponseResult.Create(result, JsonSourceGenerationContext.Default.DeploymentResult);
 
             return context.Response;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to remove AKS Edge Essentials.");
+            _logger.LogError(ex, "Failed to validate and install software requirements");
             context.Response.Status = 500;
             context.Response.Message = ex.Message;
             return context.Response;

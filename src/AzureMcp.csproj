@@ -90,6 +90,8 @@
     <EmbeddedResource Include="Resources\RemoveAksEdgeCompletely.ps1" />
     <EmbeddedResource Include="Resources\ConfirmAksEdgeDeletion.ps1" />
     <EmbeddedResource Include="Resources\ValidateSystemRequirements.ps1" />
+    <EmbeddedResource Include="Resources\Arc\ValidateAndInstallSoftwarerequirements.ps1" />
+    <EmbeddedResource Include="Resources\Arc\AksEdgeQuickDeploy.ps1" />
   </ItemGroup>
 
   <!-- TODO: Remove after 5/19/25 -->

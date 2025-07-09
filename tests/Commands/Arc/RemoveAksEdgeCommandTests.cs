@@ -20,7 +20,7 @@ namespace YourNamespace.Tests
             var mockLogger = new Mock<ILogger<RemoveAksEdgeCommand>>();
             var mockService = new Mock<IArcService>();
             mockService
-                    .Setup(service => service.RemoveAksEdgeAsync())
+                    .Setup(service => service.RemoveAksEdgeAsync(It.IsAny<string>()))
                     .ReturnsAsync(true);
 
             var serviceProvider = new ServiceCollection()

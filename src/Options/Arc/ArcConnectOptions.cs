@@ -23,4 +23,7 @@ public class ArcConnectOptions : BaseSubscriptionOptions
 
     [JsonPropertyName("clusterName")]
     public string? ClusterName { get; set; }
+
+    [JsonPropertyName("userProvidedPath")]
+    public string? UserProvidedPath { get; set; }
 }

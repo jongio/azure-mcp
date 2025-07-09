@@ -14,10 +14,10 @@
 .\RemoveAksEdgeCompletely.ps1 -RemoveVirtualSwitch
   #>
 param(
-    [Switch] $Force,
-    [Switch] $RemoveVirtualSwitch,
-    [Switch] $RemoveModules,
-    [Switch] $CleanRegistry
+    [Switch] $Force = $true,
+    [Switch] $RemoveVirtualSwitch = $true,
+    [Switch] $RemoveModules = $true,
+    [Switch] $CleanRegistry = $true
 )
 #Requires -RunAsAdministrator
 
@@ -144,7 +144,7 @@ $hnsNetworks = Get-HnsNetwork -ErrorAction SilentlyContinue | Where-Object { $_.
 if ($hnsNetworks) {
     foreach ($network in $hnsNetworks) {
         Write-Host "  Removing HNS network: $($network.Name)" -ForegroundColor Gray
-        Remove-HnsNetwork -Id $network.Id -ErrorAction SilentlyContinue
+        $network | Remove-HnsNetwork -ErrorAction SilentlyContinue
     }
 }
 

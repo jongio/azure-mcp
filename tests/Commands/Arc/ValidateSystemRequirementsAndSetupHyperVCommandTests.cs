@@ -70,6 +70,7 @@ namespace AzureMcp.Tests.Commands.Arc
             // Assert
             Assert.NotNull(response);
             Assert.Equal(500, response.Status);
+            Assert.NotNull(response.Message);
         }
     }
 
@@ -94,15 +95,20 @@ namespace AzureMcp.Tests.Commands.Arc
             return "Resource content";
         }
 
-        public Process StartProcess(string scriptPath, ProcessStartInfo processInfo)
+        public Process StartProcess(string command, ProcessStartInfo processStartInfo)
         {
-            return new Process();
+            // Mock implementation of StartProcess
+            var process = new Process();
+            process.StartInfo = processStartInfo;
+            return process;
         }
 
-        public Task<bool> RemoveAksEdgeAsync()
+        public Task<bool> RemoveAksEdgeAsync(string userProvidedPath)
         {
+            // Mock implementation of RemoveAksEdgeAsync
             return Task.FromResult(true);
         }
+
 
         public Task<DeploymentResult> ValidatePrerequisitesForAksEdgeClusterAsync()
         {
@@ -118,7 +124,7 @@ namespace AzureMcp.Tests.Commands.Arc
             return Task.FromResult(true);
         }
 
-        public Task<DeploymentResult> ValidateSystemRequirementsAndSetupHyperVAsync()
+        public Task<DeploymentResult> ValidateSystemRequirementsAndSetupHyperVAsync(string userProvidedPath)
         {
             return Task.FromResult(new DeploymentResult
             {
@@ -126,5 +132,18 @@ namespace AzureMcp.Tests.Commands.Arc
                 Steps = "Validation steps"
             });
         }
+
+        public Task<DeploymentResult> ValidateAndInstallSwRequirementAsync(string userProvidedPath)
+        {
+            return Task.FromResult(new DeploymentResult
+            {
+                Success = true,
+                Steps = "Software requirements validated and installed successfully."
+            });
+        }
+
+
+        public Task<DeploymentResult> QuickDeployAksEdgeEssentialsAsync(string? clusterName = null, string? resourceGroupName = null, string? subscriptionId = null, string? tenantId = null, string? location = null, string? userProvidedPath = null) => throw new NotImplementedException();
+
     }
 }

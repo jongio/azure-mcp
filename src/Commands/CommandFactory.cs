@@ -430,6 +430,10 @@ public class CommandFactory
             GetLogger<Arc.ValidatePrerequisitesForAksEdgeClusterCommand>(), arcService));
         arc.AddCommand("validate-system-requirements-hyperv", new Arc.ValidateSystemRequirementsAndSetupHyperVCommand(
             GetLogger<Arc.ValidateSystemRequirementsAndSetupHyperVCommand>(), arcService));
+        arc.AddCommand("validate-and-install-sw-requirements", new Arc.ValidateAndInstallSwRequirementCommand(
+            GetLogger<Arc.ValidateAndInstallSwRequirementCommand>(), arcService));
+        arc.AddCommand("quick-deploy-aks-edge-essentials", new Arc.QuickDeployAksEdgeEssentialsCommand(
+            GetLogger<Arc.QuickDeployAksEdgeEssentialsCommand>(), arcService));
     }
 
 
