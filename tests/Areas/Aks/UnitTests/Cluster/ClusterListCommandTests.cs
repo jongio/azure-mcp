@@ -86,24 +86,11 @@ public sealed class ClusterListCommandTests
             .Returns(expectedClusters);
 
         var context = new CommandContext(_serviceProvider);
-        var parseResult = _command.GetCommand().Parse("--subscription sub123");
-
-        // Act
+        var parseResult = _command.GetCommand().Parse("--subscription sub123");        // Act
         var response = await _command.ExecuteAsync(context, parseResult);
-
-        // Debug: First check what we got back
-        Console.WriteLine($"Response Status: {response.Status}");
-        Console.WriteLine($"Response Message: {response.Message}");
-        Console.WriteLine($"Response Results is null: {response.Results == null}");
 
         // Assert
         Assert.Equal(200, response.Status);
-
-        // Debug: Output response details
-        Console.WriteLine($"Response Status: {response.Status}");
-        Console.WriteLine($"Response Message: {response.Message}");
-        Console.WriteLine($"Response Results is null: {response.Results == null}");
-
         Assert.NotNull(response.Results);
 
         // Verify the mock was called
