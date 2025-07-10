@@ -104,9 +104,6 @@ The Azure MCP Server supercharges your agents with Azure context. Here are some 
 - Handle labeled configurations
 - Lock/unlock configuration settings
 
-### ☸️ Azure Kubernetes Service (AKS)
-- List AKS clusters in a subscription
-
 ### 🖥️ Azure CLI Extension
 - Execute Azure CLI commands directly
 - Support for all Azure CLI functionality

@@ -26,11 +26,13 @@ public sealed class AksCommandTests(LiveTestFixture liveTestFixture, ITestOutput
 
         var clusters = result.AssertProperty("clusters");
         Assert.Equal(JsonValueKind.Array, clusters.ValueKind);
+        
+        // Verify we have at least one cluster in the test environment
+        Assert.True(clusters.GetArrayLength() > 0, "Expected at least one AKS cluster in the test environment");
 
         // Check each cluster is a string
         foreach (var cluster in clusters.EnumerateArray())
         {
-            Assert.Equal(JsonValueKind.String, cluster.ValueKind);
             Assert.False(string.IsNullOrEmpty(cluster.GetString()));
         }
     }

@@ -1,7 +1,7 @@
 targetScope = 'resourceGroup'
 
 @minLength(3)
-@maxLength(20)
+@maxLength(63)
 @description('The base resource name. AKS cluster names must be between 1 and 63 characters.')
 param baseName string = resourceGroup().name
 
