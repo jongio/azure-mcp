@@ -992,7 +992,7 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
    - Follow existing response patterns
 
 4. Documentation:
-   - Clear command description
+   - Clear command description without repeating the service name (e.g., use "List and manage clusters" instead of "AKS operations - List and manage AKS clusters")
    - List all required options
    - Describe return format
    - Include examples in description
