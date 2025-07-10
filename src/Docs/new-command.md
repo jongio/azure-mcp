@@ -307,7 +307,12 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.{Service};
 
-// Base command for all service commands
+// Base command for all service commands (if no members needed, use concise syntax)
+public abstract class Base{Service}Command<
+    [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
+    : SubscriptionCommand<TOptions> where TOptions : Base{Service}Options, new();
+
+// Base command for all service commands (if members are needed, use full syntax)
 public abstract class Base{Service}Command<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
     : SubscriptionCommand<TOptions> where TOptions : Base{Service}Options, new()
