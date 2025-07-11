@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using Azure.ResourceManager.ContainerService;
+using AzureMcp.Areas.Aks.Models;
 using AzureMcp.Options;
 using AzureMcp.Services.Azure;
 using AzureMcp.Services.Azure.Subscription;
@@ -22,7 +23,7 @@ public sealed class AksService(
     private const string AksClustersCacheKey = "clusters";
     private static readonly TimeSpan s_cacheDuration = TimeSpan.FromHours(1);
 
-    public async Task<List<string>> ListClusters(
+    public async Task<List<Cluster>> ListClusters(
         string subscription,
         string? tenant = null,
         RetryPolicyOptions? retryPolicy = null)
@@ -35,22 +36,22 @@ public sealed class AksService(
             : $"{AksClustersCacheKey}_{subscription}_{tenant}";
 
         // Try to get from cache first
-        var cachedClusters = await _cacheService.GetAsync<List<string>>(CacheGroup, cacheKey, s_cacheDuration);
+        var cachedClusters = await _cacheService.GetAsync<List<Cluster>>(CacheGroup, cacheKey, s_cacheDuration);
         if (cachedClusters != null)
         {
             return cachedClusters;
         }
 
         var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy);
-        var clusters = new List<string>();
+        var clusters = new List<Cluster>();
 
         try
         {
             await foreach (var cluster in subscriptionResource.GetContainerServiceManagedClustersAsync())
             {
-                if (cluster?.Data?.Name != null)
+                if (cluster?.Data != null)
                 {
-                    clusters.Add(cluster.Data.Name);
+                    clusters.Add(ConvertToClusterModel(cluster));
                 }
             }
 
@@ -63,5 +64,34 @@ public sealed class AksService(
         }
 
         return clusters;
+    }
+
+    private static Cluster ConvertToClusterModel(ContainerServiceManagedClusterResource clusterResource)
+    {
+        var data = clusterResource.Data;
+        var agentPool = data.AgentPoolProfiles?.FirstOrDefault();
+
+        return new Cluster
+        {
+            Name = data.Name,
+            SubscriptionId = clusterResource.Id.SubscriptionId,
+            ResourceGroupName = clusterResource.Id.ResourceGroupName,
+            Location = data.Location.ToString(),
+            KubernetesVersion = data.KubernetesVersion,
+            ProvisioningState = data.ProvisioningState?.ToString(),
+            PowerState = data.PowerStateCode?.ToString(),
+            DnsPrefix = data.DnsPrefix,
+            Fqdn = data.Fqdn,
+            NodeCount = agentPool?.Count,
+            NodeVmSize = agentPool?.VmSize,
+            IdentityType = data.Identity?.ManagedServiceIdentityType.ToString(),
+            EnableRbac = data.EnableRbac,
+            NetworkPlugin = data.NetworkProfile?.NetworkPlugin?.ToString(),
+            NetworkPolicy = data.NetworkProfile?.NetworkPolicy?.ToString(),
+            ServiceCidr = data.NetworkProfile?.ServiceCidr,
+            DnsServiceIP = data.NetworkProfile?.DnsServiceIP?.ToString(),
+            SkuTier = data.Sku?.Tier?.ToString(),
+            Tags = data.Tags?.ToDictionary(kvp => kvp.Key, kvp => kvp.Value)
+        };
     }
 }

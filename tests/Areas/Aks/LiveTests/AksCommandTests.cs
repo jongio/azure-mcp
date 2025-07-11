@@ -30,10 +30,30 @@ public sealed class AksCommandTests(LiveTestFixture liveTestFixture, ITestOutput
         // Verify we have at least one cluster in the test environment
         Assert.True(clusters.GetArrayLength() > 0, "Expected at least one AKS cluster in the test environment");
 
-        // Check each cluster is a string
+        // Check each cluster is an object with expected properties
         foreach (var cluster in clusters.EnumerateArray())
         {
-            Assert.False(string.IsNullOrEmpty(cluster.GetString()));
+            Assert.Equal(JsonValueKind.Object, cluster.ValueKind);
+
+            // Verify required properties exist
+            Assert.True(cluster.TryGetProperty("name", out var nameProperty));
+            Assert.False(string.IsNullOrEmpty(nameProperty.GetString()));
+
+            // Verify optional but commonly present properties
+            if (cluster.TryGetProperty("location", out var locationProperty))
+            {
+                Assert.False(string.IsNullOrEmpty(locationProperty.GetString()));
+            }
+
+            if (cluster.TryGetProperty("kubernetesVersion", out var versionProperty))
+            {
+                Assert.False(string.IsNullOrEmpty(versionProperty.GetString()));
+            }
+
+            if (cluster.TryGetProperty("provisioningState", out var stateProperty))
+            {
+                Assert.False(string.IsNullOrEmpty(stateProperty.GetString()));
+            }
         }
     }
 

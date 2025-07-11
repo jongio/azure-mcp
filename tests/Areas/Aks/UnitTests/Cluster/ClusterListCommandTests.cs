@@ -5,7 +5,9 @@ using System.CommandLine;
 using System.CommandLine.Parsing;
 using System.Text.Json;
 using AzureMcp.Areas.Aks.Commands.Cluster;
+using AzureMcp.Areas.Aks.Models;
 using AzureMcp.Areas.Aks.Services;
+using AzureMcp.Commands.Aks;
 using AzureMcp.Models.Command;
 using AzureMcp.Options;
 using Microsoft.Extensions.DependencyInjection;
@@ -54,8 +56,13 @@ public sealed class ClusterListCommandTests
         // Arrange
         if (shouldSucceed)
         {
+            var testClusters = new List<AzureMcp.Areas.Aks.Models.Cluster>
+            {
+                new() { Name = "cluster1", Location = "eastus" },
+                new() { Name = "cluster2", Location = "westus" }
+            };
             _aksService.ListClusters(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
-                .Returns(new List<string> { "cluster1", "cluster2" });
+                .Returns(testClusters);
         }
 
         var context = new CommandContext(_serviceProvider);
@@ -81,7 +88,12 @@ public sealed class ClusterListCommandTests
     public async Task ExecuteAsync_ReturnsClustersList()
     {
         // Arrange
-        var expectedClusters = new List<string> { "cluster1", "cluster2", "cluster3" };
+        var expectedClusters = new List<AzureMcp.Areas.Aks.Models.Cluster>
+        {
+            new() { Name = "cluster1", Location = "eastus", KubernetesVersion = "1.28.0" },
+            new() { Name = "cluster2", Location = "westus", KubernetesVersion = "1.29.0" },
+            new() { Name = "cluster3", Location = "centralus", KubernetesVersion = "1.28.5" }
+        };
         _aksService.ListClusters(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
             .Returns(expectedClusters);
 
@@ -100,14 +112,13 @@ public sealed class ClusterListCommandTests
         // Debug: Output the actual JSON to understand the structure
         Console.WriteLine($"Actual JSON: {json}");
 
-        var result = JsonSerializer.Deserialize<ClusterListResult>(json, new JsonSerializerOptions()
-        {
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-            PropertyNameCaseInsensitive = true
-        });
+        var result = JsonSerializer.Deserialize<ClusterListCommand.ClusterListCommandResult>(json, AksJsonContext.Default.ClusterListCommandResult);
 
         Assert.NotNull(result);
-        Assert.Equal(expectedClusters, result.Clusters);
+        Assert.Equal(expectedClusters.Count, result.Clusters.Count);
+        Assert.Equal(expectedClusters[0].Name, result.Clusters[0].Name);
+        Assert.Equal(expectedClusters[0].Location, result.Clusters[0].Location);
+        Assert.Equal(expectedClusters[0].KubernetesVersion, result.Clusters[0].KubernetesVersion);
     }
 
     [Fact]
@@ -115,7 +126,7 @@ public sealed class ClusterListCommandTests
     {
         // Arrange
         _aksService.ListClusters(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
-            .Returns(new List<string>());
+            .Returns(new List<AzureMcp.Areas.Aks.Models.Cluster>());
 
         var context = new CommandContext(_serviceProvider);
         var parseResult = _command.GetCommand().Parse("--subscription sub123");
@@ -133,7 +144,7 @@ public sealed class ClusterListCommandTests
     {
         // Arrange
         _aksService.ListClusters(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
-            .Returns(Task.FromException<List<string>>(new Exception("Test error")));
+            .Returns(Task.FromException<List<AzureMcp.Areas.Aks.Models.Cluster>>(new Exception("Test error")));
 
         var context = new CommandContext(_serviceProvider);
         var parseResult = _command.GetCommand().Parse("--subscription sub123");
@@ -145,10 +156,5 @@ public sealed class ClusterListCommandTests
         Assert.Equal(500, response.Status);
         Assert.Contains("Test error", response.Message);
         Assert.Contains("troubleshooting", response.Message);
-    }
-
-    private class ClusterListResult
-    {
-        public List<string> Clusters { get; set; } = [];
     }
 }

@@ -1,6 +1,7 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using AzureMcp.Areas.Aks.Models;
 using AzureMcp.Areas.Aks.Options.Cluster;
 using AzureMcp.Areas.Aks.Services;
 using AzureMcp.Commands.Aks;
@@ -19,7 +20,7 @@ public sealed class ClusterListCommand(ILogger<ClusterListCommand> logger) : Bas
     public override string Description =>
         """
         List all Azure Kubernetes Service (AKS) clusters in a subscription.
-        Returns cluster names as a JSON array.
+        Returns detailed cluster information including configuration, network settings, and status.
         """;
 
     public override string Title => CommandTitle;
@@ -77,5 +78,5 @@ public sealed class ClusterListCommand(ILogger<ClusterListCommand> logger) : Bas
         _ => base.GetStatusCode(ex)
     };
 
-    internal record ClusterListCommandResult(List<string> Clusters);
+    internal record ClusterListCommandResult(List<Models.Cluster> Clusters);
 }
