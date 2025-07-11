@@ -9,12 +9,12 @@ using Xunit;
 namespace AzureMcp.Tests.Areas.Aks.LiveTests;
 
 [Trait("Area", "Aks")]
+[Trait("Category", "Live")]
 public sealed class AksCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper output)
     : CommandTestsBase(liveTestFixture, output), IClassFixture<LiveTestFixture>
 {
 
     [Fact]
-    [Trait("Category", "Live")]
     public async Task Should_list_aks_clusters_by_subscription()
     {
         var result = await CallToolAsync(
@@ -70,7 +70,6 @@ public sealed class AksCommandTests(LiveTestFixture liveTestFixture, ITestOutput
     }
 
     [Fact]
-    [Trait("Category", "Live")]
     public async Task Should_validate_required_subscription_parameter()
     {
         var result = await CallToolAsync(
