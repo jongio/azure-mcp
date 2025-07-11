@@ -178,7 +178,7 @@ IMPORTANT:
 - Never redefine properties from base classes
 - Make properties nullable if not required
 - Use consistent parameter names across services:
-  - Use `subscription` instead of `subscriptionId`
+  - **CRITICAL**: Always use `subscription` (never `subscriptionId`) for subscription parameters - this allows the parameter to accept both subscription IDs and subscription names, which are resolved internally by `ISubscriptionService.GetSubscription()`
   - Use `resourceGroup` instead of `resourceGroupName`
   - Use singular nouns for resource names (e.g., `server` not `serverName`)
   - Keep parameter names consistent with Azure SDK parameters when possible
@@ -1008,6 +1008,7 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
 ## Common Pitfalls to Avoid
 
 1. Do not:
+   - **CRITICAL**: Use `subscriptionId` as parameter name - Always use `subscription` to support both IDs and names
    - Redefine base class properties in Options classes
    - Skip base.RegisterOptions() call
    - Skip base.Dispose() call

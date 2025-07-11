@@ -8,7 +8,7 @@ namespace AzureMcp.Areas.Aks.Services;
 public interface IAksService
 {
     Task<List<string>> ListClusters(
-        string subscriptionId,
+        string subscription,
         string? tenant = null,
         RetryPolicyOptions? retryPolicy = null);
 }

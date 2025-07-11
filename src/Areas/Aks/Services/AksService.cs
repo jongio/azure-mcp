@@ -23,16 +23,16 @@ public sealed class AksService(
     private static readonly TimeSpan s_cacheDuration = TimeSpan.FromHours(1);
 
     public async Task<List<string>> ListClusters(
-        string subscriptionId,
+        string subscription,
         string? tenant = null,
         RetryPolicyOptions? retryPolicy = null)
     {
-        ValidateRequiredParameters(subscriptionId);
+        ValidateRequiredParameters(subscription);
 
         // Create cache key
         var cacheKey = string.IsNullOrEmpty(tenant)
-            ? $"{AksClustersCacheKey}_{subscriptionId}"
-            : $"{AksClustersCacheKey}_{subscriptionId}_{tenant}";
+            ? $"{AksClustersCacheKey}_{subscription}"
+            : $"{AksClustersCacheKey}_{subscription}_{tenant}";
 
         // Try to get from cache first
         var cachedClusters = await _cacheService.GetAsync<List<string>>(CacheGroup, cacheKey, s_cacheDuration);
@@ -41,12 +41,12 @@ public sealed class AksService(
             return cachedClusters;
         }
 
-        var subscription = await _subscriptionService.GetSubscription(subscriptionId, tenant, retryPolicy);
+        var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy);
         var clusters = new List<string>();
 
         try
         {
-            await foreach (var cluster in subscription.GetContainerServiceManagedClustersAsync())
+            await foreach (var cluster in subscriptionResource.GetContainerServiceManagedClustersAsync())
             {
                 if (cluster?.Data?.Name != null)
                 {
