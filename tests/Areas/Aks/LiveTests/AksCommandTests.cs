@@ -26,7 +26,7 @@ public sealed class AksCommandTests(LiveTestFixture liveTestFixture, ITestOutput
 
         var clusters = result.AssertProperty("clusters");
         Assert.Equal(JsonValueKind.Array, clusters.ValueKind);
-        
+
         // Verify we have at least one cluster in the test environment
         Assert.True(clusters.GetArrayLength() > 0, "Expected at least one AKS cluster in the test environment");
 
