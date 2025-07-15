@@ -29,6 +29,8 @@
 - Added support for using the hyphen/dash ("-") character in command names. [[#531](https://github.com/Azure/azure-mcp/pull/531)]
 - Added support for authenticating with the Azure account used to log into VS Code. Authentication now prioritizes the VS Code broker credential when in the context of VS Code. [[#452](https://github.com/Azure/azure-mcp/pull/452)]
 
+- Added support for listing SQL elastic pools via the command: `azmcp sql elastic-pool list`. [[#581](https://github.com/Azure/azure-mcp/pull/581)]
+
 ### Breaking Changes
 
 - Removed SSE (Server-Sent Events) transport support. Now, only stdio transport is supported as SSE is no longer part of the MCP specification. [[#593](https://github.com/Azure/azure-mcp/issues/593)]

@@ -17,7 +17,19 @@ steps:
       workingDirectory: ${{ parameters.sourceDirectory }}
     continueOnError: true
 
+  - task: PowerShell@2
+    displayName: "Check if AOT report exists"
+    inputs:
+      pwsh: true
+      targetType: 'inline'
+      script: |
+        $reportPath = "${{ parameters.sourceDirectory }}/.work/aotCompactReport"
+        $exists = Test-Path $reportPath
+        Write-Host "##vso[task.setvariable variable=AOTReportExists]$exists"
+        Write-Host "AOT report directory exists: $exists"
+
   - template: /eng/common/pipelines/templates/steps/publish-1es-artifact.yml
+    condition: eq(variables['AOTReportExists'], 'True')
     parameters:
       ArtifactPath: ${{ parameters.sourceDirectory }}/.work/aotCompactReport
       ArtifactName: AOTCompatibilityReport

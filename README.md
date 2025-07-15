@@ -77,6 +77,7 @@ The Azure MCP Server supercharges your agents with Azure context. Here are some 
 - "Show me details about my Azure SQL database 'mydb'"
 - "List Active Directory administrators for my SQL server 'myserver'"
 - "List all firewall rules for my SQL server 'myserver'"
+- "List all elastic pools in my SQL server 'myserver'"
 
 ### 💾 Azure Storage  
 - "List my Azure storage accounts"
@@ -175,6 +176,7 @@ The Azure MCP Server supercharges your agents with Azure context. Here are some 
 ### 🗄️ Azure SQL Database
 - Show database details and properties
 - List SQL server firewall rules
+- List elastic pools and their configurations
 
 ### � Azure Storage
 - List Storage accounts

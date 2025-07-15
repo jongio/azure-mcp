@@ -231,6 +231,14 @@ This file contains prompts used for end-to-end testing to ensure each tool is in
 | azmcp-sql-db-show | Show me the details of SQL database <database_name> in server <server_name> |
 | azmcp-sql-db-show | Get the configuration details for the SQL database <database_name> on server <server_name> |
 
+## Azure SQL Elastic Pool Operations
+
+| Tool Name | Test Prompt |
+|:----------|:----------|
+| azmcp-sql-elastic-pool-list | List all elastic pools in SQL server <server_name> |
+| azmcp-sql-elastic-pool-list | Show me the elastic pools configured for SQL server <server_name> |
+| azmcp-sql-elastic-pool-list | What elastic pools are available in my SQL server <server_name>? |
+
 ## Azure SQL Server Operations
 
 | Tool Name | Test Prompt |
