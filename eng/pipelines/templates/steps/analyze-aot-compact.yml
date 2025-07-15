@@ -33,8 +33,8 @@ steps:
         }
 
   - template: /eng/common/pipelines/templates/steps/publish-1es-artifact.yml
-    CustomCondition: and(succeeded(), eq(variables['ShouldPublishArtifact'], 'true'))
     parameters:
+      CustomCondition: and(succeeded(), eq(variables['ShouldPublishArtifact'], 'true'))
       ArtifactPath: ${{ parameters.sourceDirectory }}/.work/aotCompactReport
       ArtifactName: AOTCompatibilityReport
       SbomEnabled: ${{ ne(variables['Build.Reason'], 'PullRequest') }}
