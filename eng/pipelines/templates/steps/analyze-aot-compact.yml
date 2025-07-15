@@ -33,7 +33,7 @@ steps:
         }
 
   - template: /eng/common/pipelines/templates/steps/publish-1es-artifact.yml
-    condition: and(succeeded(), eq(variables['ShouldPublishArtifact'], 'true'))
+    CustomCondition: and(succeeded(), eq(variables['ShouldPublishArtifact'], 'true'))
     parameters:
       ArtifactPath: ${{ parameters.sourceDirectory }}/.work/aotCompactReport
       ArtifactName: AOTCompatibilityReport
