@@ -18,18 +18,22 @@ steps:
     continueOnError: true
 
   - task: PowerShell@2
-    displayName: "Check if AOT report exists"
+    displayName: "Check if AOT report exists and publish artifact"
     inputs:
       pwsh: true
       targetType: 'inline'
       script: |
         $reportPath = "${{ parameters.sourceDirectory }}/.work/aotCompactReport"
         $exists = Test-Path $reportPath
-        Write-Host "##vso[task.setvariable variable=AOTReportExists]$exists"
         Write-Host "AOT report directory exists: $exists"
+        if ($exists) {
+          Write-Host "##vso[task.setvariable variable=ShouldPublishArtifact]true"
+        } else {
+          Write-Host "##vso[task.setvariable variable=ShouldPublishArtifact]false"
+        }
 
   - template: /eng/common/pipelines/templates/steps/publish-1es-artifact.yml
-    condition: eq(variables['AOTReportExists'], 'True')
+    condition: and(succeeded(), eq(variables['ShouldPublishArtifact'], 'true'))
     parameters:
       ArtifactPath: ${{ parameters.sourceDirectory }}/.work/aotCompactReport
       ArtifactName: AOTCompatibilityReport
