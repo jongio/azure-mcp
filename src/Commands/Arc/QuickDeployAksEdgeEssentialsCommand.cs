@@ -34,7 +34,7 @@ public sealed class QuickDeployAksEdgeEssentialsCommand : BaseSubscriptionComman
     public override string Name => "quick-deploy-aks-edge-essentials";
 
     public override string Description =>
-        "Performs a quick deployment of AKS Edge Essentials by executing the necessary scripts and configurations to set up the environment efficiently.";
+        "Performs a quick deployment of AKS Edge Essentials by executing the necessary scripts and configurations to set up the environment efficiently. After the Edge Essentials deployment, this also connects the cluster to Azure Arc";
 
     public override string Title => _commandTitle;
 

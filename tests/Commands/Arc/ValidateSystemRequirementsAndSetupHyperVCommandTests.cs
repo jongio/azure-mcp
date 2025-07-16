@@ -76,19 +76,6 @@ namespace AzureMcp.Tests.Commands.Arc
 
     public class MockArcService : IArcService
     {
-        public Task<DeploymentResult> DeployAksEdgeEssentialClusterAsync()
-        {
-            return Task.FromResult(new DeploymentResult
-            {
-                Success = true,
-                Steps = "Deployment steps"
-            });
-        }
-
-        public Task<bool> DeployAksClusterToArcAsync(string resourceGroup, string clusterName, string location)
-        {
-            return Task.FromResult(true);
-        }
 
         public string LoadResourceFiles(string resourceName)
         {
@@ -119,7 +106,7 @@ namespace AzureMcp.Tests.Commands.Arc
             });
         }
 
-        public Task<bool> ConnectClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId)
+        public Task<bool> OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string userProvidedPath)
         {
             return Task.FromResult(true);
         }

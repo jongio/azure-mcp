@@ -82,15 +82,7 @@ namespace AzureMcp.Tests.Commands.Arc
             });
         }
 
-        public Task<DeploymentResult> DeployAksEdgeEssentialClusterAsync()
-        {
-            throw new NotImplementedException();
-        }
 
-        public Task<bool> DeployAksClusterToArcAsync(string clusterName, string resourceGroupName, string location)
-        {
-            throw new NotImplementedException();
-        }
 
         public string LoadResourceFiles(string path)
         {
@@ -103,7 +95,7 @@ namespace AzureMcp.Tests.Commands.Arc
             return Task.FromResult(true);
         }
 
-        public Task<bool> ConnectClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId)
+        public Task<bool> OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string userProvidedPath)
         {
             throw new NotImplementedException();
         }

@@ -11,14 +11,13 @@ namespace AzureMcp.Services.Azure.Arc
 {
     public class ArcService : BaseAzureService, IArcService
     {
-        private const string EdgeEssentialsDeploymentSteps = "AzureMcp.Resources.aks_edge_essentials_steps.txt";
-        private const string PrerequisitesAksEdgeInstallationSteps = "AzureMcp.Resources.prerequisites_aksee_installation.txt";
-        private const string RemoveAksEdgeClusterScript = "AzureMcp.Resources.RemoveAksEdgeCompletely.ps1";
-        private const string ValidateSystemRequirements = "AzureMcp.Resources.ValidateSystemRequirements.ps1";
-        private const string ValidateAndInstallSwRequirementScript = "AzureMcp.Resources.Arc.ValidateAndInstallSoftwarerequirements.ps1";
-        private const string AksEdgeQuickDeployScript = "AzureMcp.Resources.Arc.AksEdgeQuickDeploy.ps1";
-
-        private const string ConfirmAksEdgeClusterRemovalScript = "AzureMcp.Resources.ConfirmAksEdgeDeletion.ps1";
+        private const string PrerequisitesAksEdgeInstallation = "AzureMcp.Resources.Arc.PrerequisitesAksEdgeInstallation.txt";
+        private const string RemoveAksEdgeCompletely = "AzureMcp.Resources.Arc.RemoveAksEdgeCompletely.ps1";
+        private const string ValidateAndSetupSystemRequirements = "AzureMcp.Resources.Arc.ValidateAndSetupSystemRequirements.ps1";
+        private const string ValidateAndSetupSwRequirementScript = "AzureMcp.Resources.Arc.ValidateAndSetupSoftwarerequirements.ps1";
+        private const string AksEdgeQuickDeploy = "AzureMcp.Resources.Arc.AksEdgeQuickDeploy.ps1";
+        private const string DisconnectAzureArc = "AzureMcp.Resources.Arc.DisconnectAzureArc.ps1";
+        private const string ConfirmAksEdgeDeletion = "AzureMcp.Resources.Arc.ConfirmAksEdgeDeletion.ps1";
         private readonly Assembly _assembly;
 
         public ArcService(ITenantService? tenantService = null) : base(tenantService)
@@ -26,38 +25,15 @@ namespace AzureMcp.Services.Azure.Arc
             _assembly = typeof(ArcService).Assembly;
         }
 
-        public async Task<DeploymentResult> DeployAksEdgeEssentialClusterAsync()
-        {
-            string deploymentSteps = await Task.Run(() => LoadResourceFiles(EdgeEssentialsDeploymentSteps));
-            return new DeploymentResult
-            {
-                Success = true,
-                Steps = deploymentSteps
-            };
-        }
-
-        public async Task<bool> DeployAksClusterToArcAsync(string resourceGroup, string clusterName, string location)
-        {
-            await Task.Delay(0); // Placeholder for async operation
-            return false;
-        }
-
-
-        public async Task<bool> ConnectClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId)
+        public async Task<bool> OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string kubeConfigPath)
         {
             try
             {
-                // Validate inputs
-                ArgumentException.ThrowIfNullOrEmpty(clusterName);
-                ArgumentException.ThrowIfNullOrEmpty(resourceGroupName);
-                ArgumentException.ThrowIfNullOrEmpty(location);
-                ArgumentException.ThrowIfNullOrEmpty(subscriptionId);
-                ArgumentException.ThrowIfNullOrEmpty(tenantId);
 
                 Console.WriteLine("Connecting AKS Edge Essentials cluster to Azure Arc...");
 
                 // Step 1: Check kubeconfig and context
-                string kubeConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".kube", "config");
+                kubeConfigPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), ".kube", "config");
                 if (string.IsNullOrEmpty(kubeConfigPath))
                 {
                     throw new InvalidOperationException("Kubeconfig path is invalid.");
@@ -144,7 +120,7 @@ namespace AzureMcp.Services.Azure.Arc
             {
                 // Extract the embedded script to a temporary file
                 string tempScriptPath = Path.Combine(userProvidedPath, "RemoveAksEdgeCompletely.ps1");
-                File.WriteAllText(tempScriptPath, LoadResourceFiles(RemoveAksEdgeClusterScript));
+                File.WriteAllText(tempScriptPath, LoadResourceFiles(RemoveAksEdgeCompletely));
 
                 var processStartInfo = new ProcessStartInfo
                 {
@@ -166,7 +142,7 @@ namespace AzureMcp.Services.Azure.Arc
             {
                 // Extract the confirmation script to a temporary file
                 string tempConfirmScriptPath = Path.Combine(userProvidedPath, "ConfirmAksEdgeDeletion.ps1");
-                File.WriteAllText(tempConfirmScriptPath, LoadResourceFiles(ConfirmAksEdgeClusterRemovalScript));
+                File.WriteAllText(tempConfirmScriptPath, LoadResourceFiles(ConfirmAksEdgeDeletion));
 
                 var confirmProcessStartInfo = new ProcessStartInfo
                 {
@@ -186,11 +162,6 @@ namespace AzureMcp.Services.Azure.Arc
 
             return true;
         }
-
-        /** public string LoadDeploymentSteps()
-         {
-             return EmbeddedResourceHelper.ReadEmbeddedResource(_assembly, ResourceName);
-         }**/
         public string LoadResourceFiles(string resourceName)
         {
             return EmbeddedResourceHelper.ReadEmbeddedResource(_assembly, resourceName);
@@ -198,7 +169,7 @@ namespace AzureMcp.Services.Azure.Arc
 
         public async Task<DeploymentResult> ValidatePrerequisitesForAksEdgeClusterAsync()
         {
-            string prerequisiteSteps = await Task.Run(() => LoadResourceFiles(PrerequisitesAksEdgeInstallationSteps));
+            string prerequisiteSteps = await Task.Run(() => LoadResourceFiles(PrerequisitesAksEdgeInstallation));
             return new DeploymentResult
             {
                 Success = true,
@@ -214,8 +185,8 @@ namespace AzureMcp.Services.Azure.Arc
                 Directory.CreateDirectory(userProvidedPath);
             }
 
-            string tempScriptPath = Path.Combine(userProvidedPath, "ValidateSystemRequirements.ps1");
-            File.WriteAllText(tempScriptPath, LoadResourceFiles(ValidateSystemRequirements));
+            string tempScriptPath = Path.Combine(userProvidedPath, "ValidateAndSetupSystemRequirements.ps1");
+            File.WriteAllText(tempScriptPath, LoadResourceFiles(ValidateAndSetupSystemRequirements));
 
             var processStartInfo = new ProcessStartInfo
             {
@@ -253,8 +224,8 @@ namespace AzureMcp.Services.Azure.Arc
                 Directory.CreateDirectory(userProvidedPath);
             }
 
-            string tempScriptPath = Path.Combine(userProvidedPath, "ValidateAndInstallSoftwarerequirements.ps1");
-            File.WriteAllText(tempScriptPath, LoadResourceFiles(ValidateAndInstallSwRequirementScript));
+            string tempScriptPath = Path.Combine(userProvidedPath, "ValidateAndSetupSoftwarerequirements.ps1");
+            File.WriteAllText(tempScriptPath, LoadResourceFiles(ValidateAndSetupSwRequirementScript));
 
             var processStartInfo = new ProcessStartInfo
             {
@@ -293,7 +264,7 @@ namespace AzureMcp.Services.Azure.Arc
             }
 
             string tempScriptPath = Path.Combine(userProvidedPath, "AksEdgeQuickDeploy.ps1");
-            File.WriteAllText(tempScriptPath, LoadResourceFiles(AksEdgeQuickDeployScript));
+            File.WriteAllText(tempScriptPath, LoadResourceFiles(AksEdgeQuickDeploy));
 
             var arguments = $"-ExecutionPolicy Bypass -File \"{tempScriptPath}\" -Force";
 

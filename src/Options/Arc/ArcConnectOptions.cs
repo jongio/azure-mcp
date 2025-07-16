@@ -26,4 +26,7 @@ public class ArcConnectOptions : BaseSubscriptionOptions
 
     [JsonPropertyName("userProvidedPath")]
     public string? UserProvidedPath { get; set; }
+
+    [JsonPropertyName("kubeConfigPath")]
+    public string? KubeConfigPath { get; set; }
 }

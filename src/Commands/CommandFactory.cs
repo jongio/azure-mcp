@@ -419,11 +419,9 @@ public class CommandFactory
         _rootGroup.AddSubGroup(arc);
 
         var arcService = _serviceProvider.GetRequiredService<IArcService>();
-        arc.AddCommand("connect-cluster-arc", new Arc.ConnectClusterToArcCommand(
-            GetLogger<Arc.ConnectClusterToArcCommand>()));
-        arc.AddCommand("install-aksee-cluster", new Arc.DeployAksEdgeEssentialClusterCommand(
-       GetLogger<Arc.DeployAksEdgeEssentialClusterCommand>(),
-       arcService));
+        arc.AddCommand("onboard-cluster-to-arc", new Arc.OnboardClusterToArcCommand(
+            GetLogger<Arc.OnboardClusterToArcCommand>(), arcService));
+
         arc.AddCommand("remove-cluster-installation", new Arc.RemoveAksEdgeCommand(
             GetLogger<Arc.RemoveAksEdgeCommand>(), arcService));
         arc.AddCommand("validate-prerequisites-aksee-cluster", new Arc.ValidatePrerequisitesForAksEdgeClusterCommand(
