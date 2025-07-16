@@ -432,6 +432,8 @@ public class CommandFactory
             GetLogger<Arc.ValidateAndInstallSwRequirementCommand>(), arcService));
         arc.AddCommand("quick-deploy-aks-edge-essentials", new Arc.QuickDeployAksEdgeEssentialsCommand(
             GetLogger<Arc.QuickDeployAksEdgeEssentialsCommand>(), arcService));
+        arc.AddCommand("disconnect-from-azure-arc", new Arc.DisconnectFromAzureArcCommand(
+            GetLogger<Arc.DisconnectFromAzureArcCommand>(), arcService));
     }
 
 

@@ -117,10 +117,18 @@ namespace AzureMcp.Tests.Commands.Arc
         public Task<DeploymentResult> ValidateAndInstallSwRequirementAsync(string userProvidedPath) => throw new NotImplementedException();
         public Task<DeploymentResult> ValidatePrerequisitesForAksEdgeClusterAsync() => throw new NotImplementedException();
         public Task<DeploymentResult> ValidateSystemRequirementsAndSetupHyperVAsync(string userProvidedPath) => throw new NotImplementedException();
-        public Task<bool> OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string userProvidedPath) => throw new NotImplementedException();
         public Task<bool> RemoveAksEdgeAsync(string userProvidedPath) => throw new NotImplementedException();
         public string LoadResourceFiles(string resourceName) => throw new NotImplementedException();
         public Process StartProcess(string scriptPath, ProcessStartInfo processInfo) => throw new NotImplementedException();
 
+        Task<DeploymentResult> IArcService.OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string kubeConfigPath, string userProvidedPath)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<DeploymentResult> DisconnectFromAzureArcAsync(string resourceGroupName, string clusterName, string userProvidedPath)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

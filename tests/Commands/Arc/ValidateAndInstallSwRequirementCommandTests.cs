@@ -95,7 +95,7 @@ namespace AzureMcp.Tests.Commands.Arc
             return Task.FromResult(true);
         }
 
-        public Task<bool> OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string userProvidedPath)
+        Task<DeploymentResult> IArcService.OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string kubeConfigPath, string userProvidedPath)
         {
             throw new NotImplementedException();
         }
@@ -131,6 +131,11 @@ namespace AzureMcp.Tests.Commands.Arc
                 Success = true,
                 Steps = "Quick deployment of AKS Edge Essentials completed successfully."
             });
+        }
+
+        public Task<DeploymentResult> DisconnectFromAzureArcAsync(string resourceGroupName, string clusterName, string userProvidedPath)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -9,33 +9,29 @@ using System.Threading.Tasks;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class OnboardClusterToArcCommand : BaseSubscriptionCommand<ArcConnectOptions>
+public sealed class DisconnectFromAzureArcCommand : BaseSubscriptionCommand<ArcConnectOptions>
 {
-    private const string _commandTitle = "Onboards existing cluster to Azure Arc";
-    private readonly ILogger<OnboardClusterToArcCommand> _logger;
+    private const string _commandTitle = "Disconnects a cluster from Azure Arc";
+    private readonly ILogger<DisconnectFromAzureArcCommand> _logger;
     private readonly IArcService _arcService;
 
     // Define options as fields
-    private readonly Option<string> _clusterNameOption = new("--cluster-name", "Name of the cluster to connect to Azure Arc");
+    private readonly Option<string> _clusterNameOption = new("--cluster-name", "Name of the cluster to disconnect from Azure Arc");
     private readonly Option<string> _resourceGroupNameOption = new("--resource-group-name", "Name of the resource group");
-    private readonly Option<string> _locationOption = new("--location", "Azure region");
-    private readonly Option<string> _subscriptionIdOption = new("--subscription-id", "Azure subscription ID");
-    private readonly Option<string> _tenantIdOption = new("--tenant-id", "Azure tenant ID");
-    private readonly Option<string> _kubeConfigPathOption = new("--kube-config-path", "Path to the kubeconfig file");
     private readonly Option<string> _userProvidedPathOption = new("--user-provided-path", "Path to the user-provided files");
 
-    public OnboardClusterToArcCommand(
-        ILogger<OnboardClusterToArcCommand> logger,
+    public DisconnectFromAzureArcCommand(
+        ILogger<DisconnectFromAzureArcCommand> logger,
         IArcService arcService)
     {
         _logger = logger;
         _arcService = arcService;
     }
 
-    public override string Name => "onboard-cluster-to-arc";
+    public override string Name => "disconnect-from-azure-arc";
 
     public override string Description =>
-        "Onboards or connects an existing cluster to Azure Arc by validating the cluster and executing the necessary commands.The --user-provided-path option is required.";
+        "Disconnects an arc connected cluster from Azure Arc. It deletes all extensions and removes the cluster from Arc. The --user-provided-path option is required.";
 
     public override string Title => _commandTitle;
 
@@ -46,10 +42,6 @@ public sealed class OnboardClusterToArcCommand : BaseSubscriptionCommand<ArcConn
         // Add options to the command
         command.AddOption(_clusterNameOption);
         command.AddOption(_resourceGroupNameOption);
-        command.AddOption(_locationOption);
-        command.AddOption(_subscriptionIdOption);
-        command.AddOption(_tenantIdOption);
-        command.AddOption(_kubeConfigPathOption);
         command.AddOption(_userProvidedPathOption);
     }
 
@@ -60,18 +52,14 @@ public sealed class OnboardClusterToArcCommand : BaseSubscriptionCommand<ArcConn
         // Use the defined Option instances
         options.ClusterName = parseResult.GetValueForOption(_clusterNameOption);
         options.ResourceGroupName = parseResult.GetValueForOption(_resourceGroupNameOption);
-        options.Location = parseResult.GetValueForOption(_locationOption);
-        options.SubscriptionId = parseResult.GetValueForOption(_subscriptionIdOption);
-        options.TenantId = parseResult.GetValueForOption(_tenantIdOption);
-        options.KubeConfigPath = parseResult.GetValueForOption(_kubeConfigPathOption);
         options.UserProvidedPath = parseResult.GetValueForOption(_userProvidedPathOption);
 
         return options;
     }
 
     [McpServerTool(
-        Destructive = false,
-        ReadOnly = true,
+        Destructive = true,
+        ReadOnly = false,
         Title = _commandTitle)]
     public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
     {
@@ -80,25 +68,23 @@ public sealed class OnboardClusterToArcCommand : BaseSubscriptionCommand<ArcConn
             // Retrieve options using model binding
             var options = BindOptions(parseResult);
 
-            var result = await _arcService.OnboardClusterToArcAsync(
-                options.ClusterName!,
+            var result = await _arcService.DisconnectFromAzureArcAsync(
                 options.ResourceGroupName!,
-                options.Location!,
-                options.SubscriptionId!,
-                options.TenantId!,
-                options.KubeConfigPath!,
+                options.ClusterName!,
                 options.UserProvidedPath!);
 
             context.Response.Status = result.Success ? 200 : 500;
-            context.Response.Message = result.Steps;
+            context.Response.Message = result.Success
+                ? "Cluster successfully disconnected from Azure Arc."
+                : "Failed to disconnect cluster from Azure Arc.";
 
             return context.Response;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to onboard cluster to Azure Arc");
+            _logger.LogError(ex, "Failed to disconnect cluster from Azure Arc");
             context.Response.Status = 500;
-            context.Response.Message = $"Failed to onboard cluster to Azure Arc: {ex.Message}";
+            context.Response.Message = $"Failed to disconnect cluster from Azure Arc: {ex.Message}";
             return context.Response;
         }
     }

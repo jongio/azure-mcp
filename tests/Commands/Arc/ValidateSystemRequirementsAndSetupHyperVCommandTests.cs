@@ -106,9 +106,9 @@ namespace AzureMcp.Tests.Commands.Arc
             });
         }
 
-        public Task<bool> OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string userProvidedPath)
+        Task<DeploymentResult> IArcService.OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string kubeConfigPath, string userProvidedPath)
         {
-            return Task.FromResult(true);
+            throw new NotImplementedException();
         }
 
         public Task<DeploymentResult> ValidateSystemRequirementsAndSetupHyperVAsync(string userProvidedPath)
@@ -132,5 +132,9 @@ namespace AzureMcp.Tests.Commands.Arc
 
         public Task<DeploymentResult> QuickDeployAksEdgeEssentialsAsync(string? clusterName = null, string? resourceGroupName = null, string? subscriptionId = null, string? tenantId = null, string? location = null, string? userProvidedPath = null) => throw new NotImplementedException();
 
+        public Task<DeploymentResult> DisconnectFromAzureArcAsync(string resourceGroupName, string clusterName, string userProvidedPath)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

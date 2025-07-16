@@ -91,7 +91,8 @@
     <EmbeddedResource Include="Resources\Arc\ValidateAndSetupSoftwarerequirements.ps1" />
     <EmbeddedResource Include="Resources\Arc\AksEdgeQuickDeploy.ps1" />    
     <EmbeddedResource Include="Resources\Arc\PrerequisitesAksEdgeInstallation.txt" />
-    <EmbeddedResource Include="Resources\Arc\DisconnectAzureArc.ps1" />
+    <EmbeddedResource Include="Resources\Arc\DisconnectFromAzureArc.ps1" />
+    <EmbeddedResource Include="Resources\Arc\OnboardClusterToArc.ps1" />
   </ItemGroup>
 
   <!-- TODO: Remove after 5/19/25 -->

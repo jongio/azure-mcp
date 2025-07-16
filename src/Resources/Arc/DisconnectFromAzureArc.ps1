@@ -11,9 +11,8 @@ Specify cluster name if multiple clusters exist
 .\DisconnectFromAzureArc.ps1 -ClusterName "aksedge-cluster-name" -Force
 #>
 param(
-    [String] $ResourceGroupName = "aksedge-resources-rg",
-    [String] $ClusterName = "aks-roswain-cluster",
-    [Switch] $Force = $true
+    [String] $ResourceGroupName,
+    [String] $ClusterName
 )
 #Requires -RunAsAdministrator
 
@@ -57,15 +56,14 @@ if (-not $ClusterName) {
 }
 
 # Step 4: Confirm disconnection
-if (-not $Force) {
-    Write-Host "`nYou are about to disconnect cluster '$ClusterName' from Azure Arc." -ForegroundColor Yellow
-    Write-Host "This will remove the Arc agents from your cluster but the cluster will continue running." -ForegroundColor Yellow
-    $confirm = Read-Host "Are you sure you want to proceed? (yes/no)"
-    if ($confirm -ne "yes") {
-        Write-Host "Disconnection cancelled." -ForegroundColor Yellow
-        exit 0
-    }
+Write-Host "`nYou are about to disconnect cluster '$ClusterName' from Azure Arc." -ForegroundColor Yellow
+Write-Host "This will remove the Arc agents from your cluster but the cluster will continue running." -ForegroundColor Yellow
+$confirm = Read-Host "Are you sure you want to proceed? (yes/no)"
+if ($confirm -ne "yes") {
+    Write-Host "Disconnection cancelled." -ForegroundColor Yellow
+    exit 0
 }
+
 
 # Step 5: Check for Arc extensions
 Write-Host "`nStep 5: Checking for Arc extensions" -ForegroundColor Yellow
@@ -82,7 +80,7 @@ if ($extensions -and $extensions.Count -gt 0) {
         Write-Host "  Removing extension: $($ext.name)" -ForegroundColor Gray
         az k8s-extension delete --name $ext.name --cluster-name $ClusterName --resource-group $ResourceGroupName --cluster-type connectedClusters --yes 2>&1 | Out-Null
     }
-}
+}Start-Sleep -Seconds 10
 
 # Step 6: Disconnect from Arc
 Write-Host "`nStep 6: Disconnecting cluster from Azure Arc" -ForegroundColor Yellow
@@ -97,44 +95,10 @@ else {
     Write-Error "Failed to disconnect from Arc: $disconnectResult"
     exit 1
 }
+Start-Sleep -Seconds 10
 
-# Step 7: Verify disconnection in cluster
-Write-Host "`nStep 7: Verifying Arc removal from cluster" -ForegroundColor Yellow
-$kubeConfigPath = "$env:USERPROFILE\.kube\config"
-
-if (Test-Path $kubeConfigPath) {
-    # Check if azure-arc namespace still exists
-    $arcNamespace = kubectl get namespace azure-arc --kubeconfig $kubeConfigPath 2>$null
-    if ($LASTEXITCODE -eq 0) {
-        Write-Host "Azure Arc namespace still exists in cluster. Cleaning up..." -ForegroundColor Yellow
-        
-        # Delete Arc namespace
-        kubectl delete namespace azure-arc --kubeconfig $kubeConfigPath --timeout=5m 2>&1 | Out-Null
-        
-        # Check for any remaining Arc resources
-        Write-Host "Checking for remaining Arc resources..." -ForegroundColor Gray
-        kubectl get all --all-namespaces --kubeconfig $kubeConfigPath | Select-String "azure-arc"
-    }
-    else {
-        Write-Host "Azure Arc namespace successfully removed from cluster" -ForegroundColor Green
-    }
-}
-
-# Step 8: Update AKS Edge deployment info
-Write-Host "`nStep 8: Updating AKS Edge deployment information" -ForegroundColor Yellow
-try {
-    Import-Module "C:\Program Files\WindowsPowerShell\Modules\AksEdge\*\AksEdge.psd1" -Force -ErrorAction SilentlyContinue
-    $deploymentInfo = Get-AksEdgeDeploymentInfo -ErrorAction SilentlyContinue
-    if ($deploymentInfo) {
-        Write-Host "Current Arc Status: $($deploymentInfo.Arc.Status)" -ForegroundColor Gray
-    }
-}
-catch {
-    Write-Host "Could not update AKS Edge deployment info" -ForegroundColor Gray
-}
-
-# Step 9: Delete Arc resource from Azure
-Write-Host "`nStep 9: Deleting Azure Arc resource from Azure" -ForegroundColor Yellow
+# Step 8: Delete Arc resource from Azure
+Write-Host "`nStep 8: Deleting Azure Arc resource from Azure" -ForegroundColor Yellow
 Write-Host "Deleting Arc resource '$ClusterName' in resource group '$ResourceGroupName'..." -ForegroundColor Gray
 
 $deleteResult = az resource delete --name $ClusterName --resource-group $ResourceGroupName --resource-type "Microsoft.Kubernetes/connectedClusters" --yes 2>&1
@@ -149,3 +113,4 @@ else {
 
 Write-Host "`nArc disconnection completed!" -ForegroundColor Green
 Write-Host "Your AKS Edge cluster is still running locally but is no longer connected to Azure Arc." -ForegroundColor Cyan
+Start-Sleep -Seconds 15
