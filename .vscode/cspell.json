@@ -144,6 +144,7 @@
                 "testareas",
                 "testcontainer",
                 "testdb",
+                "testpool",
                 "testproxy",
                 "testrg",
                 "testserver",
