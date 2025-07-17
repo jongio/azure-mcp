@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class ValidateSystemRequirementsAndSetupHyperVCommand : BaseSubscriptionCommand<AkseeDeploymentOptions>
+public sealed class ValidateSystemRequirementsAndSetupHyperVCommand : BaseSubscriptionCommand<ArcConnectOptions>
 {
     private const string _commandTitle = "Validate System Requirements and Setup Hyper-V";
     private readonly ILogger<ValidateSystemRequirementsAndSetupHyperVCommand> _logger;

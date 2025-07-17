@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class ValidatePrerequisitesForAksEdgeClusterCommand : BaseSubscriptionCommand<AkseeDeploymentOptions>
+public sealed class ValidatePrerequisitesForAksEdgeClusterCommand : BaseSubscriptionCommand<ArcConnectOptions>
 {
     private const string _commandTitle = "Validate prerequisites for AKS Edge Essentials Cluster";
     private readonly ILogger<ValidatePrerequisitesForAksEdgeClusterCommand> _logger;

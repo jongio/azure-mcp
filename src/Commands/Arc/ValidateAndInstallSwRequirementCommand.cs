@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class ValidateAndInstallSwRequirementCommand : BaseSubscriptionCommand<AkseeDeploymentOptions>
+public sealed class ValidateAndInstallSwRequirementCommand : BaseSubscriptionCommand<ArcConnectOptions>
 {
     private const string _commandTitle = "Validate and Install Software Requirements";
     private readonly ILogger<ValidateAndInstallSwRequirementCommand> _logger;
