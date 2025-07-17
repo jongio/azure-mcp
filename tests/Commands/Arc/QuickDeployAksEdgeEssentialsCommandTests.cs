@@ -8,7 +8,7 @@ using AzureMcp.Models.Command;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Moq;
+using NSubstitute;
 using Xunit;
 using AzureMcp.Services.Azure.Arc;
 using System.Diagnostics;
@@ -25,7 +25,7 @@ namespace AzureMcp.Tests.Commands.Arc
         {
             var services = new ServiceCollection();
             services.AddLogging();
-            services.AddSingleton<IArcService, MockArcServiceForQuickDeploy>();
+            services.AddSingleton(Substitute.For<IArcService>());
             services.AddSingleton(new ArcConnectOptions
             {
                 ClusterName = "TestCluster",
@@ -41,25 +41,25 @@ namespace AzureMcp.Tests.Commands.Arc
         public async Task ExecuteAsync_ShouldReturnSuccessResponse()
         {
             // Arrange
-            var arcServiceMock = new Mock<IArcService>();
-            arcServiceMock.Setup(x => x.QuickDeployAksEdgeEssentialsAsync(
-                "testCluster",
-                "testResourceGroup",
-                "testSubscription",
-                "testTenant",
-                "testLocation",
-                "testUserProvidedPath"))
-                .ReturnsAsync(new DeploymentResult
+            var arcServiceMock = Substitute.For<IArcService>();
+            arcServiceMock.QuickDeployAksEdgeEssentialsAsync(
+                Arg.Is<string>(x => x == "TestCluster"),
+                Arg.Is<string>(x => x == "TestResourceGroup"),
+                Arg.Is<string>(x => x == "TestSubscriptionId"),
+                Arg.Is<string>(x => x == "TestTenantId"),
+                Arg.Is<string>(x => x == "TestLocation"),
+                Arg.Is<string>(x => x == "testUserProvidedPath"))
+                .Returns(Task.FromResult(new DeploymentResult
                 {
                     Success = true,
                     Steps = "Quick deployment of AKS Edge Essentials completed successfully."
-                });
+                }));
 
             var command = new QuickDeployAksEdgeEssentialsCommand(
                 _serviceProvider.GetRequiredService<ILogger<QuickDeployAksEdgeEssentialsCommand>>(),
-                arcServiceMock.Object);
+                arcServiceMock);
 
-            var parseResult = command.GetCommand().Parse("");
+            var parseResult = command.GetCommand().Parse("--cluster-name TestCluster --resource-group-name TestResourceGroup --subscription-id TestSubscriptionId --tenant-id TestTenantId --location TestLocation --user-provided-path testUserProvidedPath");
             var context = new CommandContext(_serviceProvider);
 
             // Act
@@ -74,20 +74,20 @@ namespace AzureMcp.Tests.Commands.Arc
         public async Task ExecuteAsync_ShouldHandleErrorResponse()
         {
             // Arrange
-            var loggerMock = new Mock<ILogger<QuickDeployAksEdgeEssentialsCommand>>();
-            var arcServiceMock = new Mock<IArcService>();
-            arcServiceMock.Setup(x => x.QuickDeployAksEdgeEssentialsAsync(
+            var loggerMock = Substitute.For<ILogger<QuickDeployAksEdgeEssentialsCommand>>();
+            var arcServiceMock = Substitute.For<IArcService>();
+            arcServiceMock.QuickDeployAksEdgeEssentialsAsync(
                 "errorCluster",
                 "errorResourceGroup",
                 "errorSubscription",
                 "errorTenant",
                 "errorLocation",
-                "errorPath "))
-                .Throws(new InvalidOperationException("Error during quick deployment."));
+                "errorPath")
+                .Returns(Task.FromException<DeploymentResult>(new InvalidOperationException("Error during quick deployment.")));
 
             var command = new QuickDeployAksEdgeEssentialsCommand(
-                loggerMock.Object,
-                arcServiceMock.Object);
+                loggerMock,
+                arcServiceMock);
 
             var parseResult = command.GetCommand().Parse("");
             var context = new CommandContext(_serviceProvider);
@@ -99,36 +99,6 @@ namespace AzureMcp.Tests.Commands.Arc
             Assert.NotNull(response);
             Assert.Equal(500, response.Status);
             Assert.NotNull(response.Message);
-        }
-    }
-
-    public class MockArcServiceForQuickDeploy : IArcService
-    {
-        public Task<DeploymentResult> QuickDeployAksEdgeEssentialsAsync(string clusterName, string resourceGroupName, string subscriptionId, string tenantId, string location, string userProvidedPath)
-        {
-            return Task.FromResult(new DeploymentResult
-            {
-                Success = true,
-                Steps = "Mock deployment completed successfully."
-            });
-        }
-
-        // Mock other methods from IArcService as needed
-        public Task<DeploymentResult> ValidateAndInstallSwRequirementAsync(string userProvidedPath) => throw new NotImplementedException();
-        public Task<DeploymentResult> ValidatePrerequisitesForAksEdgeClusterAsync() => throw new NotImplementedException();
-        public Task<DeploymentResult> ValidateSystemRequirementsAndSetupHyperVAsync(string userProvidedPath) => throw new NotImplementedException();
-        public Task<bool> RemoveAksEdgeAsync(string userProvidedPath) => throw new NotImplementedException();
-        public string LoadResourceFiles(string resourceName) => throw new NotImplementedException();
-        public Process StartProcess(string scriptPath, ProcessStartInfo processInfo) => throw new NotImplementedException();
-
-        Task<DeploymentResult> IArcService.OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string kubeConfigPath, string userProvidedPath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<DeploymentResult> DisconnectFromAzureArcAsync(string resourceGroupName, string clusterName, string userProvidedPath)
-        {
-            throw new NotImplementedException();
         }
     }
 }

@@ -1,44 +1,87 @@
 using AzureMcp.Commands.Arc;
 using AzureMcp.Models.Command;
-using AzureMcp.Options.Arc;
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Moq;
+using NSubstitute;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using Xunit;
 
-namespace YourNamespace.Tests
+namespace AzureMcp.Tests.Commands.Arc;
+
+public class RemoveAksEdgeCommandTests
 {
-    public class RemoveAksEdgeCommandTests
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IArcService _arcService;
+    private readonly ILogger<RemoveAksEdgeCommand> _logger;
+    private readonly RemoveAksEdgeCommand _command;
+    private readonly CommandContext _context;
+    private readonly Parser _parser;
+    private readonly string UserProvidedPath = "testPath";
+
+    public RemoveAksEdgeCommandTests()
     {
-        [Fact]
-        public async Task ExecuteAsync_ShouldRemoveAksEdgeSuccessfully()
+        _arcService = Substitute.For<IArcService>();
+        _logger = Substitute.For<ILogger<RemoveAksEdgeCommand>>();
+
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddSingleton(_arcService);
+        _serviceProvider = serviceCollection.BuildServiceProvider();
+
+        _command = new(_logger, _arcService);
+        _context = new(_serviceProvider);
+        _parser = new(_command.GetCommand());
+    }
+
+    private void MockArcServiceSuccess()
+    {
+        _arcService.RemoveAksEdgeAsync(Arg.Any<string>()).Returns(true);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ShouldRemoveAksEdgeSuccessfully()
+    {
+        // Arrange
+        MockArcServiceSuccess();
+
+        var args = new[]
         {
-            // Arrange
-            var mockLogger = new Mock<ILogger<RemoveAksEdgeCommand>>();
-            var mockService = new Mock<IArcService>();
-            mockService
-                    .Setup(service => service.RemoveAksEdgeAsync(It.IsAny<string>()))
-                    .ReturnsAsync(true);
+            "--path", UserProvidedPath
+        };
 
-            var serviceProvider = new ServiceCollection()
-                .AddSingleton(mockService.Object)
-                .BuildServiceProvider();
+        var parseResult = _parser.Parse(args);
 
-            var command = new RemoveAksEdgeCommand(mockLogger.Object, mockService.Object);
-            var rootCommand = new RootCommand { new Command("remove-cluster-installation") };
-            var parseResult = rootCommand.Parse("remove-cluster-installation");
-            var context = new CommandContext(serviceProvider);
+        // Act
+        var response = await _command.ExecuteAsync(_context, parseResult);
 
-            // Act
-            var response = await command.ExecuteAsync(context, parseResult);
+        // Assert
+        Assert.NotNull(response);
+        Assert.Equal(200, response.Status);
+        Assert.Equal("AKS Edge Essentials removed successfully.", response.Message);
+        await _arcService.Received(1).RemoveAksEdgeAsync(Arg.Is(UserProvidedPath));
+    }
 
-            // Assert
-            Assert.NotNull(response);
-            Assert.Equal(200, response.Status);
-            Assert.Equal("AKS Edge Essentials removed successfully.", response.Message);
-        }
+    [Fact]
+    public async Task ExecuteAsync_ShouldHandleException()
+    {
+        // Arrange
+        var args = new[]
+        {
+            "--path", UserProvidedPath
+        };
+
+        var expectedError = "Test error";
+        _arcService.When(x => x.RemoveAksEdgeAsync(Arg.Is(UserProvidedPath))).Throws(new Exception(expectedError));
+
+        var parseResult = _parser.Parse(args);
+
+        // Act
+        var response = await _command.ExecuteAsync(_context, parseResult);
+
+        // Assert
+        Assert.NotNull(response);
+        Assert.Equal(500, response.Status);
+        Assert.Contains(expectedError, response.Message, StringComparison.OrdinalIgnoreCase);
     }
 }

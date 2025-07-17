@@ -5,41 +5,60 @@ using System.Threading.Tasks;
 using AzureMcp.Commands.Arc;
 using AzureMcp.Models;
 using AzureMcp.Models.Command;
+using AzureMcp.Services.Azure.Arc; // Added namespace for DeploymentResult
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Moq;
+using NSubstitute;
 using Xunit;
-using AzureMcp.Services.Azure.Arc;
-using System.Diagnostics; // Add this namespace for ProcessStartInfo
 
 namespace AzureMcp.Tests.Commands.Arc
 {
     public class ValidateAndInstallSwRequirementCommandTests
     {
         private readonly IServiceProvider _serviceProvider;
+        private readonly IArcService _arcService;
+        private readonly ILogger<ValidateAndInstallSwRequirementCommand> _logger;
+        private readonly ValidateAndInstallSwRequirementCommand _command;
+        private readonly CommandContext _context;
+        private readonly Parser _parser;
+        private readonly string UserProvidedPath = "C:\\TestPath";
 
         public ValidateAndInstallSwRequirementCommandTests()
         {
-            var services = new ServiceCollection();
-            services.AddLogging();
-            services.AddSingleton<IArcService, MockArcServiceForValidateAndInstall>();
-            _serviceProvider = services.BuildServiceProvider();
+            _arcService = Substitute.For<IArcService>();
+            _logger = Substitute.For<ILogger<ValidateAndInstallSwRequirementCommand>>();
+
+            var serviceCollection = new ServiceCollection();
+            serviceCollection.AddSingleton(_arcService);
+            _serviceProvider = serviceCollection.BuildServiceProvider();
+
+            _command = new(_logger, _arcService);
+            _context = new(_serviceProvider);
+            _parser = new(_command.GetCommand());
+        }
+
+        private void MockArcServiceSuccess()
+        {
+            _arcService.ValidateAndInstallSwRequirementAsync(Arg.Any<string>())
+                .Returns(Task.FromResult(new DeploymentResult
+                {
+                    Success = true,
+                    Steps = "Software requirements validated and installed successfully."
+                }));
         }
 
         [Fact]
         public async Task ExecuteAsync_ShouldReturnSuccessResponse()
         {
             // Arrange
-            var command = new ValidateAndInstallSwRequirementCommand(
-                _serviceProvider.GetRequiredService<ILogger<ValidateAndInstallSwRequirementCommand>>(),
-                _serviceProvider.GetRequiredService<IArcService>());
+            MockArcServiceSuccess();
 
-            var parseResult = command.GetCommand().Parse("--path C:\\TestPath");
-            var context = new CommandContext(_serviceProvider);
+            var args = new[] { "--path", UserProvidedPath };
+            var parseResult = _parser.Parse(args);
 
             // Act
-            var response = await command.ExecuteAsync(context, parseResult);
+            var response = await _command.ExecuteAsync(_context, parseResult);
 
             // Assert
             Assert.Equal(200, response.Status);
@@ -50,92 +69,21 @@ namespace AzureMcp.Tests.Commands.Arc
         public async Task ExecuteAsync_ShouldHandleErrorResponse()
         {
             // Arrange
-            var loggerMock = new Mock<ILogger<ValidateAndInstallSwRequirementCommand>>();
-            var arcServiceMock = new Mock<IArcService>();
-            arcServiceMock.Setup(x => x.ValidateAndInstallSwRequirementAsync(It.IsAny<string>()))
-                .Throws(new InvalidOperationException("Error during validation and installation."));
+            var args = new[] { "--path", "C:\\InvalidPath" };
 
-            var command = new ValidateAndInstallSwRequirementCommand(
-                loggerMock.Object,
-                arcServiceMock.Object);
+            var expectedError = "Error during validation and installation.";
+            _arcService.When(x => x.ValidateAndInstallSwRequirementAsync(Arg.Any<string>()))
+                .Throws(new InvalidOperationException(expectedError));
 
-            var parseResult = command.GetCommand().Parse("--path C:\\InvalidPath");
-            var context = new CommandContext(_serviceProvider);
+            var parseResult = _parser.Parse(args);
 
             // Act
-            var response = await command.ExecuteAsync(context, parseResult);
+            var response = await _command.ExecuteAsync(_context, parseResult);
 
             // Assert
             Assert.NotNull(response);
             Assert.Equal(500, response.Status);
-            Assert.NotNull(response.Message);
-        }
-    }
-    public class MockArcServiceForValidateAndInstall : IArcService
-    {
-        public Task<DeploymentResult> ValidateAndInstallSwRequirementAsync(string path)
-        {
-            return Task.FromResult(new DeploymentResult
-            {
-                Success = true,
-                Steps = "Software requirements validated and installed successfully."
-            });
-        }
-
-
-
-        public string LoadResourceFiles(string path)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<bool> RemoveAksEdgeAsync(string userProvidedPath)
-        {
-            // Mock implementation for RemoveAksEdgeAsync
-            return Task.FromResult(true);
-        }
-
-        Task<DeploymentResult> IArcService.OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string kubeConfigPath, string userProvidedPath)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Process StartProcess(string command, ProcessStartInfo processStartInfo)
-        {
-            // Mock implementation of StartProcess
-            var process = new Process();
-            process.StartInfo = processStartInfo;
-            return process;
-        }
-
-        public Task<DeploymentResult> ValidatePrerequisitesForAksEdgeClusterAsync()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<DeploymentResult> ValidateSystemRequirementsAndSetupHyperVAsync(string userProvidedPath)
-        {
-            // Mock implementation for ValidateSystemRequirementsAndSetupHyperVAsync
-            return Task.FromResult(new DeploymentResult
-            {
-                Success = true,
-                Steps = "System requirements validated and Hyper-V setup completed successfully."
-            });
-        }
-
-
-        public Task<DeploymentResult> QuickDeployAksEdgeEssentialsAsync(string clusterName, string resourceGroupName, string subscriptionId, string tenantId, string location, string userProvidedPath)
-        {
-            return Task.FromResult(new DeploymentResult
-            {
-                Success = true,
-                Steps = "Quick deployment of AKS Edge Essentials completed successfully."
-            });
-        }
-
-        public Task<DeploymentResult> DisconnectFromAzureArcAsync(string resourceGroupName, string clusterName, string userProvidedPath)
-        {
-            throw new NotImplementedException();
+            Assert.Contains(expectedError, response.Message, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

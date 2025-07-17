@@ -1,9 +1,10 @@
 using AzureMcp.Commands.Arc;
 using AzureMcp.Models.Command;
+using AzureMcp.Services.Azure.Arc; // Added namespace for DeploymentResult
 using AzureMcp.Services.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Moq;
+using NSubstitute;
 using System.CommandLine;
 using System.CommandLine.Parsing;
 using Xunit;
@@ -12,30 +13,48 @@ namespace AzureMcp.Tests.Commands.Arc;
 
 public class ValidatePrerequisitesForAksEdgeClusterCommandTests
 {
+    private readonly IServiceProvider _serviceProvider;
+    private readonly IArcService _arcService;
+    private readonly ILogger<ValidatePrerequisitesForAksEdgeClusterCommand> _logger;
+    private readonly ValidatePrerequisitesForAksEdgeClusterCommand _command;
+    private readonly CommandContext _context;
+    private readonly Parser _parser;
+
+    public ValidatePrerequisitesForAksEdgeClusterCommandTests()
+    {
+        _arcService = Substitute.For<IArcService>();
+        _logger = Substitute.For<ILogger<ValidatePrerequisitesForAksEdgeClusterCommand>>();
+
+        var serviceCollection = new ServiceCollection();
+        serviceCollection.AddSingleton(_arcService);
+        _serviceProvider = serviceCollection.BuildServiceProvider();
+
+        _command = new(_logger, _arcService);
+        _context = new(_serviceProvider);
+        _parser = new(_command.GetCommand());
+    }
+
+    private void MockArcServiceSuccess()
+    {
+        _arcService.ValidatePrerequisitesForAksEdgeClusterAsync()
+            .Returns(Task.FromResult(new DeploymentResult
+            {
+                Success = true,
+                Steps = "Test Prerequisites steps"
+            }));
+    }
+
     [Fact]
     public async Task ExecuteAsync_ShouldValidatePrerequisitesSuccessfully()
     {
         // Arrange
-        var mockLogger = new Mock<ILogger<ValidatePrerequisitesForAksEdgeClusterCommand>>();
-        var mockService = new Mock<IArcService>();
-        mockService.Setup(s => s.ValidatePrerequisitesForAksEdgeClusterAsync())
-            .ReturnsAsync(new AzureMcp.Services.Azure.Arc.DeploymentResult
-            {
-                Success = true,
-                Steps = "Test Prerequisites steps"
-            });
+        MockArcServiceSuccess();
 
-        var serviceProvider = new ServiceCollection()
-            .AddSingleton(mockService.Object)
-            .BuildServiceProvider();
-
-        var command = new ValidatePrerequisitesForAksEdgeClusterCommand(mockLogger.Object, mockService.Object);
-        var rootCommand = new RootCommand { new Command("validate-prerequisites-aksee-cluster") };
-        var parseResult = rootCommand.Parse("validate-prerequisites-aksee-cluster");
-        var context = new CommandContext(serviceProvider);
+        var args = new[] { "validate-prerequisites-aksee-cluster" };
+        var parseResult = _parser.Parse(args);
 
         // Act
-        var response = await command.ExecuteAsync(context, parseResult);
+        var response = await _command.ExecuteAsync(_context, parseResult);
 
         // Assert
         Assert.NotNull(response);
@@ -48,11 +67,10 @@ public class ValidatePrerequisitesForAksEdgeClusterCommandTests
     public void LoadPrerequisitesSteps_ShouldReturnNonEmptyString()
     {
         // Arrange
-        var mockService = new Mock<IArcService>();
-        mockService.Setup(s => s.LoadResourceFiles(It.IsAny<string>())).Returns("Sample prerequisites steps");
+        _arcService.LoadResourceFiles(Arg.Any<string>()).Returns("Sample prerequisites steps");
 
         // Act
-        var prerequisitesSteps = mockService.Object.LoadResourceFiles("AzureMcp.Resources.Prerequisites_aksee_installation.txt");
+        var prerequisitesSteps = _arcService.LoadResourceFiles("AzureMcp.Resources.Prerequisites_aksee_installation.txt");
 
         // Assert
         Assert.NotNull(prerequisitesSteps);
