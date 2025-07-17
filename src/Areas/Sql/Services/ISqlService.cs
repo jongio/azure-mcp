@@ -42,7 +42,7 @@ public interface ISqlService
         RetryPolicyOptions? retryPolicy,
         CancellationToken cancellationToken = default);
 
-            /// <summary>
+    /// <summary>
     /// Gets a list of elastic pools for a SQL server.
     /// </summary>
     /// <param name="serverName">The name of the SQL server</param>
