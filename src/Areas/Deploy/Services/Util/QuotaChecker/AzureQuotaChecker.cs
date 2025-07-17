@@ -1,8 +1,8 @@
+using System.Net.Http.Headers;
+using System.Text.Json;
 using Azure.Core;
 using Azure.ResourceManager;
 using AzureMcp.Services.Azure.Authentication;
-using System.Net.Http.Headers;
-using System.Text.Json;
 
 namespace Areas.Deploy.Services.Util;
 

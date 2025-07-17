@@ -30,13 +30,13 @@ public static class EncodeMermaid
     public static string GetDecodedMermaidChart(string encodedChart)
     {
         byte[] compressedData = Convert.FromBase64String(encodedChart);
-        
+
         byte[] decompressedData = DecompressData(compressedData);
-        
+
         string jsonString = Encoding.UTF8.GetString(decompressedData);
-        
+
         MermaidData? data = JsonSerializer.Deserialize(jsonString, DeployJsonContext.Default.MermaidData);
-        
+
         return data?.Code ?? string.Empty;
     }
 

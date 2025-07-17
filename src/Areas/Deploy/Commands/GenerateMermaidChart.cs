@@ -34,7 +34,7 @@ public static class GenerateMermaidChart
             serviceName.Add($"Language: {service.Language}");
             serviceName.Add($"Port: {service.Port}");
 
-            if (service.DockerSettings != null && 
+            if (service.DockerSettings != null &&
                 string.Equals(service.AzureComputeHost, "azurecontainerapp", StringComparison.OrdinalIgnoreCase))
             {
                 serviceName.Add($"DockerFile: {service.DockerSettings.DockerFilePath}");

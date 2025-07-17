@@ -2,11 +2,11 @@
 // Licensed under the MIT License.
 
 using System.Text.Json.Serialization;
-using AzureMcp.Areas.Deploy.Options;
-using AzureMcp.Areas.Deploy.Models;
+using Areas.Deploy.Services.Util;
 using AzureMcp.Areas.Deploy.Commands.Quota;
 using AzureMcp.Areas.Deploy.Commands.Region;
-using Areas.Deploy.Services.Util;
+using AzureMcp.Areas.Deploy.Models;
+using AzureMcp.Areas.Deploy.Options;
 
 namespace AzureMcp.Areas.Deploy.Commands;
 

@@ -1,10 +1,10 @@
+using Azure.Core;
 using Azure.Monitor.Query;
+using Azure.Monitor.Query.Models;
 using Azure.ResourceManager;
-using Azure.ResourceManager.Resources;
 using Azure.ResourceManager.AppContainers;
 using Azure.ResourceManager.AppService;
-using Azure.Monitor.Query.Models;
-using Azure.Core;
+using Azure.ResourceManager.Resources;
 
 namespace Areas.Deploy.Services.Util;
 

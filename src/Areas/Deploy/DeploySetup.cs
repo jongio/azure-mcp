@@ -1,16 +1,16 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using AzureMcp.Areas.Deploy.Commands;
+using AzureMcp.Areas.Deploy.Commands.InfraCodeRules;
+using AzureMcp.Areas.Deploy.Commands.Plan;
+using AzureMcp.Areas.Deploy.Commands.Quota;
+using AzureMcp.Areas.Deploy.Commands.Region;
+using AzureMcp.Areas.Deploy.Services;
 using AzureMcp.Areas.Extension.Commands;
 using AzureMcp.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using AzureMcp.Areas.Deploy.Commands;
-using AzureMcp.Areas.Deploy.Commands.Region;
-using AzureMcp.Areas.Deploy.Commands.Plan;
-using AzureMcp.Areas.Deploy.Services;
-using AzureMcp.Areas.Deploy.Commands.Quota;
-using AzureMcp.Areas.Deploy.Commands.InfraCodeRules;
 
 namespace AzureMcp.Areas.Deploy;
 
@@ -31,7 +31,7 @@ internal sealed class DeploySetup : IAreaSetup
         deploy.AddCommand("infra-code-rules-get", new InfraCodeRulesGetCommand(loggerFactory.CreateLogger<InfraCodeRulesGetCommand>()));
 
         deploy.AddCommand("available-region-get", new RegionCheckCommand(loggerFactory.CreateLogger<RegionCheckCommand>()));
-        
+
         deploy.AddCommand("quota-check", new QuotaCheckCommand(loggerFactory.CreateLogger<QuotaCheckCommand>()));
 
         deploy.AddCommand("azd-app-log-get", new AzdAppLogGetCommand(loggerFactory.CreateLogger<AzdAppLogGetCommand>()));

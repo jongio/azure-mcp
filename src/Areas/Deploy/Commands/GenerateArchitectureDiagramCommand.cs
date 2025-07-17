@@ -3,11 +3,11 @@
 
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using AzureMcp.Areas.Deploy.Options;
 using AzureMcp.Commands;
 using AzureMcp.Helpers;
 using Microsoft.Extensions.Logging;
-using AzureMcp.Areas.Deploy.Options;
-using System.Text.Json.Nodes;
 
 namespace AzureMcp.Areas.Deploy.Commands;
 

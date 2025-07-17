@@ -77,7 +77,7 @@ public static class CommandExtensions
             var jsonString = jsonObject.ToJsonString();
             args.Add(jsonString);
         }
-        
+
         return command.Parse(args.ToArray());
     }
 }

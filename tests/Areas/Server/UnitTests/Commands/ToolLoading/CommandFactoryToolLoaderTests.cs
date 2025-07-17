@@ -306,7 +306,7 @@ public class CommandFactoryToolLoaderTests
         var (toolLoader, commandFactory) = CreateToolLoader(multiServiceOptions);
         var request = CreateRequest();
         var result = await toolLoader.ListToolsHandler(request, CancellationToken.None);
-        
+
         Assert.NotNull(result);
         Assert.NotEmpty(result.Tools);
 
@@ -343,7 +343,7 @@ public class CommandFactoryToolLoaderTests
                     if (itemsProperty.TryGetProperty("properties", out var servicesProperties))
                     {
                         var servicePropertyArgs = servicesProperties.EnumerateObject().ToArray();
-                        Assert.Contains(servicePropertyArgs, prop => prop.Name.Equals("dependencies", StringComparison.OrdinalIgnoreCase) && 
+                        Assert.Contains(servicePropertyArgs, prop => prop.Name.Equals("dependencies", StringComparison.OrdinalIgnoreCase) &&
                                                                     prop.Value.GetProperty("type").GetString() == "array");
                     }
                 }
