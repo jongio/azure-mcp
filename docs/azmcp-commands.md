@@ -285,19 +285,19 @@ azmcp search index query --subscription <subscription> --service-name <service-n
 ### Azure Arc Operations
 ```bash
 # Validate system requirements and setup Hyper-V for AKS Edge Essentials
-azmcp arc validate-system-requirements-hyperv --subscription <subscription> --path <path>
+azmcp arc validate-system-requirements-hyperv --path <path>
 
 # Validate prerequisites for AKS Edge Essentials cluster
-azmcp arc validate-prerequisites-aksee-cluster --subscription <subscription> --path <path>
+azmcp arc validate-prerequisites-aksee-cluster
 
 # Validate and install software requirements for AKS Edge Essentials
-azmcp arc validate-and-install-sw-requirements --subscription <subscription> --path <path>
+azmcp arc validate-and-install-sw-requirements --path <path>
 
 # Quick deploy AKS Edge Essentials and connect to Azure Arc
-azmcp arc quick-deploy-aks-edge-essentials --subscription <subscription> --resource-group <resource-group> --location <location> --cluster-name <cluster-name> --path <path>
+azmcp arc quick-deploy-aks-edge-essentials --subscription <subscription> --resource-group <resource-group> --location <location> --cluster-name <cluster-name> --path <path> --tenant-id <tenant-id>
 
 # Onboard existing cluster to Azure Arc
-azmcp arc onboard-cluster-to-arc --subscription <subscription> --resource-group <resource-group> --location <location> --cluster-name <cluster-name> --kube-config-path <path> --path <path>
+azmcp arc onboard-cluster-to-arc --resource-group <resource-group> --location <location> --cluster-name <cluster-name> --kube-config-path <path> --path <path> --subscription <subscription> --tenant-id <tenant-id>
 
 # Disconnect cluster from Azure Arc
 azmcp arc disconnect-from-azure-arc --subscription <subscription> --resource-group <resource-group> --cluster-name <cluster-name> --path <path>
