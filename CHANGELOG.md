@@ -1,5 +1,16 @@
 # Release History
 
+## 0.2.2 (Unreleased)
+
+### Features Added
+
+- Pre-requisites for onboarding cluster to Arc. https://github.com/Azure/azure-mcp/pull/637
+- Validating and installing system requirements. https://github.com/Azure/azure-mcp/pull/637
+- Validating and installing software dependencies. https://github.com/Azure/azure-mcp/pull/637
+- Quick Deploy AKS Edge Essentials and connect to Arc. https://github.com/Azure/azure-mcp/pull/637
+- Onboard existing cluster to Arc. https://github.com/Azure/azure-mcp/pull/637
+- Disconnect cluster from Arc. https://github.com/Azure/azure-mcp/pull/637
+
 ## 0.2.1 (Unreleased)
 
 ### Features Added

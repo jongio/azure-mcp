@@ -282,6 +282,27 @@ azmcp search index describe --subscription <subscription> --service-name <servic
 azmcp search index query --subscription <subscription> --service-name <service-name> --index-name <index-name> --query <query>
 ```
 
+### Azure Arc Operations
+```bash
+# Validate system requirements and setup Hyper-V for AKS Edge Essentials
+azmcp arc validate-system-requirements-hyperv --subscription <subscription> --path <path>
+
+# Validate prerequisites for AKS Edge Essentials cluster
+azmcp arc validate-prerequisites-aksee-cluster --subscription <subscription> --path <path>
+
+# Validate and install software requirements for AKS Edge Essentials
+azmcp arc validate-and-install-sw-requirements --subscription <subscription> --path <path>
+
+# Quick deploy AKS Edge Essentials and connect to Azure Arc
+azmcp arc quick-deploy-aks-edge-essentials --subscription <subscription> --resource-group <resource-group> --location <location> --cluster-name <cluster-name> --path <path>
+
+# Onboard existing cluster to Azure Arc
+azmcp arc onboard-cluster-to-arc --subscription <subscription> --resource-group <resource-group> --location <location> --cluster-name <cluster-name> --kube-config-path <path> --path <path>
+
+# Disconnect cluster from Azure Arc
+azmcp arc disconnect-from-azure-arc --subscription <subscription> --resource-group <resource-group> --cluster-name <cluster-name> --path <path>
+```
+
 ## Response Format
 
 All responses follow a consistent JSON format:

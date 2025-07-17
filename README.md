@@ -149,6 +149,17 @@ Agents and models can discover and learn best practices and usage guidelines for
 
 ### 🛡️ Azure Best Practices
 - Get secure, production-grade Azure SDK best practices for effective code generation.
+
+### Azure Arc Tools
+
+Azure MCP now supports the following Azure Arc tools:
+
+- Pre-requisites for onboarding cluster to Arc.
+- Validating and installing system requirements.
+- Validating and installing software dependencies.
+- Quick Deploy AKS Edge Essentials and connect to Arc.
+- Onboard existing cluster to Arc.
+- Disconnect cluster from Arc.
 </details>
 
 For detailed command documentation and examples, see [Azure MCP Commands](https://github.com/Azure/azure-mcp/blob/main/docs/azmcp-commands.md).
