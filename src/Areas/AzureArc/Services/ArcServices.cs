@@ -14,14 +14,14 @@ namespace AzureMcp.Areas.AzureArc.Services
 {
     public class ArcService : BaseAzureService, IArcServices
     {
-        private const string PrerequisitesAksEdgeInstallation = "Areas.AzureArc.Resources.PrerequisitesAksEdgeInstallation.txt";
-        private const string RemoveAksEdgeCompletely = "Areas.AzureArc.Resources.RemoveAksEdgeCompletely.ps1";
-        private const string ValidateAndSetupSystemRequirements = "Areas.AzureArc.Resources.ValidateAndSetupSystemRequirements.ps1";
-        private const string ValidateAndSetupSwRequirementScript = "Areas.AzureArc.Resources.ValidateAndSetupSoftwarerequirements.ps1";
-        private const string AksEdgeQuickDeploy = "Areas.AzureArc.Resources.AksEdgeQuickDeploy.ps1";
-        private const string DisconnectFromAzureArc = "Areas.AzureArc.Resources.DisconnectFromAzureArc.ps1";
-        private const string ConfirmAksEdgeDeletion = "Areas.AzureArc.Resources.ConfirmAksEdgeDeletion.ps1";
-        private const string OnboardClusterToArc = "Areas.AzureArc.Resources.OnboardClusterToArc.ps1";
+        private const string PrerequisitesAksEdgeInstallation = "PrerequisitesAksEdgeInstallation.txt";
+        private const string RemoveAksEdgeCompletely = "RemoveAksEdgeCompletely.ps1";
+        private const string ValidateAndSetupSystemRequirements = "ValidateAndSetupSystemRequirements.ps1";
+        private const string ValidateAndSetupSwRequirementScript = "ValidateAndSetupSoftwarerequirements.ps1";
+        private const string AksEdgeQuickDeploy = "AksEdgeQuickDeploy.ps1";
+        private const string DisconnectFromAzureArc = "DisconnectFromAzureArc.ps1";
+        private const string ConfirmAksEdgeDeletion = "ConfirmAksEdgeDeletion.ps1";
+        private const string OnboardClusterToArc = "OnboardClusterToArc.ps1";
         private readonly Assembly _assembly;
 
         public ArcService(ITenantService? tenantService = null) : base(tenantService)
@@ -146,7 +146,8 @@ namespace AzureMcp.Areas.AzureArc.Services
         }
         public string LoadResourceFiles(string resourceName)
         {
-            return EmbeddedResourceHelper.ReadEmbeddedResource(_assembly, resourceName);
+            string actualResourceName = EmbeddedResourceHelper.FindEmbeddedResource(_assembly, resourceName);
+            return EmbeddedResourceHelper.ReadEmbeddedResource(_assembly, actualResourceName);
         }
 
         public async Task<DeploymentResult> ValidatePrerequisitesForAksEdgeClusterAsync()
