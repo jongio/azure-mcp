@@ -78,9 +78,8 @@ A complete command requires:
 1. OptionDefinitions static class: `src/Areas/{Area}/Options/{Area}OptionDefinitions.cs`
 2. Options class: `src/Areas/{Area}/Options/{Resource}/{Operation}Options.cs`
 3. Command class: `src/Areas/{Area}/Commands/{Resource}/{Resource}{Operation}Command.cs`
-4. Service interface: `src/Areas/{Area}/Services/I{Service}Service.cs`
-5. Service implementation: `src/Areas/{Area}/Services/{Service}Service.cs`
-   - {Area} and {Service} should not be considered synonymous
+4. Service interface: `src/Areas/{Area}/Services/I{Area}Service.cs`
+5. Service implementation: `src/Areas/{Area}/Services/{Area}Service.cs`
    - It's common for an area to have a single service class named after the
      area but some areas will have multiple service classes
 6. Unit test: `tests/Areas/{Area}/UnitTests/{Resource}/{Resource}{Operation}CommandTests.cs`
@@ -88,9 +87,9 @@ A complete command requires:
 8. Command registration in RegisterCommands(): `src/Areas/{Area}/{Area}Setup.cs`
 9. Area registration in RegisterAreas(): `src/Program.cs`
 10. **Live test infrastructure** (if needed):
-   - Bicep template: `/infra/services/{area}.bicep`
+   - Bicep template: `/infra/services/{service}.bicep`
    - Module registration in: `/infra/test-resources.bicep`
-   - Optional post-deployment script: `/infra/services/{area}-post.ps1`
+   - Optional post-deployment script: `/infra/services/{service}-post.ps1`
 
 **IMPORTANT**: If implementing a new area, you must also ensure:
 - The Azure Resource Manager package is added to `Directory.Packages.props` first
@@ -167,7 +166,7 @@ var databaseResource = await sqlServerResource.Value
 ### 2. Options Class
 
 ```csharp
-public class {Resource}{Operation}Options : Base{Service}Options
+public class {Resource}{Operation}Options : Base{Area}Options
 {
     // Only add properties not in base class
     public string? NewOption { get; set; }
@@ -175,7 +174,7 @@ public class {Resource}{Operation}Options : Base{Service}Options
 ```
 
 IMPORTANT:
-- Inherit from appropriate base class (BaseServiceOptions, GlobalOptions, etc.)
+- Inherit from appropriate base class (Base{Area}Options, GlobalOptions, etc.)
 - Never redefine properties from base classes
 - Make properties nullable if not required
 - Use consistent parameter names across services:
@@ -189,7 +188,7 @@ IMPORTANT:
 
 ```csharp
 public sealed class {Resource}{Operation}Command(ILogger<{Resource}{Operation}Command> logger)
-    : Base{Service}Command<{Resource}{Operation}Options>
+    : Base{Area}Command<{Resource}{Operation}Options>
 {
     private const string CommandTitle = "Human Readable Title";
     private readonly ILogger<{Resource}{Operation}Command> _logger = logger;
@@ -241,7 +240,7 @@ public sealed class {Resource}{Operation}Command(ILogger<{Resource}{Operation}Co
             context.Activity?.WithSubscriptionTag(options); 
 
             // Get the appropriate service from DI
-            var service = context.GetService<I{Service}Service>();
+            var service = context.GetService<I{Area}Service>();
 
             // Call service operation(s) with required parameters
             var results = await service.{Operation}(
@@ -254,7 +253,7 @@ public sealed class {Resource}{Operation}Command(ILogger<{Resource}{Operation}Co
             context.Response.Results = results?.Count > 0 ?
                 ResponseResult.Create(
                     new {Operation}CommandResult(results),
-                    {Service}JsonContext.Default.{Operation}CommandResult) :
+                    {Area}JsonContext.Default.{Operation}CommandResult) :
                 null;
         }
         catch (Exception ex)
@@ -301,22 +300,22 @@ Each service has its own hierarchy of base command classes that inherit from `Gl
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Commands.Subscription;
 using AzureMcp.Models.Option;
-using AzureMcp.Areas.{Service}.Options;
+using AzureMcp.Areas.{Area}.Options;
 using AzureMcp.Commands;
 
-namespace AzureMcp.Areas.{Service}.Commands;
+namespace AzureMcp.Areas.{Area}.Commands;
 
 // Base command for all service commands (if no members needed, use concise syntax)
-public abstract class Base{Service}Command<
+public abstract class Base{Area}Command<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
-    : SubscriptionCommand<TOptions> where TOptions : Base{Service}Options, new();
+    : SubscriptionCommand<TOptions> where TOptions : Base{Area}Options, new();
 
 // Base command for all service commands (if members are needed, use full syntax)
-public abstract class Base{Service}Command<
+public abstract class Base{Area}Command<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
-    : SubscriptionCommand<TOptions> where TOptions : Base{Service}Options, new()
+    : SubscriptionCommand<TOptions> where TOptions : Base{Area}Options, new()
 {
-    protected readonly Option<string> _commonOption = {Service}OptionDefinitions.CommonOption;
+    protected readonly Option<string> _commonOption = {Area}OptionDefinitions.CommonOption;
     protected readonly Option<string> _resourceGroupOption = OptionDefinitions.Common.ResourceGroup;
     protected virtual bool RequiresResourceGroup => true;
 
@@ -347,8 +346,8 @@ public abstract class Base{Service}Command<
 }
 
 // Service implementation example with subscription resolution
-public class {Service}Service(ISubscriptionService subscriptionService, ITenantService tenantService) 
-    : BaseAzureService(tenantService), I{Service}Service
+public class {Area}Service(ISubscriptionService subscriptionService, ITenantService tenantService) 
+    : BaseAzureService(tenantService), I{Area}Service
 {
     private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
 
@@ -372,7 +371,7 @@ Unit tests follow a standardized pattern that tests initialization, validation, 
 public class {Resource}{Operation}CommandTests
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly I{Service}Service _service;
+    private readonly I{Area}Service _service;
     private readonly ILogger<{Resource}{Operation}Command> _logger;
     private readonly {Resource}{Operation}Command _command;
     private readonly CommandContext _context;
@@ -380,7 +379,7 @@ public class {Resource}{Operation}CommandTests
 
     public {Resource}{Operation}CommandTests()
     {
-        _service = Substitute.For<I{Service}Service>();
+        _service = Substitute.For<I{Area}Service>();
         _logger = Substitute.For<ILogger<{Resource}{Operation}Command>>();
 
         var collection = new ServiceCollection().AddSingleton(_service);
@@ -455,9 +454,9 @@ public class {Resource}{Operation}CommandTests
 Integration tests inherit from `CommandTestsBase` and use test fixtures:
 
 ```csharp
-[Trait("Area", "{Service}")]
+[Trait("Area", "{Area}")]
 [Trait("Category", "Live")]
-public class {Service}CommandTests : CommandTestsBase, IClassFixture<LiveTestFixture>
+public class {Area}CommandTests : CommandTestsBase, IClassFixture<LiveTestFixture>
 {
     protected const string TenantNameReason = "Service principals cannot use TenantName for lookup";
     protected LiveTestSettings Settings { get; }
@@ -465,7 +464,7 @@ public class {Service}CommandTests : CommandTestsBase, IClassFixture<LiveTestFix
     protected ITestOutputHelper Output { get; }
     protected IMcpClient Client { get; }
 
-    public {Service}CommandTests(LiveTestFixture fixture, ITestOutputHelper output)
+    public {Area}CommandTests(LiveTestFixture fixture, ITestOutputHelper output)
         : base(fixture, output)
     {
         Client = fixture.Client;
@@ -480,7 +479,7 @@ public class {Service}CommandTests : CommandTestsBase, IClassFixture<LiveTestFix
     {
         // Arrange
         var result = await CallToolAsync(
-            "azmcp_{service}_{resource}_{operation}",
+            "azmcp_{area}_{resource}_{operation}",
             new()
             {
                 { "subscription", Settings.Subscription },
@@ -506,7 +505,7 @@ public class {Service}CommandTests : CommandTestsBase, IClassFixture<LiveTestFix
     public async Task Should_Return400_WithInvalidInput(string args)
     {
         var result = await CallToolAsync(
-            $"azmcp_{service}_{resource}_{operation} {args}");
+            $"azmcp_{area}_{resource}_{operation} {args}");
 
         Assert.Equal(400, result.GetProperty("status").GetInt32());
         Assert.Contains("required",
@@ -521,8 +520,8 @@ public class {Service}CommandTests : CommandTestsBase, IClassFixture<LiveTestFix
 private void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFactory)
 {
     var service = new CommandGroup(
-        "{service}",
-        "{Service} operations");
+        "{area}",
+        "{Area} operations");
     rootGroup.AddSubGroup(service);
 
     var resource = new CommandGroup(
@@ -530,7 +529,7 @@ private void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFacto
         "{Resource} operations");
     service.AddSubGroup(resource);
 
-    resource.AddCommand("operation", new {Service}.{Resource}{Operation}Command(
+    resource.AddCommand("operation", new {Area}.{Resource}{Operation}Command(
         loggerFactory.CreateLogger<{Resource}{Operation}Command>()));
 }
 ```
@@ -545,7 +544,7 @@ private void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFacto
     {
         return [
             new AzureMcp.Areas.AppConfig.AppConfigSetup(),
-            new AzureMcp.Areas.{Service}.{Service}Setup(),
+            new AzureMcp.Areas.{Area}.{Area}Setup(),
             new AzureMcp.Areas.Storage.StorageSetup(),
         ];
     }
@@ -718,7 +717,7 @@ targetScope = 'resourceGroup'
 
 @minLength(3)
 @maxLength(17)  // Adjust based on service naming limits
-@description('The base resource name. {Service} names have specific length restrictions.')
+@description('The base resource name. Service names have specific length restrictions.')
 param baseName string = resourceGroup().name
 
 @description('The location of the resource. By default, this is the same as the resource group.')
@@ -800,7 +799,7 @@ output testResourceName string = serviceResource::testResource.name
 **2. Add Module to Main Template (`/infra/test-resources.bicep`)**
 
 ```bicep
-module {service} 'services/{service}.bicep' = if (empty(areas) || contains(areas, '{Service}')) {
+module {area} 'services/{service}.bicep' = if (empty(areas) || contains(areas, '{service}')) {
   name: '${deploymentName}-{service}'
   params: {
     baseName: baseName
@@ -833,11 +832,11 @@ param (
     [hashtable] $AdditionalParameters
 )
 
-Write-Host "Running {Service} post-deployment setup..."
+Write-Host "Running {Area} post-deployment setup..."
 
 try {
     # Extract outputs from deployment
-    $serviceName = $DeploymentOutputs['{service}']['serviceResourceName']['value']
+    $serviceName = $DeploymentOutputs['{area}']['serviceResourceName']['value']
     $resourceGroup = $AdditionalParameters['ResourceGroupName']
     
     # Perform additional setup (e.g., create sample data, configure settings)
@@ -846,10 +845,10 @@ try {
     # Example: Run Azure CLI commands for additional setup
     # az {service} {operation} --name $serviceName --resource-group $resourceGroup
     
-    Write-Host "{Service} post-deployment setup completed successfully."
+    Write-Host "{Area} post-deployment setup completed successfully."
 }
 catch {
-    Write-Error "Failed to complete {Service} post-deployment setup: $_"
+    Write-Error "Failed to complete {Area} post-deployment setup: $_"
     throw
 }
 ```
@@ -859,9 +858,9 @@ catch {
 Integration tests should use the deployed infrastructure:
 
 ```csharp
-[Trait("Area", "{Service}")]
+[Trait("Area", "{Area}")]
 [Trait("Category", "Live")]
-public class {Service}CommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper output)
+public class {Area}CommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper output)
     : CommandTestsBase(liveTestFixture, output), IClassFixture<LiveTestFixture>
 {
     [Fact]
@@ -872,7 +871,7 @@ public class {Service}CommandTests(LiveTestFixture liveTestFixture, ITestOutputH
         var resourceName = "test{resource}";
         
         var result = await CallToolAsync(
-            "azmcp_{service}_{resource}_show",
+            "azmcp_{area}_{resource}_show",
             new()
             {
                 { "subscription", Settings.SubscriptionId },
@@ -900,7 +899,7 @@ public class {Service}CommandTests(LiveTestFixture liveTestFixture, ITestOutputH
         var argsString = string.Join(" ", allArgs);
         
         var result = await CallToolAsync(
-            "azmcp_{service}_{resource}_show",
+            "azmcp_{area}_{resource}_show",
             new()
             {
                 { "args", argsString }
@@ -918,10 +917,10 @@ Use the deployment script with your service area:
 
 ```powershell
 # Deploy test resources for your service
-./eng/scripts/Deploy-TestResources.ps1 -Areas "{Service}" -Location "East US"
+./eng/scripts/Deploy-TestResources.ps1 -Areas "{Area}" -Location "East US"
 
 # Run live tests
-dotnet test --filter "Category=Live&Area={Service}"
+dotnet test --filter "Category=Live&Area={Area}"
 ```
 
 Live test scenarios should include:
@@ -998,7 +997,7 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
 
 5. Live Test Infrastructure:
    - Use minimal resource configurations for cost efficiency
-   - Follow naming conventions: `baseName` (most common) or `{baseName}-{service}` if needed
+   - Follow naming conventions: `baseName` (most common) or `{baseName}-{area}` if needed
    - Include proper RBAC assignments for test application
    - Output all necessary identifiers for test consumption
    - Use appropriate Azure service API versions
