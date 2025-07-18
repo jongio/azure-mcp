@@ -7,15 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class RemoveAksEdgeCommand : GlobalCommand<ArcConnectOptions>
+public sealed class RemoveAksEdgeCommand(ILogger<RemoveAksEdgeCommand> logger) : GlobalCommand<ArcConnectOptions>
 {
     private const string _commandTitle = "Remove installation for existing cluster";
-    private readonly ILogger<RemoveAksEdgeCommand> _logger;
-
-    public RemoveAksEdgeCommand(ILogger<RemoveAksEdgeCommand> logger)
-    {
-        _logger = logger;
-    }
 
     public override string Name => "remove-Aks-Edge-installation";
 
@@ -53,7 +47,7 @@ public sealed class RemoveAksEdgeCommand : GlobalCommand<ArcConnectOptions>
                 throw new ArgumentException("The path parameter is required.");
             }
 
-            _logger.LogInformation("Starting AKS Edge Essentials removal.");
+            logger.LogInformation("Starting AKS Edge Essentials removal.");
 
             var arcService = context.GetService<IArcServices>();
             var removalSuccess = await arcService.RemoveAksEdgeAsync(options.UserProvidedPath);
@@ -73,7 +67,7 @@ public sealed class RemoveAksEdgeCommand : GlobalCommand<ArcConnectOptions>
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to remove AKS Edge Essentials.");
+            logger.LogError(ex, "Failed to remove AKS Edge Essentials.");
             context.Response.Status = 500;
             context.Response.Message = ex.Message;
             return context.Response;

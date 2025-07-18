@@ -7,20 +7,14 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class DisconnectFromAzureArcCommand : GlobalCommand<ArcConnectOptions>
+public sealed class DisconnectFromAzureArcCommand(ILogger<DisconnectFromAzureArcCommand> logger) : GlobalCommand<ArcConnectOptions>
 {
     private const string _commandTitle = "Disconnects a cluster from Azure Arc";
-    private readonly ILogger<DisconnectFromAzureArcCommand> _logger;
 
     // Define options as fields
     private readonly Option<string> _clusterNameOption = new("--cluster-name", "Name of the cluster to disconnect from Azure Arc");
     private readonly Option<string> _resourceGroupNameOption = new("--resource-group-name", "Name of the resource group");
     private readonly Option<string> _userProvidedPathOption = new("--user-provided-path", "Path to the user-provided files");
-
-    public DisconnectFromAzureArcCommand(ILogger<DisconnectFromAzureArcCommand> logger)
-    {
-        _logger = logger;
-    }
 
     public override string Name => "disconnect-from-azure-arc";
 
@@ -77,7 +71,7 @@ public sealed class DisconnectFromAzureArcCommand : GlobalCommand<ArcConnectOpti
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to disconnect cluster from Azure Arc");
+            logger.LogError(ex, "Failed to disconnect cluster from Azure Arc");
             context.Response.Status = 500;
             context.Response.Message = $"Failed to disconnect cluster from Azure Arc: {ex.Message}";
             return context.Response;

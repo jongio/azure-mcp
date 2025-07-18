@@ -9,7 +9,7 @@ using AzureMcp.Services.Azure.Tenant;
 
 namespace AzureMcp.Areas.AzureArc.Services
 {
-    public class ArcService(ITenantService? tenantService = null) : BaseAzureService(tenantService), IArcServices
+    public class ArcServices(ITenantService? tenantService = null) : BaseAzureService(tenantService), IArcServices
     {
         private const string PrerequisitesAksEdgeInstallation = "PrerequisitesAksEdgeInstallation.txt";
         private const string RemoveAksEdgeCompletely = "RemoveAksEdgeCompletely.ps1";
@@ -19,7 +19,7 @@ namespace AzureMcp.Areas.AzureArc.Services
         private const string DisconnectFromAzureArc = "DisconnectFromAzureArc.ps1";
         private const string ConfirmAksEdgeDeletion = "ConfirmAksEdgeDeletion.ps1";
         private const string OnboardClusterToArc = "OnboardClusterToArc.ps1";
-        private readonly Assembly _assembly = typeof(ArcService).Assembly;
+        private readonly Assembly _assembly = typeof(ArcServices).Assembly;
 
         public async Task<DeploymentResult> OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string kubeConfigPath, string userProvidedPath)
         {
@@ -49,8 +49,8 @@ namespace AzureMcp.Areas.AzureArc.Services
                 Verb = "runas"
             };
 
-            Process process = StartProcess(tempScriptPath, processStartInfo);
-            await Task.Run(() => process.WaitForExit());
+            using Process process = StartProcess(tempScriptPath, processStartInfo);
+            await process.WaitForExitAsync();
 
             return new DeploymentResult
             {
@@ -79,8 +79,8 @@ namespace AzureMcp.Areas.AzureArc.Services
                 Verb = "runas"
             };
 
-            Process process = StartProcess(tempScriptPath, processStartInfo);
-            await Task.Run(() => process.WaitForExit());
+            using Process process = StartProcess(tempScriptPath, processStartInfo);
+            await process.WaitForExitAsync();
 
             return new DeploymentResult
             {
@@ -262,8 +262,8 @@ namespace AzureMcp.Areas.AzureArc.Services
                 Verb = "runas"
             };
 
-            Process process = StartProcess(tempScriptPath, processStartInfo);
-            await Task.Run(() => process.WaitForExit());
+            using Process process = StartProcess(tempScriptPath, processStartInfo);
+            await process.WaitForExitAsync();
 
             return new DeploymentResult
             {

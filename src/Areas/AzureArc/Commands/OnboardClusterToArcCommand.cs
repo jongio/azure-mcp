@@ -7,10 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class OnboardClusterToArcCommand : GlobalCommand<ArcConnectOptions>
+public sealed class OnboardClusterToArcCommand(ILogger<OnboardClusterToArcCommand> logger) : GlobalCommand<ArcConnectOptions>
 {
     private const string _commandTitle = "Onboards existing cluster to Azure Arc";
-    private readonly ILogger<OnboardClusterToArcCommand> _logger;
 
     // Define options as fields
     private readonly Option<string> _clusterNameOption = new("--cluster-name", "Name of the cluster to connect to Azure Arc");
@@ -20,11 +19,6 @@ public sealed class OnboardClusterToArcCommand : GlobalCommand<ArcConnectOptions
     private readonly Option<string> _tenantIdOption = new("--tenant-id", "Azure tenant ID");
     private readonly Option<string> _kubeConfigPathOption = new("--kube-config-path", "Path to the kubeconfig file");
     private readonly Option<string> _userProvidedPathOption = new("--user-provided-path", "Path to the user-provided files");
-
-    public OnboardClusterToArcCommand(ILogger<OnboardClusterToArcCommand> logger)
-    {
-        _logger = logger;
-    }
 
     public override string Name => "onboard-cluster-to-arc";
 
@@ -91,7 +85,7 @@ public sealed class OnboardClusterToArcCommand : GlobalCommand<ArcConnectOptions
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to onboard cluster to Azure Arc");
+            logger.LogError(ex, "Failed to onboard cluster to Azure Arc");
             context.Response.Status = 500;
             context.Response.Message = $"Failed to onboard cluster to Azure Arc: {ex.Message}";
             return context.Response;

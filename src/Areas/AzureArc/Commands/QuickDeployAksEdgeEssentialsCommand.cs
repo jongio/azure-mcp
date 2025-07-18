@@ -7,10 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class QuickDeployAksEdgeEssentialsCommand : GlobalCommand<ArcConnectOptions>
+public sealed class QuickDeployAksEdgeEssentialsCommand(ILogger<QuickDeployAksEdgeEssentialsCommand> logger) : GlobalCommand<ArcConnectOptions>
 {
     private const string _commandTitle = "Quick Deploy AKS Edge Essentials";
-    private readonly ILogger<QuickDeployAksEdgeEssentialsCommand> _logger;
 
     private readonly Option<string> _clusterNameOption = new("--cluster-name", "Name of the AKS Edge Essentials cluster.") { IsRequired = true };
     private readonly Option<string> _resourceGroupNameOption = new("--resource-group-name", "Name of the resource group.") { IsRequired = true };
@@ -18,12 +17,6 @@ public sealed class QuickDeployAksEdgeEssentialsCommand : GlobalCommand<ArcConne
     private readonly Option<string> _tenantIdOption = new("--tenant-id", "Azure tenant ID.") { IsRequired = true };
     private readonly Option<string> _locationOption = new("--location", "Azure region where the cluster will be registered.") { IsRequired = true };
     private readonly Option<string> _userProvidedPathOption = new("--user-provided-path", "User-provided path for temporary files.") { IsRequired = true };
-
-
-    public QuickDeployAksEdgeEssentialsCommand(ILogger<QuickDeployAksEdgeEssentialsCommand> logger)
-    {
-        _logger = logger;
-    }
 
     public override string Name => "quick-deploy-aks-edge-essentials";
 
@@ -88,7 +81,7 @@ public sealed class QuickDeployAksEdgeEssentialsCommand : GlobalCommand<ArcConne
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to perform quick deployment of AKS Edge Essentials");
+            logger.LogError(ex, "Failed to perform quick deployment of AKS Edge Essentials");
             context.Response.Status = 500;
             context.Response.Message = ex.Message;
             return context.Response;

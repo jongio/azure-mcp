@@ -13,7 +13,7 @@ public class AzureArcSetup : IAreaSetup
 {
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddSingleton<IArcServices, ArcService>();
+        services.AddSingleton<IArcServices, ArcServices>();
     }
 
     public void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFactory)

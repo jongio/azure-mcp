@@ -7,15 +7,9 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class ValidatePrerequisitesForAksEdgeClusterCommand : GlobalCommand<ArcConnectOptions>
+public sealed class ValidatePrerequisitesForAksEdgeClusterCommand(ILogger<ValidatePrerequisitesForAksEdgeClusterCommand> logger) : GlobalCommand<ArcConnectOptions>
 {
     private const string _commandTitle = "Validate prerequisites for AKS Edge Essentials Cluster";
-    private readonly ILogger<ValidatePrerequisitesForAksEdgeClusterCommand> _logger;
-
-    public ValidatePrerequisitesForAksEdgeClusterCommand(ILogger<ValidatePrerequisitesForAksEdgeClusterCommand> logger)
-    {
-        _logger = logger;
-    }
 
     public override string Name => "validate-prerequisites-aksee-cluster";
 
@@ -42,7 +36,7 @@ public sealed class ValidatePrerequisitesForAksEdgeClusterCommand : GlobalComman
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to validate prerequisites for AKS Edge Essentials cluster");
+            logger.LogError(ex, "Failed to validate prerequisites for AKS Edge Essentials cluster");
             context.Response.Status = 500;
             context.Response.Message = ex.Message;
             return context.Response;

@@ -7,17 +7,11 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class ValidateAndInstallSwRequirementCommand : GlobalCommand<ArcConnectOptions>
+public sealed class ValidateAndInstallSwRequirementCommand(ILogger<ValidateAndInstallSwRequirementCommand> logger) : GlobalCommand<ArcConnectOptions>
 {
     private const string _commandTitle = "Validate and Install Software Requirements";
-    private readonly ILogger<ValidateAndInstallSwRequirementCommand> _logger;
 
     private readonly Option<string> _pathOption = new Option<string>("--path", "The path to validate and install software requirements") { IsRequired = true };
-
-    public ValidateAndInstallSwRequirementCommand(ILogger<ValidateAndInstallSwRequirementCommand> logger)
-    {
-        _logger = logger;
-    }
 
     public override string Name => "validate-install-software-requirements";
 
@@ -64,7 +58,7 @@ public sealed class ValidateAndInstallSwRequirementCommand : GlobalCommand<ArcCo
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to validate and install software requirements");
+            logger.LogError(ex, "Failed to validate and install software requirements");
             context.Response.Status = 500;
             context.Response.Message = ex.Message;
             return context.Response;

@@ -7,17 +7,11 @@ using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class ValidateSystemRequirementsAndSetupHyperVCommand : GlobalCommand<ArcConnectOptions>
+public sealed class ValidateSystemRequirementsAndSetupHyperVCommand(ILogger<ValidateSystemRequirementsAndSetupHyperVCommand> logger) : GlobalCommand<ArcConnectOptions>
 {
     private const string _commandTitle = "Validate System Requirements and Setup Hyper-V";
-    private readonly ILogger<ValidateSystemRequirementsAndSetupHyperVCommand> _logger;
 
     private readonly Option<string> _pathOption = new Option<string>("--path", "The path to validate system requirements and setup Hyper-V") { IsRequired = true };
-
-    public ValidateSystemRequirementsAndSetupHyperVCommand(ILogger<ValidateSystemRequirementsAndSetupHyperVCommand> logger)
-    {
-        _logger = logger;
-    }
 
     public override string Name => "validate-system-requirements-hyperv";
 
@@ -55,7 +49,7 @@ public sealed class ValidateSystemRequirementsAndSetupHyperVCommand : GlobalComm
 
             // Informational warning about system restart
             string warningMessage = "Note: The system may restart after Hyper-V installation.";
-            _logger.LogInformation(warningMessage);
+            logger.LogInformation(warningMessage);
 
             var arcService = context.GetService<IArcServices>();
             var result = await arcService.ValidateSystemRequirementsAndSetupHyperVAsync(options.UserProvidedPath);
@@ -67,7 +61,7 @@ public sealed class ValidateSystemRequirementsAndSetupHyperVCommand : GlobalComm
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Failed to validate system requirements and setup Hyper-V");
+            logger.LogError(ex, "Failed to validate system requirements and setup Hyper-V");
             context.Response.Status = 500;
             context.Response.Message = ex.Message;
             return context.Response;
