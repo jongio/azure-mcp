@@ -597,7 +597,7 @@ protected virtual void HandleException(CommandContext context, Exception ex)
     response.Status = GetStatusCode(ex);
     // Add link to troubleshooting guide
     response.Message = GetErrorMessage(ex) +
-        ". To mitigate this issue, please refer to the troubleshooting guidelines here at https://aka.ms/azmcp/troubleshooting.";
+        ". To mitigate this issue, please refer to the troubleshooting guidelines at https://aka.ms/azmcp/troubleshooting.";
     response.Results = ResponseResult.Create(
         result, JsonSourceGenerationContext.Default.ExceptionResult);
 }
