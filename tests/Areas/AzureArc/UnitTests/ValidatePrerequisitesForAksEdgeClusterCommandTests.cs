@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using System.CommandLine.Parsing;
 using AzureMcp.Areas.AzureArc.Services;
 using AzureMcp.Commands.Arc;

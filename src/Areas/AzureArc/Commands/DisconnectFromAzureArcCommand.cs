@@ -1,11 +1,9 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using AzureMcp.Areas.AzureArc.Services;
-using AzureMcp.Commands.Subscription;
-using AzureMcp.Models.Option;
 using AzureMcp.Options.Arc;
 using Microsoft.Extensions.Logging;
-using System.CommandLine;
-using System.CommandLine.Parsing;
-using System.Threading.Tasks;
 
 namespace AzureMcp.Commands.Arc;
 

@@ -2,7 +2,6 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics;
-using AzureMcp.Options;
 
 namespace AzureMcp.Areas.AzureArc.Services;
 

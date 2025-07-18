@@ -4,15 +4,12 @@
 using System.Diagnostics;
 using System.Reflection;
 using AzureMcp.Helpers;
-using AzureMcp.Options;
 using AzureMcp.Services.Azure;
-using AzureMcp.Services.Azure.Subscription;
 using AzureMcp.Services.Azure.Tenant;
-using AzureMcp.Services.Caching;
 
 namespace AzureMcp.Areas.AzureArc.Services
 {
-    public class ArcService : BaseAzureService, IArcServices
+    public class ArcService(ITenantService? tenantService = null) : BaseAzureService(tenantService), IArcServices
     {
         private const string PrerequisitesAksEdgeInstallation = "PrerequisitesAksEdgeInstallation.txt";
         private const string RemoveAksEdgeCompletely = "RemoveAksEdgeCompletely.ps1";
@@ -22,12 +19,7 @@ namespace AzureMcp.Areas.AzureArc.Services
         private const string DisconnectFromAzureArc = "DisconnectFromAzureArc.ps1";
         private const string ConfirmAksEdgeDeletion = "ConfirmAksEdgeDeletion.ps1";
         private const string OnboardClusterToArc = "OnboardClusterToArc.ps1";
-        private readonly Assembly _assembly;
-
-        public ArcService(ITenantService? tenantService = null) : base(tenantService)
-        {
-            _assembly = typeof(ArcService).Assembly;
-        }
+        private readonly Assembly _assembly = typeof(ArcService).Assembly;
 
         public async Task<DeploymentResult> OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string kubeConfigPath, string userProvidedPath)
         {
