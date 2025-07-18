@@ -238,7 +238,7 @@ public sealed class {Resource}{Operation}Command(ILogger<{Resource}{Operation}Co
                 return context.Response;
             }
 
-            AddSubscriptionInformation(context.Activity, options); 
+            context.Activity?.WithSubscriptionTag(options); 
 
             // Get the appropriate service from DI
             var service = context.GetService<I{Service}Service>();
@@ -263,7 +263,7 @@ public sealed class {Resource}{Operation}Command(ILogger<{Resource}{Operation}Co
             _logger.LogError(ex,
                 "Error in {Operation}. Required: {Required}, Optional: {Optional}, Options: {@Options}",
                 Name, options.RequiredParam, options.OptionalParam, options);
-            HandleException(context.Response, ex);
+            HandleException(context, ex);
         }
 
         return context.Response;
@@ -301,12 +301,10 @@ Each service has its own hierarchy of base command classes that inherit from `Gl
 using System.Diagnostics.CodeAnalysis;
 using AzureMcp.Commands.Subscription;
 using AzureMcp.Models.Option;
-using AzureMcp.Options.{Service};
-using Azure.Core;
-using AzureMcp.Models;
-using Microsoft.Extensions.Logging;
+using AzureMcp.Areas.{Service}.Options;
+using AzureMcp.Commands;
 
-namespace AzureMcp.Commands.{Service};
+namespace AzureMcp.Areas.{Service}.Commands;
 
 // Base command for all service commands (if no members needed, use concise syntax)
 public abstract class Base{Service}Command<
@@ -318,7 +316,7 @@ public abstract class Base{Service}Command<
     [DynamicallyAccessedMembers(TrimAnnotations.CommandAnnotations)] TOptions>
     : SubscriptionCommand<TOptions> where TOptions : Base{Service}Options, new()
 {
-    protected readonly Option<string> _commonOption = {Area}OptionDefinitions.CommonOption;
+    protected readonly Option<string> _commonOption = {Service}OptionDefinitions.CommonOption;
     protected readonly Option<string> _resourceGroupOption = OptionDefinitions.Common.ResourceGroup;
     protected virtual bool RequiresResourceGroup => true;
 
@@ -377,17 +375,19 @@ public class {Resource}{Operation}CommandTests
     private readonly I{Service}Service _service;
     private readonly ILogger<{Resource}{Operation}Command> _logger;
     private readonly {Resource}{Operation}Command _command;
+    private readonly CommandContext _context;
+    private readonly Parser _parser;
 
     public {Resource}{Operation}CommandTests()
     {
         _service = Substitute.For<I{Service}Service>();
         _logger = Substitute.For<ILogger<{Resource}{Operation}Command>>();
 
-        var collection = new ServiceCollection();
-        collection.AddSingleton(_service);
+        var collection = new ServiceCollection().AddSingleton(_service);
         _serviceProvider = collection.BuildServiceProvider();
-
         _command = new(_logger);
+        _context = new(_serviceProvider);
+        _parser = new(_command.GetCommand());
     }
 
     [Fact]
@@ -408,15 +408,14 @@ public class {Resource}{Operation}CommandTests
         // Arrange
         if (shouldSucceed)
         {
-            _service.{Operation}(Arg.Any<{Resource}{Operation}Options>())
+            _service.{Operation}(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
                 .Returns(new List<ResultType>());
         }
 
-        var context = new CommandContext(_serviceProvider);
-        var parseResult = _command.GetCommand().Parse(args);
+        var parseResult = _parser.Parse(args.Split(' ', StringSplitOptions.RemoveEmptyEntries));
 
         // Act
-        var response = await _command.ExecuteAsync(context, parseResult);
+        var response = await _command.ExecuteAsync(_context, parseResult);
 
         // Assert
         Assert.Equal(shouldSucceed ? 200 : 400, response.Status);
@@ -435,14 +434,13 @@ public class {Resource}{Operation}CommandTests
     public async Task ExecuteAsync_HandlesServiceErrors()
     {
         // Arrange
-        _service.{Operation}(Arg.Any<{Resource}{Operation}Options>())
+        _service.{Operation}(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
             .Returns(Task.FromException<List<ResultType>>(new Exception("Test error")));
 
-        var context = new CommandContext(_serviceProvider);
-        var parseResult = _command.GetCommand().Parse("--required value");
+        var parseResult = _parser.Parse(["--required", "value"]);
 
         // Act
-        var response = await _command.ExecuteAsync(context, parseResult);
+        var response = await _command.ExecuteAsync(_context, parseResult);
 
         // Assert
         Assert.Equal(500, response.Status);
@@ -482,7 +480,7 @@ public class {Service}CommandTests : CommandTestsBase, IClassFixture<LiveTestFix
     {
         // Arrange
         var result = await CallToolAsync(
-            "azmcp-{service}-{resource}-{operation}",
+            "azmcp_{service}_{resource}_{operation}",
             new()
             {
                 { "subscription", Settings.Subscription },
@@ -508,7 +506,7 @@ public class {Service}CommandTests : CommandTestsBase, IClassFixture<LiveTestFix
     public async Task Should_Return400_WithInvalidInput(string args)
     {
         var result = await CallToolAsync(
-            $"azmcp-{service}-{resource}-{operation} {args}");
+            $"azmcp_{service}_{resource}_{operation} {args}");
 
         Assert.Equal(400, result.GetProperty("status").GetInt32());
         Assert.Contains("required",
@@ -588,7 +586,7 @@ protected virtual string GetErrorMessage(Exception ex) => ex switch
 ### 3. Response Format
 The base `HandleException` combines status, message and details:
 ```csharp
-protected virtual void HandleException(CommandResponse response, Exception ex)
+protected virtual void HandleException(CommandContext context, Exception ex)
 {
     // Create a strongly typed exception result
     var result = new ExceptionResult(
@@ -599,7 +597,7 @@ protected virtual void HandleException(CommandResponse response, Exception ex)
     response.Status = GetStatusCode(ex);
     // Add link to troubleshooting guide
     response.Message = GetErrorMessage(ex) +
-        ". Details at https://aka.ms/azmcp/troubleshooting";
+        ". To mitigate this issue, please refer to the troubleshooting guidelines here at https://aka.ms/azmcp/troubleshooting.";
     response.Results = ResponseResult.Create(
         result, JsonSourceGenerationContext.Default.ExceptionResult);
 }
@@ -874,7 +872,7 @@ public class {Service}CommandTests(LiveTestFixture liveTestFixture, ITestOutputH
         var resourceName = "test{resource}";
         
         var result = await CallToolAsync(
-            "azmcp-{service}-{resource}-show",
+            "azmcp_{service}_{resource}_show",
             new()
             {
                 { "subscription", Settings.SubscriptionId },
@@ -902,7 +900,7 @@ public class {Service}CommandTests(LiveTestFixture liveTestFixture, ITestOutputH
         var argsString = string.Join(" ", allArgs);
         
         var result = await CallToolAsync(
-            "azmcp-{service}-{resource}-show",
+            "azmcp_{service}_{resource}_show",
             new()
             {
                 { "args", argsString }
