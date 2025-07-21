@@ -6,6 +6,10 @@ using System.Text;
 
 namespace AzureMcp.Areas.Deploy.Commands;
 
+/// <summary>
+/// Utility class to encode and decode Mermaid charts.
+/// It compresses the Mermaid chart data to Base64 format for use with https://mermaid.live/view#pako:{encodedDiagram}
+/// </summary>
 public static class EncodeMermaid
 {
     public static string GetEncodedMermaidChart(string graph)
