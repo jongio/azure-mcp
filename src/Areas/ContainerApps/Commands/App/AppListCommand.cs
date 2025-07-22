@@ -1,0 +1,99 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
+using AzureMcp.Areas.ContainerApps.Models;
+using AzureMcp.Areas.ContainerApps.Options;
+using AzureMcp.Areas.ContainerApps.Options.App;
+using AzureMcp.Areas.ContainerApps.Services;
+using AzureMcp.Commands.Subscription;
+using AzureMcp.Services.Telemetry;
+using Microsoft.Extensions.Logging;
+
+namespace AzureMcp.Areas.ContainerApps.Commands.App;
+
+public sealed class AppListCommand(ILogger<AppListCommand> logger) : SubscriptionCommand<AppListOptions>
+{
+    private const string CommandTitle = "List Container Apps";
+    private readonly ILogger<AppListCommand> _logger = logger;
+    private new readonly Option<string> _resourceGroupOption = ContainerAppsOptionDefinitions.OptionalResourceGroup;
+    private readonly Option<string> _environmentOption = ContainerAppsOptionDefinitions.Environment;
+
+    public override string Name => "list";
+
+    public override string Description =>
+        """
+        Retrieves all Azure Container Apps within a specified subscription or resource group. 
+        This command is useful for discovering containerized applications, understanding deployment patterns, 
+        auditing container workloads, and getting an overview of your container app infrastructure.
+        
+        Use this when you need to:
+        - Find all container apps in your Azure subscription
+        - Audit containerized applications across resource groups
+        - Discover container apps within specific managed environments
+        - Get deployment details and configuration information
+        - Analyze container app distribution and resource usage patterns
+        
+        Returns detailed information including app names, locations, provisioning states, 
+        managed environment associations, and configuration details for each container app.
+        """;
+
+    public override string Title => CommandTitle;
+
+    protected override void RegisterOptions(Command command)
+    {
+        base.RegisterOptions(command);
+        command.AddOption(_resourceGroupOption);
+        command.AddOption(_environmentOption);
+    }
+
+    protected override AppListOptions BindOptions(ParseResult parseResult)
+    {
+        var options = base.BindOptions(parseResult);
+        options.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
+        options.Environment = parseResult.GetValueForOption(_environmentOption);
+        return options;
+    }
+
+    [McpServerTool(Destructive = false, ReadOnly = true, Title = CommandTitle)]
+    public override async Task<CommandResponse> ExecuteAsync(CommandContext context, ParseResult parseResult)
+    {
+        var options = BindOptions(parseResult);
+
+        try
+        {
+            if (!Validate(parseResult.CommandResult, context.Response).IsValid)
+            {
+                return context.Response;
+            }
+
+            context.Activity?.WithSubscriptionTag(options);
+
+            var containerAppsService = context.GetService<IContainerAppsService>() ?? 
+                throw new InvalidOperationException("Container Apps service is not available.");
+
+            var apps = await containerAppsService.ListApps(
+                options.Subscription!,
+                options.ResourceGroup,
+                options.Environment,
+                options.Tenant,
+                options.RetryPolicy);
+
+            context.Response.Results = apps?.Count > 0 ?
+                ResponseResult.Create(
+                    new AppListCommandResult(apps),
+                    ContainerAppsSerializationContext.Default.AppListCommandResult) :
+                null;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex,
+                "Error listing container apps. ResourceGroup: {ResourceGroup}, Environment: {Environment}, Options: {@Options}",
+                options.ResourceGroup, options.Environment, options);
+            HandleException(context, ex);
+        }
+
+        return context.Response;
+    }
+
+    public record AppListCommandResult(List<ContainerApp> ContainerApps);
+}

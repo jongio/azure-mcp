@@ -5,6 +5,26 @@
 
 This document provides a comprehensive guide for implementing commands in Azure MCP following established patterns.
 
+## 🚀 Quick Start Checklist
+
+**ALWAYS follow this exact order to avoid common issues:**
+
+1. ✅ **Create Bicep template FIRST** (`/infra/services/{area}.bicep`)
+2. ✅ **Add module to `/infra/test-resources.bicep`**
+3. ✅ **Add ARM package to both `Directory.Packages.props` AND `AzureMcp.csproj`**
+4. ✅ **Create all required files** (12 files total - see Required Files section)
+5. ✅ **Implement comprehensive unit tests** (6+ test methods minimum)
+6. ✅ **Create live tests** using deployed Azure resources
+7. ✅ **Register everything** (area, commands, services)
+8. ✅ **Update documentation** (4 files: CHANGELOG, README, azmcp-commands, e2eTestPrompts)
+9. ✅ **Run build and tests** before PR
+
+**🔥 Most Common Mistakes:**
+- Forgetting to create Bicep template first → Tests fail
+- Inadequate unit test coverage → Issues slip through
+- Wrong ARM SDK patterns → Compilation errors
+- Missing registrations → Command not found
+
 ## Area Pattern: Organizing Service Code
 
 All new services and their commands should use the Area pattern:
@@ -14,6 +34,31 @@ All new services and their commands should use the Area pattern:
 
 This keeps all code, options, models, and tests for a service together. See `src/Areas/Storage` for a reference implementation.
 
+## 🚨 CRITICAL: Implementation Order and Completeness
+
+When implementing a new command, **follow this exact sequence** to avoid common pitfalls:
+
+### Phase 1: Basic Structure Setup (Required First)
+1. **ALWAYS start with the live test infrastructure** - Create Bicep template and add to test-resources.bicep
+2. Add Azure Resource Manager package to BOTH `Directory.Packages.props` AND `AzureMcp.csproj`
+3. Create all required files using the template patterns below
+4. Register area in `Program.cs` RegisterAreas()
+
+### Phase 2: Implementation and Testing
+5. Implement service logic with proper ARM SDK patterns
+6. Create comprehensive unit tests with multiple scenarios
+7. Create live tests using deployed test resources
+8. Run build and ensure all tests pass
+
+### Phase 3: Documentation (Required Before PR)
+9. Update CHANGELOG.md, README.md, docs/azmcp-commands.md, and e2eTests/e2eTestPrompts.md
+
+**⚠️ Common Mistakes That Cause Issues:**
+- Forgetting to create Bicep template first → Live tests fail
+- Not following ARM SDK patterns → Compilation errors
+- Missing comprehensive test scenarios → Poor coverage
+- Skipping documentation updates → Incomplete PR
+
 ## Command Architecture
 
 ### Command Design Principles
@@ -21,11 +66,17 @@ This keeps all code, options, models, and tests for a service together. See `src
 1. **Command Interface**
    - `IBaseCommand` serves as the root interface with core command capabilities:
      - `Name`: Command name for CLI display
-     - `Description`: Detailed command description
+     - `Description`: Detailed command description (should NOT include parameter information)
      - `Title`: Human-readable command title
      - `GetCommand()`: Retrieves System.CommandLine command definition
      - `ExecuteAsync()`: Executes command logic
      - `Validate()`: Validates command inputs
+
+2. **Command Descriptions**
+   - Command descriptions should focus on what the command does, not how to use it
+   - Do NOT include parameter or option information in descriptions
+   - Parameter details are automatically provided by the MCP framework through tool schemas
+   - Keep descriptions concise and action-oriented
 
 2. **Command Hierarchy**
    All commands must implement the hierarchy pattern:
@@ -73,20 +124,81 @@ This keeps all code, options, models, and tests for a service together. See `src
 
 ### Required Files
 
-A complete command requires:
+A complete command requires **ALL** of these files (use this as a checklist):
 
-1. OptionDefinitions static class: `src/Areas/{Area}/Options/{Area}OptionDefinitions.cs`
-2. Options class: `src/Areas/{Area}/Options/{Resource}/{Operation}Options.cs`
-3. Command class: `src/Areas/{Area}/Commands/{Resource}/{Resource}{Operation}Command.cs`
-4. Service interface: `src/Areas/{Area}/Services/I{Area}Service.cs`
-5. Service implementation: `src/Areas/{Area}/Services/{Area}Service.cs`
-   - It's common for an area to have a single service class named after the
-     area but some areas will have multiple service classes
-6. Unit test: `tests/Areas/{Area}/UnitTests/{Resource}/{Resource}{Operation}CommandTests.cs`
-7. Integration test: `tests/Areas/{Area}/LiveTests/{Area}CommandTests.cs`
-8. Command registration in RegisterCommands(): `src/Areas/{Area}/{Area}Setup.cs`
-9. Area registration in RegisterAreas(): `src/Program.cs`
-10. **Live test infrastructure** (if needed):
+#### 🏗️ Core Implementation Files:
+1. **OptionDefinitions static class**: `src/Areas/{Area}/Options/{Area}OptionDefinitions.cs`
+   ```csharp
+   public static class {Area}OptionDefinitions
+   {
+       public static readonly Option<string> OptionalResourceGroup = OptionDefinitions.Common.CreateOptionalResourceGroup();
+       // Add area-specific options here
+   }
+   ```
+
+2. **Options class**: `src/Areas/{Area}/Options/{Resource}/{Operation}Options.cs`
+   ```csharp
+   public class {Resource}{Operation}Options : SubscriptionOptions
+   {
+       // Only add properties not in SubscriptionOptions base class
+       public string? AreaSpecificProperty { get; set; }
+   }
+   ```
+
+3. **Command class**: `src/Areas/{Area}/Commands/{Resource}/{Resource}{Operation}Command.cs`
+   - Must be `sealed class`
+   - Must inherit from `SubscriptionCommand<TOptions>`
+   - Must have `[McpServerTool(Destructive = false, ReadOnly = true, Title = CommandTitle)]` attribute
+   - Description should NOT include parameter information
+
+4. **Service interface**: `src/Areas/{Area}/Services/I{Area}Service.cs`
+5. **Service implementation**: `src/Areas/{Area}/Services/{Area}Service.cs`
+   - Must inherit from `BaseAzureService(tenantService)`
+   - Must inject `ISubscriptionService` for subscription resolution
+   - It's common for an area to have a single service class named after the area
+
+#### 🧪 Testing Files (CRITICAL - Often Forgotten):
+6. **Unit test**: `tests/Areas/{Area}/UnitTests/{Resource}/{Resource}{Operation}CommandTests.cs`
+   - Must test: success cases, error handling, parameter validation, empty results
+   - Must use NSubstitute mocking patterns
+   - Must have comprehensive test coverage (6+ test methods)
+
+7. **Integration test**: `tests/Areas/{Area}/LiveTests/{Area}CommandTests.cs`
+   - Must inherit from `CommandTestsBase` and implement `IClassFixture<LiveTestFixture>`
+   - Must test with real deployed Azure resources
+   - Must include error scenarios (invalid subscription, etc.)
+
+#### 🔧 Infrastructure Files (MUST CREATE FIRST):
+8. **Bicep template**: `/infra/services/{area}.bicep` (lowercase area name)
+   - Must include `testApplicationOid` parameter
+   - Must deploy test resources with minimal cost configurations
+   - Must include RBAC role assignments for test application
+   - Must have outputs for test resource names
+
+9. **Test resource module**: Add to `/infra/test-resources.bicep`
+   ```bicep
+   module {area} 'services/{area}.bicep' = if (empty(areas) || contains(areas, '{Area}')) {
+     name: '${deploymentName}-{area}'
+     params: {
+       baseName: baseName
+       location: location
+       testApplicationOid: testApplicationOid
+     }
+   }
+   ```
+
+#### 🔗 Registration Files:
+10. **Command registration**: `src/Areas/{Area}/{Area}Setup.cs`
+    - ConfigureServices method must register service interface
+    - RegisterCommands method must create command groups
+
+11. **Area registration**: `src/Program.cs`
+    - Add to RegisterAreas() method: `new AzureMcp.Areas.{Area}.{Area}Setup()`
+
+#### 📝 Serialization Files:
+12. **JSON serialization context**: `src/Areas/{Area}/{Area}SerializationContext.cs`
+    - Must include all model types and command result types
+    - Required for AOT compilation
    - Bicep template: `/infra/services/{service}.bicep`
    - Module registration in: `/infra/test-resources.bicep`
    - Optional post-deployment script: `/infra/services/{service}-post.ps1`
@@ -363,14 +475,99 @@ public class {Area}Service(ISubscriptionService subscriptionService, ITenantServ
 }
 ```
 
-### 4. Unit Tests
+### 4. Unit Testing Patterns and Requirements
 
-Unit tests follow a standardized pattern that tests initialization, validation, and execution:
+Unit tests are **CRITICAL** and often inadequately implemented. Follow these patterns exactly:
 
+#### Required Test Structure
 ```csharp
+[Trait("Area", "{Area}")]
 public class {Resource}{Operation}CommandTests
 {
     private readonly IServiceProvider _serviceProvider;
+    private readonly I{Area}Service _{area}Service;
+    private readonly ILogger<{Resource}{Operation}Command> _logger;
+    private readonly {Resource}{Operation}Command _command;
+    private readonly CommandContext _context;
+    private readonly Parser _parser;
+
+    public {Resource}{Operation}CommandTests()
+    {
+        _{area}Service = Substitute.For<I{Area}Service>();
+        _logger = Substitute.For<ILogger<{Resource}{Operation}Command>>();
+
+        var collection = new ServiceCollection().AddSingleton(_{area}Service);
+        _serviceProvider = collection.BuildServiceProvider();
+        _command = new(_logger);
+        _context = new(_serviceProvider);
+        _parser = new(_command.GetCommand());
+    }
+}
+```
+
+#### REQUIRED Test Methods (Minimum 6 tests):
+
+1. **Success Case**: Test normal execution with valid data
+2. **Resource Group Filtering**: Test filtering by resource group if supported
+3. **Additional Filtering**: Test area-specific filtering (e.g., environment)
+4. **Exception Handling**: Test service throws exception
+5. **Empty Results**: Test when service returns empty list
+6. **Parameter Validation**: Theory test for various parameter combinations
+
+#### Example Test Implementation:
+```csharp
+[Fact]
+public async Task ExecuteAsync_WithSubscription_ReturnsResults()
+{
+    // Arrange
+    var subscriptionId = "test-subscription";
+    var expectedResults = new List<Model> { /* test data */ };
+
+    _service.ListMethod(Arg.Is(subscriptionId), Arg.Any<string?>(), /* params */)
+        .Returns(expectedResults);
+
+    var parseResult = _parser.Parse(["--subscription", subscriptionId]);
+
+    // Act
+    var result = await _command.ExecuteAsync(_context, parseResult);
+
+    // Assert
+    Assert.Equal(200, result.Status);
+    Assert.NotNull(result.Results);
+    await _service.Received(1).ListMethod(subscriptionId, null, /* expected params */);
+}
+
+[Fact]
+public async Task ExecuteAsync_ServiceThrows_HandlesException()
+{
+    // Arrange
+    var errorMessage = "Service error";
+    _service.ListMethod(Arg.Any<string>(), /* params */)
+        .ThrowsAsync(new InvalidOperationException(errorMessage));
+
+    var parseResult = _parser.Parse(["--subscription", "test-sub"]);
+
+    // Act
+    var result = await _command.ExecuteAsync(_context, parseResult);
+
+    // Assert
+    Assert.Equal(500, result.Status);
+    Assert.Contains(errorMessage, result.Message);
+}
+
+[Theory]
+[InlineData("--subscription", "test-sub")]
+[InlineData("--subscription", "test-sub", "--resource-group", "test-rg")]
+public void Parse_ValidArguments_ParsesCorrectly(params string[] args)
+{
+    // Act
+    var parseResult = _parser.Parse(args);
+
+    // Assert
+    Assert.Empty(parseResult.Errors);
+    Assert.True(parseResult.CommandResult.Command.Name == "expectedName");
+}
+```
     private readonly I{Area}Service _service;
     private readonly ILogger<{Resource}{Operation}Command> _logger;
     private readonly {Resource}{Operation}Command _command;
@@ -449,16 +646,136 @@ public class {Resource}{Operation}CommandTests
 }
 ```
 
-### 5. Integration Tests
+### 5. Integration Tests and Live Test Infrastructure
 
-Integration tests inherit from `CommandTestsBase` and use test fixtures:
+Integration tests inherit from `CommandTestsBase` and use test fixtures with **REAL** deployed Azure resources:
+
+#### CRITICAL: Create Bicep Template FIRST
+Before implementing any command, you MUST create the live test infrastructure:
+
+**1. Create Bicep Template (`/infra/services/{area}.bicep`)** - Use lowercase area name:
+
+```bicep
+targetScope = 'resourceGroup'
+
+@minLength(3)
+@maxLength(20)  // Adjust based on service naming limits
+@description('The base resource name. Service names have specific length restrictions.')
+param baseName string = resourceGroup().name
+
+@description('The location of the resource. By default, this is the same as the resource group.')
+param location string = resourceGroup().location
+
+@description('The client OID to grant access to test resources.')
+param testApplicationOid string
+
+// Generate shorter names for services with length constraints
+var shortName = length(baseName) > 15 ? substring(baseName, 0, 15) : baseName
+
+// Main service resource - use minimal cost configurations
+resource mainResource 'Microsoft.{Provider}/{resourceType}@{apiVersion}' = {
+  name: shortName  // or '${shortName}-suffix' if disambiguation needed
+  location: location
+  properties: {
+    // Minimal configuration for cost efficiency
+  }
+}
+
+// Test child resources (if needed)
+resource testResource 'Microsoft.{Provider}/{childResourceType}@{apiVersion}' = {
+  parent: mainResource
+  name: 'test{resourcename}'  // e.g., 'testapp', 'testdb'
+  properties: {
+    // Minimal test configuration
+  }
+}
+
+// REQUIRED: Role assignment for test application
+resource serviceRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  name: '{role-guid}'  // e.g., 'b24988ac-6180-42a0-ab88-20f7382dd24c' for Contributor
+}
+
+resource testAppRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(serviceRoleDefinition.id, testApplicationOid, resourceGroup().id)
+  properties: {
+    roleDefinitionId: serviceRoleDefinition.id
+    principalId: testApplicationOid
+    description: '{Area} access for test application'
+  }
+}
+
+// REQUIRED: Outputs for test consumption
+output mainResourceName string = mainResource.name
+output testResourceName string = testResource.name
+// Add other outputs as needed for tests
+```
+
+**2. Add Module to Main Template (`/infra/test-resources.bicep`)**:
+
+```bicep
+module {area} 'services/{area}.bicep' = if (empty(areas) || contains(areas, '{Area}')) {
+  name: '${deploymentName}-{area}'
+  params: {
+    baseName: baseName
+    location: location
+    testApplicationOid: testApplicationOid
+  }
+}
+```
+
+#### Live Test Implementation Pattern:
 
 ```csharp
 [Trait("Area", "{Area}")]
 [Trait("Category", "Live")]
-public class {Area}CommandTests : CommandTestsBase, IClassFixture<LiveTestFixture>
+public class {Area}CommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper output)
+    : CommandTestsBase(liveTestFixture, output), IClassFixture<LiveTestFixture>
 {
-    protected const string TenantNameReason = "Service principals cannot use TenantName for lookup";
+    [Fact]
+    public async Task List_WithSubscription_ReturnsSuccess()
+    {
+        var result = await CallToolAsync("azmcp_{area}_{operation}", new()
+        {
+            { "subscription", Settings.SubscriptionName }
+        });
+
+        Assert.NotNull(result);
+        // Verify structure of returned data
+        var items = result.Value.GetProperty("{itemsPropertyName}");
+        Assert.Equal(JsonValueKind.Array, items.ValueKind);
+    }
+
+    [Fact]
+    public async Task List_WithInvalidSubscription_ReturnsError()
+    {
+        var result = await CallToolAsync("azmcp_{area}_{operation}", new()
+        {
+            { "subscription", "invalid-subscription-name" }
+        });
+
+        Assert.True(result.HasValue);
+        var errorDetails = result.Value;
+        Assert.True(errorDetails.TryGetProperty("message", out var messageProperty));
+        Assert.Contains("Could not find subscription", messageProperty.GetString());
+        Assert.True(errorDetails.TryGetProperty("type", out var typeProperty));
+        Assert.Equal("Exception", typeProperty.GetString());
+    }
+
+    [Fact]
+    public async Task List_WithResourceGroup_ReturnsSuccess()
+    {
+        var result = await CallToolAsync("azmcp_{area}_{operation}", new()
+        {
+            { "subscription", Settings.SubscriptionName },
+            { "resourceGroup", "non-existent-rg" }
+        });
+
+        Assert.NotNull(result);
+        // Should return empty array for non-existent RG
+    }
+}
+```
     protected LiveTestSettings Settings { get; }
     protected StringBuilder FailureOutput { get; } = new();
     protected ITestOutputHelper Output { get; }
@@ -1003,6 +1320,61 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
    - Use appropriate Azure service API versions
    - Consider resource location constraints and availability
 
+## Common Issues Encountered and Solutions
+
+### 🚨 Critical Issues That Block Development
+
+#### 1. **Missing Bicep Template** (Most Common Blocker)
+**Issue**: Tests fail because no test infrastructure exists  
+**Symptoms**: Live tests throw "Resource not found" or authentication errors  
+**Solution**: **ALWAYS create `/infra/services/{area}.bicep` BEFORE implementing commands**  
+**Prevention**: Follow the implementation order sequence in this document  
+
+#### 2. **Inadequate Unit Test Coverage**
+**Issue**: Tests are too basic and don't catch real issues  
+**Symptoms**: Bugs slip through, coverage reports show low percentages  
+**Solution**: Include ALL required test methods (minimum 6): success, error handling, filtering, empty results, parameter validation  
+**Example**: Container Apps implementation needed 6 comprehensive test methods  
+
+#### 3. **ARM SDK Pattern Mistakes**
+**Issue**: Using wrong Azure Resource Manager access patterns  
+**Symptoms**: Compilation errors, runtime exceptions  
+**Solution**: Use resource collections: `.GetContainerApps().GetAsync()` not `.GetContainerAppAsync()`  
+**Pattern**: Always access through collections, not direct async methods  
+
+### ⚠️ Common Development Pitfalls
+
+#### 4. **Property Access Issues**
+**Issue**: `'Data' does not contain definition for 'X'`  
+**Cause**: Azure SDK property names differ from expected  
+**Solution**: Use IntelliSense to explore actual properties  
+**Common Fixes**: `Location.ToString()`, `CreatedOn` not `CreationDate`  
+
+#### 5. **Registration Failures**
+**Issue**: Command not found or service not available  
+**Symptoms**: "Command not found" or "Service not available" errors  
+**Solution**: Verify registration in BOTH `Program.cs` RegisterAreas() AND `{Area}Setup.cs`  
+
+#### 6. **Bicep Deployment Issues**
+**Issue**: Template validation fails or high costs  
+**Cause**: Invalid constraints or expensive configurations  
+**Solution**: Use `az bicep build` to validate; use minimal cost SKUs  
+**Prevention**: Follow Bicep template patterns exactly  
+
+### 📋 Prevention Checklist
+
+To avoid these issues, **ALWAYS** follow this order:
+
+1. ✅ **Create Bicep template FIRST** (`/infra/services/{area}.bicep`)
+2. ✅ **Add module to `/infra/test-resources.bicep`**
+3. ✅ **Follow exact file structure and naming patterns**
+4. ✅ **Create comprehensive unit tests (6+ methods minimum)**
+5. ✅ **Create live tests using deployed Azure resources**
+6. ✅ **Verify ARM SDK patterns with existing implementations**
+7. ✅ **Register area, commands, and services correctly**
+8. ✅ **Update all documentation files**
+9. ✅ **Run full build and test suite before PR**
+
 ## Common Pitfalls to Avoid
 
 1. Do not:
@@ -1135,44 +1507,57 @@ var subscriptionResource = await _subscriptionService.GetSubscription(subscripti
 
 ## Checklist
 
-Before submitting:
+**Before submitting, verify ALL items are completed:**
 
-- [ ] Options class follows inheritance pattern
-- [ ] Command class implements all required members
-- [ ] Command uses proper OptionDefinitions
-- [ ] Service interface and implementation complete
-- [ ] Unit tests cover all paths
-- [ ] Integration tests added
-- [ ] Registered in CommandFactory
-- [ ] Follows file structure exactly
-- [ ] Error handling implemented
-- [ ] Documentation complete
-- [ ] No compiler warnings
-- [ ] Tests pass (run specific tests: `dotnet test --filter "FullyQualifiedName~YourCommandTests"`)
-- [ ] Build succeeds with `dotnet build`
-- [ ] Code formatting applied with `dotnet format`
-- [ ] Spelling check passes with `.\eng\common\spelling\Invoke-Cspell.ps1`
-- [ ] **Remove unnecessary using statements from all C# files** (use IDE cleanup or `dotnet format analyzers`)
-- [ ] Azure Resource Manager package added to both Directory.Packages.props and AzureMcp.csproj
-- [ ] All Azure SDK property names verified and correct
-- [ ] Resource access patterns use collections (e.g., `.GetSqlServers().GetAsync()`
-- [ ] Subscription resolution uses `ISubscriptionService.GetSubscription()`
+### 📋 Core Implementation
+- [ ] **Bicep template created FIRST** in `/infra/services/{area}.bicep` with minimal cost configuration
+- [ ] **Test resources module added** to `/infra/test-resources.bicep`
+- [ ] **RBAC permissions configured** for test application in Bicep template
+- [ ] Options class follows inheritance pattern (inherits from SubscriptionOptions)
+- [ ] Command class implements all required members and is `sealed`
+- [ ] Command uses proper OptionDefinitions from static class
+- [ ] Service interface and implementation complete with ARM SDK patterns
 - [ ] Service constructor includes `ISubscriptionService` injection for Azure resources
 - [ ] JSON serialization context includes all new model types
-- [ ] Live test infrastructure created (Bicep template in `/infra/services/`)
-- [ ] Test resources module added to `/infra/test-resources.bicep`
-- [ ] RBAC permissions configured for test application in Bicep template
-- [ ] Live tests use deployed resources via `Settings.ResourceBaseName` pattern
-- [ ] Resource outputs defined in Bicep template for test consumption
+- [ ] Area registered in `Program.cs` RegisterAreas()
+- [ ] Commands registered in `{Area}Setup.cs` RegisterCommands()
 
-### Documentation Requirements
+### 🧪 Testing Requirements  
+- [ ] **Unit tests comprehensive** (minimum 6 test methods covering success, errors, filtering, empty results, parameter validation)
+- [ ] **Live integration tests** using deployed Azure resources via `Settings.SubscriptionName`
+- [ ] Unit tests use NSubstitute mocking patterns correctly
+- [ ] Live tests inherit from `CommandTestsBase` and implement `IClassFixture<LiveTestFixture>`
+- [ ] Tests include error scenarios (invalid subscription, etc.)
+- [ ] All tests pass: `dotnet test --filter "Area={YourArea}"`
 
-**REQUIRED**: All new commands must update the following documentation files:
+### 🔧 Technical Compliance
+- [ ] **Azure Resource Manager package added** to both `Directory.Packages.props` AND `AzureMcp.csproj`
+- [ ] All Azure SDK property names verified and correct (use IntelliSense)
+- [ ] Resource access patterns use collections (e.g., `.GetSqlServers().GetAsync()`)
+- [ ] Subscription resolution uses `ISubscriptionService.GetSubscription()`
+- [ ] **Always use `subscription` parameter name** (never `subscriptionId`) to support both IDs and names
+- [ ] Command descriptions do NOT include parameter information (MCP framework handles this)
+- [ ] Error handling implemented with proper logging
+- [ ] Build succeeds with `dotnet build`
+- [ ] **Remove unnecessary using statements** from all C# files (use `dotnet format analyzers`)
+- [ ] Code formatting applied with `dotnet format`
+- [ ] No compiler warnings
 
+### 📝 Documentation (REQUIRED)
 - [ ] **CHANGELOG.md**: Add entry under "Unreleased" section describing the new command(s)
 - [ ] **docs/azmcp-commands.md**: Add command documentation with description, syntax, parameters, and examples
-- [ ] **README.md**: Update the supported services table and add example prompts demonstrating the new command(s) in the appropriate service section
-- [ ] **e2eTests/e2eTestPrompts.md**: Add test prompts for end-to-end validation of the new command(s)
+- [ ] **README.md**: Update supported services table and add example prompts in appropriate service section
+- [ ] **e2eTests/e2eTestPrompts.md**: Add test prompts for end-to-end validation
+- [ ] Spelling check passes with `.\eng\common\spelling\Invoke-Cspell.ps1`
+
+### ⚡ Final Validation
+- [ ] **Run comprehensive test**: `dotnet test --filter "FullyQualifiedName~{YourCommandTests}"`
+- [ ] **Deploy and test live resources**: `./eng/scripts/Deploy-TestResources.ps1 -Areas "{Area}"`
+- [ ] **Verify command works end-to-end** with real Azure subscription
+- [ ] Resource outputs defined in Bicep template for test consumption
+- [ ] Live tests use deployed resources via correct naming patterns
+
+**🎯 Success Criteria**: All checklist items completed, build passes, tests pass, documentation updated
 
 **Documentation Standards**:
 - Use consistent command paths in all documentation (e.g., `azmcp sql db show`, not `azmcp sql database show`)
