@@ -20,21 +20,7 @@ public sealed class AppListCommand(ILogger<AppListCommand> logger) : BaseContain
     public override string Name => "list";
 
     public override string Description =>
-        """
-        Retrieves all Azure Container Apps within a specified subscription or resource group. 
-        This command is useful for discovering containerized applications, understanding deployment patterns, 
-        auditing container workloads, and getting an overview of your container app infrastructure.
-        
-        Use this when you need to:
-        - Find all container apps in your Azure subscription
-        - Audit containerized applications across resource groups
-        - Discover container apps within specific managed environments
-        - Get deployment details and configuration information
-        - Analyze container app distribution and resource usage patterns
-        
-        Returns detailed information including app names, locations, provisioning states, 
-        managed environment associations, and configuration details for each container app.
-        """;
+        "Retrieves Azure Container Apps within a specified subscription or resource group.";
 
     public override string Title => CommandTitle;
 
