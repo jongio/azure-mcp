@@ -41,7 +41,7 @@ public class ContainerAppsService(ISubscriptionService subscriptionService, ITen
                         if (appResource.Id.ResourceGroupName?.Equals(resourceGroupName, StringComparison.OrdinalIgnoreCase) == true)
                         {
                             var app = ConvertToContainerApp(appResource);
-                            if (string.IsNullOrEmpty(environmentName) || 
+                            if (string.IsNullOrEmpty(environmentName) ||
                                 IsAppInEnvironment(app, environmentName))
                             {
                                 apps.Add(app);
@@ -56,7 +56,7 @@ public class ContainerAppsService(ISubscriptionService subscriptionService, ITen
                 await foreach (var appResource in subscriptionResource.GetContainerAppsAsync())
                 {
                     var app = ConvertToContainerApp(appResource);
-                    if (string.IsNullOrEmpty(environmentName) || 
+                    if (string.IsNullOrEmpty(environmentName) ||
                         IsAppInEnvironment(app, environmentName))
                     {
                         apps.Add(app);
@@ -75,7 +75,7 @@ public class ContainerAppsService(ISubscriptionService subscriptionService, ITen
     private static ContainerApp ConvertToContainerApp(ContainerAppResource appResource)
     {
         var data = appResource.Data;
-        
+
         return new ContainerApp
         {
             Name = data.Name,

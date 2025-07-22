@@ -68,7 +68,7 @@ public sealed class AppListCommand(ILogger<AppListCommand> logger) : Subscriptio
 
             context.Activity?.WithSubscriptionTag(options);
 
-            var containerAppsService = context.GetService<IContainerAppsService>() ?? 
+            var containerAppsService = context.GetService<IContainerAppsService>() ??
                 throw new InvalidOperationException("Container Apps service is not available.");
 
             var apps = await containerAppsService.ListApps(

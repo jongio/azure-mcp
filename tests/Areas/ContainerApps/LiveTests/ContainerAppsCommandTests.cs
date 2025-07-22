@@ -47,7 +47,7 @@ public class ContainerAppsCommandTests(LiveTestFixture liveTestFixture, ITestOut
         Assert.Equal("Exception", typeProperty.GetString());
     }
 
-    [Fact] 
+    [Fact]
     public async Task ContainerAppList_WithResourceGroup_ReturnsSuccess()
     {
         // Arrange & Act
