@@ -31,13 +31,15 @@ public class ContainerAppsService(ISubscriptionService subscriptionService, ITen
         {
             if (!string.IsNullOrEmpty(resourceGroupName))
             {
-                // List apps in specific resource group
+                // List apps in specific resource group - enumerate subscription apps and filter efficiently
                 var resourceGroup = await subscriptionResource.GetResourceGroupAsync(resourceGroupName);
                 if (resourceGroup?.Value != null)
                 {
+                    // The Azure SDK doesn't provide resource group-level enumeration for Container Apps
+                    // So we enumerate at subscription level but filter early to minimize processing
                     await foreach (var appResource in subscriptionResource.GetContainerAppsAsync())
                     {
-                        // Filter by resource group
+                        // Early filter by resource group to avoid unnecessary object conversion
                         if (appResource.Id.ResourceGroupName?.Equals(resourceGroupName, StringComparison.OrdinalIgnoreCase) == true)
                         {
                             var app = ConvertToContainerApp(appResource);
