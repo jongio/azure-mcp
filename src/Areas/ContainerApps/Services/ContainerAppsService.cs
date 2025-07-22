@@ -83,10 +83,10 @@ public class ContainerAppsService(ISubscriptionService subscriptionService, ITen
             Type = data.ResourceType.ToString(),
             Location = data.Location.ToString(),
             ResourceGroup = appResource.Id.ResourceGroupName,
-            SubscriptionId = appResource.Id.SubscriptionId,
+            SubscriptionId = appResource.Id.SubscriptionId?.ToString(),
             ManagedEnvironmentId = data.EnvironmentId?.ToString(),
             ProvisioningState = data.ProvisioningState?.ToString(),
-            Tags = data.Tags?.ToDictionary(t => t.Key, t => t.Value)
+            Tags = data.Tags?.ToDictionary(t => t.Key, t => t.Value?.ToString() ?? string.Empty)
         };
     }
 

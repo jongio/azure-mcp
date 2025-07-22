@@ -12,7 +12,7 @@ This document provides a comprehensive guide for implementing commands in Azure 
 1. ✅ **Create Bicep template FIRST** (`/infra/services/{area}.bicep`)
 2. ✅ **Add module to `/infra/test-resources.bicep`**
 3. ✅ **Add ARM package to both `Directory.Packages.props` AND `AzureMcp.csproj`**
-4. ✅ **Create all required files** (12 files total - see Required Files section)
+4. ✅ **Create all required files** (14 files total - see Required Files section)
 5. ✅ **Implement comprehensive unit tests** (6+ test methods minimum)
 6. ✅ **Create live tests** using deployed Azure resources
 7. ✅ **Register everything** (area, commands, services)
@@ -21,8 +21,11 @@ This document provides a comprehensive guide for implementing commands in Azure 
 
 **🔥 Most Common Mistakes:**
 - Forgetting to create Bicep template first → Tests fail
+- Missing base command/options architecture → Poor code organization
 - Inadequate unit test coverage → Issues slip through
 - Wrong ARM SDK patterns → Compilation errors
+- JSON type mismatches → Runtime serialization errors
+- Using unsafe test assertions → Test failures with error responses
 - Missing registrations → Command not found
 
 ## Area Pattern: Organizing Service Code
@@ -133,49 +136,82 @@ A complete command requires **ALL** of these files (use this as a checklist):
    {
        public static readonly Option<string> OptionalResourceGroup = OptionDefinitions.Common.CreateOptionalResourceGroup();
        // Add area-specific options here
+       public static readonly Option<string> Environment = new("--environment", "Environment filter");
    }
    ```
 
-2. **Options class**: `src/Areas/{Area}/Options/{Resource}/{Operation}Options.cs`
+2. **Base Options class**: `src/Areas/{Area}/Options/Base{Area}Options.cs`
    ```csharp
-   public class {Resource}{Operation}Options : SubscriptionOptions
+   public abstract class Base{Area}Options : SubscriptionOptions
    {
-       // Only add properties not in SubscriptionOptions base class
-       public string? AreaSpecificProperty { get; set; }
+       // Common properties for all area commands (e.g., Environment)
+       public string? Environment { get; set; }
    }
    ```
 
-3. **Command class**: `src/Areas/{Area}/Commands/{Resource}/{Resource}{Operation}Command.cs`
+3. **Specific Options class**: `src/Areas/{Area}/Options/{Resource}/{Operation}Options.cs`
+   ```csharp
+   public class {Resource}{Operation}Options : Base{Area}Options
+   {
+       // Only add properties not in base class
+       // Environment property inherited from Base{Area}Options
+   }
+   ```
+
+4. **Base Command class**: `src/Areas/{Area}/Commands/Base{Area}Command.cs`
+   ```csharp
+   public abstract class Base{Area}Command<TOptions> : SubscriptionCommand<TOptions> 
+       where TOptions : Base{Area}Options, new()
+   {
+       protected readonly Option<string> _environmentOption = {Area}OptionDefinitions.Environment;
+       
+       protected override void RegisterOptions(Command command)
+       {
+           base.RegisterOptions(command);
+           command.AddOption(_environmentOption);
+       }
+       
+       protected override TOptions BindOptions(ParseResult parseResult)
+       {
+           var options = base.BindOptions(parseResult);
+           options.Environment = parseResult.GetValueForOption(_environmentOption);
+           return options;
+       }
+   }
+   ```
+
+5. **Command class**: `src/Areas/{Area}/Commands/{Resource}/{Resource}{Operation}Command.cs`
    - Must be `sealed class`
-   - Must inherit from `SubscriptionCommand<TOptions>`
+   - Must inherit from `Base{Area}Command<{Resource}{Operation}Options>`
    - Must have `[McpServerTool(Destructive = false, ReadOnly = true, Title = CommandTitle)]` attribute
    - Description should NOT include parameter information
 
-4. **Service interface**: `src/Areas/{Area}/Services/I{Area}Service.cs`
-5. **Service implementation**: `src/Areas/{Area}/Services/{Area}Service.cs`
+6. **Service interface**: `src/Areas/{Area}/Services/I{Area}Service.cs`
+7. **Service implementation**: `src/Areas/{Area}/Services/{Area}Service.cs`
    - Must inherit from `BaseAzureService(tenantService)`
    - Must inject `ISubscriptionService` for subscription resolution
    - It's common for an area to have a single service class named after the area
 
 #### 🧪 Testing Files (CRITICAL - Often Forgotten):
-6. **Unit test**: `tests/Areas/{Area}/UnitTests/{Resource}/{Resource}{Operation}CommandTests.cs`
+8. **Unit test**: `tests/Areas/{Area}/UnitTests/{Resource}/{Resource}{Operation}CommandTests.cs`
    - Must test: success cases, error handling, parameter validation, empty results
    - Must use NSubstitute mocking patterns
    - Must have comprehensive test coverage (6+ test methods)
 
-7. **Integration test**: `tests/Areas/{Area}/LiveTests/{Area}CommandTests.cs`
+9. **Integration test**: `tests/Areas/{Area}/LiveTests/{Area}CommandTests.cs`
    - Must inherit from `CommandTestsBase` and implement `IClassFixture<LiveTestFixture>`
    - Must test with real deployed Azure resources
    - Must include error scenarios (invalid subscription, etc.)
+   - **CRITICAL**: Must use `result.AssertProperty("propertyName")` instead of `result.Value.GetProperty("propertyName")`
 
 #### 🔧 Infrastructure Files (MUST CREATE FIRST):
-8. **Bicep template**: `/infra/services/{area}.bicep` (lowercase area name)
-   - Must include `testApplicationOid` parameter
-   - Must deploy test resources with minimal cost configurations
-   - Must include RBAC role assignments for test application
-   - Must have outputs for test resource names
+10. **Bicep template**: `/infra/services/{area}.bicep` (lowercase area name)
+    - Must include `testApplicationOid` parameter
+    - Must deploy test resources with minimal cost configurations
+    - Must include RBAC role assignments for test application
+    - Must have outputs for test resource names
 
-9. **Test resource module**: Add to `/infra/test-resources.bicep`
+11. **Test resource module**: Add to `/infra/test-resources.bicep`
    ```bicep
    module {area} 'services/{area}.bicep' = if (empty(areas) || contains(areas, '{Area}')) {
      name: '${deploymentName}-{area}'
@@ -188,30 +224,33 @@ A complete command requires **ALL** of these files (use this as a checklist):
    ```
 
 #### 🔗 Registration Files:
-10. **Command registration**: `src/Areas/{Area}/{Area}Setup.cs`
+12. **Command registration**: `src/Areas/{Area}/{Area}Setup.cs`
     - ConfigureServices method must register service interface
     - RegisterCommands method must create command groups
 
-11. **Area registration**: `src/Program.cs`
+13. **Area registration**: `src/Program.cs`
     - Add to RegisterAreas() method: `new AzureMcp.Areas.{Area}.{Area}Setup()`
 
 #### 📝 Serialization Files:
-12. **JSON serialization context**: `src/Areas/{Area}/{Area}SerializationContext.cs`
+14. **JSON serialization context**: `src/Areas/{Area}/{Area}SerializationContext.cs`
     - Must include all model types and command result types
+    - Must include all base class types (e.g., `Base{Area}Options`)
     - Required for AOT compilation
-   - Bicep template: `/infra/services/{service}.bicep`
-   - Module registration in: `/infra/test-resources.bicep`
-   - Optional post-deployment script: `/infra/services/{service}-post.ps1`
+    - Bicep template: `/infra/services/{service}.bicep`
+    - Module registration in: `/infra/test-resources.bicep`
+    - Optional post-deployment script: `/infra/services/{service}-post.ps1`
 
 **IMPORTANT**: If implementing a new area, you must also ensure:
 - The Azure Resource Manager package is added to `Directory.Packages.props` first
 - The package reference is added to `src/AzureMcp.csproj`
+- **Base classes**: Create `Base{Area}Options` and `Base{Area}Command` classes following the pattern
 - Models, base commands, and option definitions follow the established patterns
-- JSON serialization context includes all new model types
+- JSON serialization context includes all new model types AND base classes
 - Service registration in the area setup ConfigureServices method
 - **Live test infrastructure**: Add Bicep template to `/infra/services/` and module to `/infra/test-resources.bicep`
 - **Test resource deployment**: Ensure resources are properly configured with RBAC for test application
 - **Resource naming**: Follow consistent naming patterns - many services use just `baseName`, while others may need suffixes for disambiguation (e.g., `{baseName}-suffix`)
+- **Defensive JSON handling**: Always call `.ToString()` on Azure SDK properties that might be numbers
 
 ## Implementation Guidelines
 
@@ -274,6 +313,12 @@ var databaseResource = await sqlServerResource.Value
 - When you see `cannot convert from 'System.Threading.CancellationToken' to 'string'`, check method parameter order
 - For `'SqlDatabaseData' does not contain a definition for 'X'`, verify property names in the actual SDK types
 - Use existing service implementations as reference for correct property access patterns
+
+**JSON Serialization and Type Safety:**
+- Always call `.ToString()` on Azure SDK properties that might be numbers (e.g., `SubscriptionId`, `Tag.Value`)
+- Use defensive coding: `appResource.Id.SubscriptionId?.ToString()` and `t.Value?.ToString() ?? string.Empty`
+- This prevents "The requested operation requires an element of type 'String', but the target element has type 'Number'" errors
+- Add all model types to the serialization context, including base classes like `Base{Area}Options`
 
 ### 2. Options Class
 
@@ -741,13 +786,26 @@ public class {Area}CommandTests(LiveTestFixture liveTestFixture, ITestOutputHelp
         });
 
         Assert.NotNull(result);
-        // Verify structure of returned data
-        var items = result.Value.GetProperty("{itemsPropertyName}");
+        // CRITICAL: Use AssertProperty instead of GetProperty for safe access
+        var items = result.AssertProperty("{itemsPropertyName}");
         Assert.Equal(JsonValueKind.Array, items.ValueKind);
     }
 
     [Fact]
     public async Task List_WithInvalidSubscription_ReturnsError()
+    {
+        var result = await CallToolAsync("azmcp_{area}_{operation}", new()
+        {
+            { "subscription", "invalid-subscription-name" }
+        });
+
+        // For error responses, check if result has value and extract error details
+        Assert.True(result.HasValue);
+        var errorDetails = result.Value;
+        Assert.True(errorDetails.TryGetProperty("message", out var messageProperty));
+        Assert.Contains("Could not find subscription", messageProperty.GetString());
+    }
+}
     {
         var result = await CallToolAsync("azmcp_{area}_{operation}", new()
         {
@@ -1330,21 +1388,41 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
 **Solution**: **ALWAYS create `/infra/services/{area}.bicep` BEFORE implementing commands**  
 **Prevention**: Follow the implementation order sequence in this document  
 
-#### 2. **Inadequate Unit Test Coverage**
+#### 2. **Missing Base Command/Options Architecture**
+**Issue**: Commands don't follow the proper inheritance hierarchy  
+**Symptoms**: Direct inheritance from `SubscriptionCommand`, missing shared options  
+**Solution**: **ALWAYS create `Base{Area}Command` and `Base{Area}Options` classes**  
+**Example**: Container Apps needed `BaseContainerAppsCommand` and `BaseContainerAppsOptions`
+- Base classes handle common options (like Environment)
+- Specific commands inherit from base and add only their unique options
+
+#### 3. **Inadequate Unit Test Coverage**
 **Issue**: Tests are too basic and don't catch real issues  
 **Symptoms**: Bugs slip through, coverage reports show low percentages  
 **Solution**: Include ALL required test methods (minimum 6): success, error handling, filtering, empty results, parameter validation  
 **Example**: Container Apps implementation needed 6 comprehensive test methods  
 
-#### 3. **ARM SDK Pattern Mistakes**
+#### 4. **ARM SDK Pattern Mistakes**
 **Issue**: Using wrong Azure Resource Manager access patterns  
 **Symptoms**: Compilation errors, runtime exceptions  
 **Solution**: Use resource collections: `.GetContainerApps().GetAsync()` not `.GetContainerAppAsync()`  
 **Pattern**: Always access through collections, not direct async methods  
 
+#### 5. **JSON Serialization Type Errors**
+**Issue**: "The requested operation requires an element of type 'String', but the target element has type 'Number'"  
+**Symptoms**: Runtime errors during JSON serialization/deserialization  
+**Solution**: Always call `.ToString()` on Azure SDK properties that might be numbers  
+**Example**: `SubscriptionId?.ToString()`, `t.Value?.ToString() ?? string.Empty`  
+
+#### 6. **Incorrect Test Assertion Patterns**
+**Issue**: Using `result.Value.GetProperty()` instead of safe assertion methods  
+**Symptoms**: Tests fail with `KeyNotFoundException` when response has errors  
+**Solution**: **ALWAYS use `result.AssertProperty("propertyName")` for safe property access**  
+**Prevention**: This method checks if the property exists and provides better error messages  
+
 ### ⚠️ Common Development Pitfalls
 
-#### 4. **Property Access Issues**
+#### 7. **Property Access Issues**
 **Issue**: `'Data' does not contain definition for 'X'`  
 **Cause**: Azure SDK property names differ from expected  
 **Solution**: Use IntelliSense to explore actual properties  

@@ -24,7 +24,7 @@ public class ContainerAppsCommandTests(LiveTestFixture liveTestFixture, ITestOut
 
         // Assert
         Assert.NotNull(result);
-        var containerApps = result.Value.GetProperty("containerApps");
+        var containerApps = result.AssertProperty("containerApps");
         Assert.Equal(JsonValueKind.Array, containerApps.ValueKind);
     }
 
@@ -59,7 +59,7 @@ public class ContainerAppsCommandTests(LiveTestFixture liveTestFixture, ITestOut
 
         // Assert
         Assert.NotNull(result);
-        var containerApps = result.Value.GetProperty("containerApps");
+        var containerApps = result.AssertProperty("containerApps");
         Assert.Equal(JsonValueKind.Array, containerApps.ValueKind);
     }
 
@@ -77,7 +77,7 @@ public class ContainerAppsCommandTests(LiveTestFixture liveTestFixture, ITestOut
         if (result.HasValue)
         {
             // If successful, should have containerApps array
-            var containerApps = result.Value.GetProperty("containerApps");
+            var containerApps = result.AssertProperty("containerApps");
             Assert.Equal(JsonValueKind.Array, containerApps.ValueKind);
         }
         else

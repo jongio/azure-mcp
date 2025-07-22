@@ -1,22 +1,21 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
+using AzureMcp.Areas.ContainerApps.Commands;
 using AzureMcp.Areas.ContainerApps.Models;
 using AzureMcp.Areas.ContainerApps.Options;
 using AzureMcp.Areas.ContainerApps.Options.App;
 using AzureMcp.Areas.ContainerApps.Services;
-using AzureMcp.Commands.Subscription;
 using AzureMcp.Services.Telemetry;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Areas.ContainerApps.Commands.App;
 
-public sealed class AppListCommand(ILogger<AppListCommand> logger) : SubscriptionCommand<AppListOptions>
+public sealed class AppListCommand(ILogger<AppListCommand> logger) : BaseContainerAppsCommand<AppListOptions>
 {
     private const string CommandTitle = "List Container Apps";
     private readonly ILogger<AppListCommand> _logger = logger;
     private new readonly Option<string> _resourceGroupOption = ContainerAppsOptionDefinitions.OptionalResourceGroup;
-    private readonly Option<string> _environmentOption = ContainerAppsOptionDefinitions.Environment;
 
     public override string Name => "list";
 
@@ -43,14 +42,12 @@ public sealed class AppListCommand(ILogger<AppListCommand> logger) : Subscriptio
     {
         base.RegisterOptions(command);
         command.AddOption(_resourceGroupOption);
-        command.AddOption(_environmentOption);
     }
 
     protected override AppListOptions BindOptions(ParseResult parseResult)
     {
         var options = base.BindOptions(parseResult);
         options.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
-        options.Environment = parseResult.GetValueForOption(_environmentOption);
         return options;
     }
 
