@@ -17,7 +17,8 @@ This document provides a comprehensive guide for implementing commands in Azure 
 6. ✅ **Create live tests** using deployed Azure resources
 7. ✅ **Register everything** (area, commands, services)
 8. ✅ **Update documentation** (4 files: CHANGELOG, README, azmcp-commands, e2eTestPrompts)
-9. ✅ **Run build and tests** before PR
+9. ✅ **Add copyright headers** (`./eng/scripts/Add-CopyrightHeaders.ps1`)
+10. ✅ **Run build and tests** before PR
 
 **🔥 Most Common Mistakes:**
 - Forgetting to create Bicep template first → Tests fail
@@ -51,16 +52,18 @@ When implementing a new command, **follow this exact sequence** to avoid common 
 5. Implement service logic with proper ARM SDK patterns
 6. Create comprehensive unit tests with multiple scenarios
 7. Create live tests using deployed test resources
-8. Run build and ensure all tests pass
 
 ### Phase 3: Documentation (Required Before PR)
 9. Update CHANGELOG.md, README.md, docs/azmcp-commands.md, and e2eTests/e2eTestPrompts.md
+10. Add copyright headers using `./eng/scripts/Add-CopyrightHeaders.ps1`
+11. Run build and ensure all tests pass
 
 **⚠️ Common Mistakes That Cause Issues:**
 - Forgetting to create Bicep template first → Live tests fail
 - Not following ARM SDK patterns → Compilation errors
 - Missing comprehensive test scenarios → Poor coverage
 - Skipping documentation updates → Incomplete PR
+- Missing copyright headers → Build failures
 
 ## Command Architecture
 
