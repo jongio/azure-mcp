@@ -3,6 +3,7 @@
 
 using Azure.ResourceManager.AppContainers;
 using AzureMcp.Areas.ContainerApps.Models;
+using AzureMcp.Helpers;
 using AzureMcp.Options;
 using AzureMcp.Services.Azure;
 using AzureMcp.Services.Azure.Subscription;
@@ -76,20 +77,27 @@ public class ContainerAppsService(ISubscriptionService subscriptionService, ITen
 
     private static ContainerApp ConvertToContainerApp(ContainerAppResource appResource)
     {
-        var data = appResource.Data;
-
-        return new ContainerApp
+        try
         {
-            Name = data.Name,
-            Id = data.Id?.ToString(),
-            Type = data.ResourceType.ToString(),
-            Location = data.Location.ToString(),
-            ResourceGroup = appResource.Id.ResourceGroupName,
-            SubscriptionId = appResource.Id.SubscriptionId?.ToString(),
-            ManagedEnvironmentId = data.EnvironmentId?.ToString(),
-            ProvisioningState = data.ProvisioningState?.ToString(),
-            Tags = data.Tags?.ToDictionary(t => t.Key, t => t.Value?.ToString() ?? string.Empty)
-        };
+            var data = appResource.Data;
+
+            return new ContainerApp
+            {
+                Name = data.Name,
+                Id = data.Id?.ToString(),
+                Type = data.ResourceType.ToString(),
+                Location = data.Location.ToString(),
+                ResourceGroup = appResource.Id.ResourceGroupName,
+                SubscriptionId = appResource.Id.SubscriptionId,
+                ManagedEnvironmentId = data.EnvironmentId?.ToString(),
+                ProvisioningState = data.ProvisioningState?.ToString(),
+                Tags = TagConverter.ConvertTagsToString(data.Tags)
+            };
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error converting container app resource to model: {ex.Message}", ex);
+        }
     }
 
     private static bool IsAppInEnvironment(ContainerApp app, string environmentName)

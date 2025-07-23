@@ -15,9 +15,12 @@ param testApplicationOid string
 var shortName = length(baseName) > 15 ? substring(baseName, 0, 15) : baseName
 
 // Container Apps Managed Environment
-resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2024-03-01' = {
+resource containerAppEnvironment 'Microsoft.App/managedEnvironments@2022-06-01-preview' = {
   name: '${shortName}-env'
   location: location
+  sku: {
+    name: 'Consumption'
+  }
   properties: {
     appLogsConfiguration: {
       destination: 'log-analytics'
@@ -47,7 +50,7 @@ resource logAnalyticsWorkspace 'Microsoft.OperationalInsights/workspaces@2023-09
 }
 
 // Test Container App
-resource testContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
+resource testContainerApp 'Microsoft.App/containerApps@2022-06-01-preview' = {
   name: '${shortName}-app'
   location: location
   properties: {
@@ -56,6 +59,7 @@ resource testContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
       ingress: {
         external: true
         targetPort: 80
+        allowInsecure: false
         traffic: [
           {
             weight: 100
@@ -70,8 +74,8 @@ resource testContainerApp 'Microsoft.App/containerApps@2024-03-01' = {
           image: 'mcr.microsoft.com/k8se/quickstart:latest'
           name: 'simple-hello-world-container'
           resources: {
-            cpu: json('0.25')
-            memory: '0.5Gi'
+            cpu: json('.25')
+            memory: '.5Gi'
           }
         }
       ]

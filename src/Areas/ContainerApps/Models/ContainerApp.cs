@@ -38,5 +38,5 @@ public class ContainerApp
     public ContainerAppTemplate? Template { get; set; }
 
     [JsonPropertyName("tags")]
-    public Dictionary<string, string>? Tags { get; set; }
+    public string? Tags { get; set; }
 }
