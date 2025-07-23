@@ -347,7 +347,7 @@ public class CommandFactoryToolLoaderTests
             }
         }
     }
-    
+
     [Fact]
     public async Task CallToolHandler_BeforeListToolsHandler_ExecutesSuccessfully()
     {

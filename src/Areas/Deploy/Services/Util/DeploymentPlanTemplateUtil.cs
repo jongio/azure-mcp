@@ -45,13 +45,20 @@ public static class DeploymentPlanTemplateUtil
 
         if (provisioningTool.ToLowerInvariant() == "azd")
         {
+            var deployTitle = targetAppService.ToLowerInvariant() == "aks"
+                ? ""
+                : " And Deploy the Application";
+            var checkLog = targetAppService.ToLowerInvariant() == "aks"
+                ? ""
+                : "6. Check the application log with tool azd-app-log-get to ensure the services are running.";
             steps.Add($"""
-            1. Provision Azure Infrastructure
+            1. Provision Azure Infrastructure{deployTitle}:
                 1. Based on following required Azure resources in plan, get the IaC rules from the tool infra-code-rules-get
                 2. Generate IaC ({azdIacOptions} files) for required azure resources based on the plan.
                 3. Pre-check: use get_errors tool to check generated Bicep grammar errors. Fix the errors if exist.
-                4. Run the AZD command `azd provision` to provision the resources and confirm each resource is created or already exists.
+                4. Run the AZD command `azd up` to provision the resources and confirm each resource is created or already exists.
                 5. Check the deployment output to ensure the resources are provisioned successfully.
+                {checkLog}
             """);
             if (targetAppService.ToLowerInvariant() == "aks")
             {
@@ -64,7 +71,7 @@ public static class DeploymentPlanTemplateUtil
             else
             {
                 steps.Add($$"""
-                3: Summary:
+                2: Summary:
                     1. {{summary}}
                 """);
             }
