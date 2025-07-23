@@ -1,30 +1,30 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT License.
 
-using Areas.Deploy.Services.Util;
-using AzureMcp.Areas.Deploy.Options;
-using AzureMcp.Areas.Deploy.Services;
+using AzureMcp.Areas.Quota.Services.Util;
+using AzureMcp.Areas.Quota.Options;
+using AzureMcp.Areas.Quota.Services;
 using AzureMcp.Commands;
 using AzureMcp.Commands.Subscription;
 using AzureMcp.Models.Command;
 using AzureMcp.Services.Telemetry;
 using Microsoft.Extensions.Logging;
 
-namespace AzureMcp.Areas.Deploy.Commands.Quota;
+namespace AzureMcp.Areas.Quota.Commands;
 
-public class QuotaCheckCommand(ILogger<QuotaCheckCommand> logger) : SubscriptionCommand<QuotaCheckOptions>()
+public class UsageCheckCommand(ILogger<UsageCheckCommand> logger) : SubscriptionCommand<UsageCheckOptions>()
 {
-    private const string CommandTitle = "Check Available Azure Quota for Regions";
-    private readonly ILogger<QuotaCheckCommand> _logger = logger;
+    private const string CommandTitle = "Check Azure resources usage and quota in a region";
+    private readonly ILogger<UsageCheckCommand> _logger = logger;
 
-    private readonly Option<string> _regionOption = DeployOptionDefinitions.QuotaCheck.Region;
-    private readonly Option<string> _resourceTypesOption = DeployOptionDefinitions.QuotaCheck.ResourceTypes;
+    private readonly Option<string> _regionOption = QuotaOptionDefinitions.QuotaCheck.Region;
+    private readonly Option<string> _resourceTypesOption = QuotaOptionDefinitions.QuotaCheck.ResourceTypes;
 
-    public override string Name => "quota-check";
+    public override string Name => "usage-get";
 
     public override string Description =>
         """
-        This tool will check the Azure quota availability for the resources that are going to be deployed.
+        This tool will check the usage and quota information for Azure resources in a region.
         """;
 
     public override string Title => CommandTitle;
@@ -36,7 +36,7 @@ public class QuotaCheckCommand(ILogger<QuotaCheckCommand> logger) : Subscription
         command.AddOption(_resourceTypesOption);
     }
 
-    protected override QuotaCheckOptions BindOptions(ParseResult parseResult)
+    protected override UsageCheckOptions BindOptions(ParseResult parseResult)
     {
         var options = base.BindOptions(parseResult);
         options.Region = parseResult.GetValueForOption(_regionOption) ?? string.Empty;
@@ -64,8 +64,8 @@ public class QuotaCheckCommand(ILogger<QuotaCheckCommand> logger) : Subscription
                 .Select(rt => rt.Trim())
                 .Where(rt => !string.IsNullOrWhiteSpace(rt))
                 .ToList();
-            var deployService = context.GetService<IDeployService>();
-            Dictionary<string, List<QuotaInfo>> toolResult = await deployService.GetAzureQuotaAsync(
+            var quotaService = context.GetService<IQuotaService>();
+            Dictionary<string, List<UsageInfo>> toolResult = await quotaService.GetAzureQuotaAsync(
                 ResourceTypes,
                 options.Subscription!,
                 options.Region);
@@ -74,19 +74,19 @@ public class QuotaCheckCommand(ILogger<QuotaCheckCommand> logger) : Subscription
 
             context.Response.Results = toolResult?.Count > 0 ?
                 ResponseResult.Create(
-                    new QuotaCheckCommandResult(toolResult),
-                    DeployJsonContext.Default.QuotaCheckCommandResult) :
+                    new UsageCheckCommandResult(toolResult),
+                    QuotaJsonContext.Default.UsageCheckCommandResult) :
                 null;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error checking Azure quota");
+            _logger.LogError(ex, "Error checking Azure resource usage");
             HandleException(context, ex);
         }
         return context.Response;
 
     }
 
-    internal record QuotaCheckCommandResult(Dictionary<string, List<QuotaInfo>> QuotaInfo);
+    internal record UsageCheckCommandResult(Dictionary<string, List<UsageInfo>> UsageInfo);
 
 }

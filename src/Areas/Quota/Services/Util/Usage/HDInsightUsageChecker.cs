@@ -2,21 +2,21 @@ using Azure.Core;
 using Azure.ResourceManager.HDInsight;
 using Azure.ResourceManager.HDInsight.Models;
 
-namespace Areas.Deploy.Services.Util;
+namespace AzureMcp.Areas.Quota.Services.Util;
 
-public class HDInsightQuotaChecker(TokenCredential credential, string subscriptionId) : AzureQuotaChecker(credential, subscriptionId)
+public class HDInsightUsageChecker(TokenCredential credential, string subscriptionId) : AzureUsageChecker(credential, subscriptionId)
 {
-    public override async Task<List<QuotaInfo>> GetQuotaForLocationAsync(string location)
+    public override async Task<List<UsageInfo>> GetQuotaForLocationAsync(string location)
     {
         try
         {
             var subscription = ResourceClient.GetSubscriptionResource(new ResourceIdentifier($"/subscriptions/{SubscriptionId}"));
             var usages = subscription.GetHDInsightUsagesAsync(location);
-            var result = new List<QuotaInfo>();
+            var result = new List<UsageInfo>();
 
             await foreach (HDInsightUsage item in usages)
             {
-                result.Add(new QuotaInfo(
+                result.Add(new UsageInfo(
                      Name: item.Name?.LocalizedValue ?? item.Name?.Value ?? string.Empty,
                      Limit: (int)(item.Limit ?? 0),
                      Used: (int)(item.CurrentValue ?? 0),
@@ -27,8 +27,7 @@ public class HDInsightQuotaChecker(TokenCredential credential, string subscripti
         }
         catch (Exception error)
         {
-            Console.WriteLine($"Error fetching HDInsight quotas: {error.Message}");
-            return [];
+            throw new Exception($"Error fetching HDInsight quotas: {error.Message}");
         }
     }
 }

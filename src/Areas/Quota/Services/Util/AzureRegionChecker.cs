@@ -1,3 +1,6 @@
+// Copyright (c) Microsoft Corporation.
+// Licensed under the MIT License.
+
 using Azure;
 using Azure.Core;
 using Azure.ResourceManager;
@@ -5,9 +8,9 @@ using Azure.ResourceManager.CognitiveServices;
 using Azure.ResourceManager.CognitiveServices.Models;
 using Azure.ResourceManager.PostgreSql.FlexibleServers;
 using Azure.ResourceManager.PostgreSql.FlexibleServers.Models;
-using AzureMcp.Areas.Deploy.Models;
+using AzureMcp.Areas.Quota.Models;
 
-namespace Areas.Deploy.Services.Util;
+namespace AzureMcp.Areas.Quota.Services.Util;
 
 public interface IRegionChecker
 {
@@ -59,8 +62,7 @@ public class DefaultRegionChecker(ArmClient armClient, string subscriptionId) : 
         }
         catch (Exception error)
         {
-            Console.WriteLine($"Error fetching regions for resource type {resourceType}: {error.Message}");
-            return [];
+            throw new Exception($"Error fetching regions for resource type {resourceType}: {error.Message}");
         }
     }
 }
@@ -130,7 +132,7 @@ public class CognitiveServicesRegionChecker : AzureRegionChecker
             }
             catch (Exception error)
             {
-                Console.WriteLine($"Error checking cognitive services models for region {region}: {error.Message}");
+                throw new Exception($"Error checking cognitive services models for region {region}: {error.Message}");
             }
         }
 
@@ -172,7 +174,7 @@ public class PostgreSqlRegionChecker(ArmClient armClient, string subscriptionId)
             }
             catch (Exception error)
             {
-                Console.WriteLine($"Error checking PostgreSQL capabilities for region {region}: {error.Message}");
+                throw new Exception($"Error checking PostgreSQL capabilities for region {region}: {error.Message}");
             }
         }
 
