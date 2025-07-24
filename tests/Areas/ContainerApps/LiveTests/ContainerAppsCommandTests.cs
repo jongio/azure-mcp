@@ -22,6 +22,9 @@ public class ContainerAppsCommandTests(LiveTestFixture liveTestFixture, ITestOut
             { "subscription", Settings.SubscriptionName }
         });
 
+        // Log the result for debugging
+        Output.WriteLine($"ContainerAppList_WithSubscription result: {result?.ToString() ?? "null"}");
+
         // Assert
         Assert.NotNull(result);
         var containerApps = result.AssertProperty("containerApps");
@@ -36,6 +39,9 @@ public class ContainerAppsCommandTests(LiveTestFixture liveTestFixture, ITestOut
         {
             { "subscription", "invalid-subscription-name" }
         });
+
+        // Log the result for debugging
+        Output.WriteLine($"ContainerAppList_WithInvalidSubscription result: {result?.ToString() ?? "null"}");
 
         // Assert
         // Should return runtime error response with error details in results
@@ -57,6 +63,9 @@ public class ContainerAppsCommandTests(LiveTestFixture liveTestFixture, ITestOut
             { "resourceGroup", "non-existent-rg" }
         });
 
+        // Log the result for debugging
+        Output.WriteLine($"ContainerAppList_WithResourceGroup result: {result?.ToString() ?? "null"}");
+
         // Assert
         Assert.NotNull(result);
         var containerApps = result.AssertProperty("containerApps");
@@ -72,6 +81,9 @@ public class ContainerAppsCommandTests(LiveTestFixture liveTestFixture, ITestOut
             { "subscription", Settings.SubscriptionName },
             { "environment", "non-existent-env" }
         });
+
+        // Log the result for debugging
+        Output.WriteLine($"ContainerAppList_WithEnvironment result: {result?.ToString() ?? "null"}");
 
         // Assert
         if (result.HasValue)
@@ -93,6 +105,9 @@ public class ContainerAppsCommandTests(LiveTestFixture liveTestFixture, ITestOut
     {
         // Arrange & Act
         var result = await CallToolAsync("azmcp_containerapp_list", new Dictionary<string, object?>());
+
+        // Log the result for debugging
+        Output.WriteLine($"ContainerAppList_MissingRequiredParams result: {result?.ToString() ?? "null"}");
 
         // Assert
         Assert.Null(result); // Should return null for missing required parameters
