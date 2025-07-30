@@ -119,8 +119,8 @@ public class IaCRulesGetCommandTests
         // arrange
         var args = _parser.Parse([
             "--deployment-tool", "AzCli",
-            "--iac-type", "bicep",
-            "--resource-types", "appservice"
+            "--iac-type", "",
+            "--resource-types", "aks"
         ]);
 
         // act
@@ -130,8 +130,7 @@ public class IaCRulesGetCommandTests
         Assert.NotNull(result);
         Assert.Equal(200, result.Status);
         Assert.NotNull(result.Message);
-        Assert.Contains("Deployment Tool AzCli", result.Message, StringComparison.OrdinalIgnoreCase);
-        Assert.Contains("No additional rules", result.Message, StringComparison.OrdinalIgnoreCase);
+        Assert.Contains("If creating AzCli script, the script should stop if any command fails.", result.Message, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]

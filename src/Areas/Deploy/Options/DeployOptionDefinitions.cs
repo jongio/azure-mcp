@@ -139,7 +139,7 @@ public static class DeployOptionDefinitions
 
         public static readonly Option<string> AzdIacOptions = new(
             $"--{AzdIacOptionsName}",
-            "The Infrastructure as Code option for azd. Valid values: bicep, terraform."
+            "The Infrastructure as Code option for azd. Valid values: bicep, terraform. Leave empty if Deployment tool is AzCli."
         )
         {
             IsRequired = false
@@ -157,16 +157,16 @@ public static class DeployOptionDefinitions
 
         public static readonly Option<string> IacType = new(
             "--iac-type",
-            "The Infrastructure as Code type. Valid values: bicep, terraform")
+            "The Infrastructure as Code type. Valid values: bicep, terraform. Leave empty if deployment-tool is AzCli.")
         {
-            IsRequired = true
+            IsRequired = false
         };
 
         public static readonly Option<string> ResourceTypes = new(
             "--resource-types",
-            "Comma-separated list of Azure resource types to generate rules for. Supported values: 'appservice' (App Service) and/or 'containerapp' (Container App) and/or 'function' (Function App). Other resources do not have special rules.")
+            "Specifies the Azure resource types to retrieve IaC rules for. It should be comma-separated. Supported values are: 'appservice', 'containerapp', 'function', 'aks'. If none of these services are used, this parameter can be left empty.")
         {
-            IsRequired = true,
+            IsRequired = false,
             AllowMultipleArgumentsPerToken = true
         };
     }

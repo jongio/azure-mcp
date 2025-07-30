@@ -21,14 +21,17 @@ public static class IaCRulesTemplateUtil
     /// <returns>A formatted IaC rules string.</returns>
     public static string GetIaCRules(string deploymentTool, string iacType, string[] resourceTypes)
     {
+        var parameters = CreateTemplateParameters(deploymentTool, iacType, resourceTypes);
+        var deploymentToolRules = GenerateDeploymentToolRules(parameters);
+        if (deploymentTool.Equals(DeploymentTool.AzCli, StringComparison.OrdinalIgnoreCase))
+        {
+            return TemplateService.LoadTemplate("IaCRules/azcli-rules");
+        }
         // Default values for optional parameters
         if (string.IsNullOrWhiteSpace(iacType))
         {
             iacType = "bicep";
         }
-
-        var parameters = CreateTemplateParameters(deploymentTool, iacType, resourceTypes);
-        var deploymentToolRules = GenerateDeploymentToolRules(parameters);
         var iacTypeRules = GenerateIaCTypeRules(parameters);
         var resourceSpecificRules = GenerateResourceSpecificRules(parameters);
         var finalInstructions = GenerateFinalInstructions(parameters);
