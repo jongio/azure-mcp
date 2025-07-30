@@ -36,7 +36,7 @@ public sealed class CommandFactoryToolLoader(
             : commandFactory.GroupCommands(options.Value.Namespace);
     private readonly ILogger<CommandFactoryToolLoader> _logger = logger;
 
-    public const string RawMcpToolInputOptionName = "rawMcpToolInput";
+    public const string RawMcpToolInputOptionName = "raw-mcp-tool-input";
 
     /// <summary>
     /// Gets whether the tool loader operates in read-only mode.

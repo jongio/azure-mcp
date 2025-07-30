@@ -34,7 +34,7 @@ public class ArchitectureDiagramTests
     public async Task GenerateArchitectureDiagram_ShouldReturnNoServiceDetected()
     {
         var command = new GenerateArchitectureDiagramCommand(_logger);
-        var args = command.GetCommand().Parse(["--rawMcpToolInput", "{\"projectName\": \"test\",\"services\": []}"]);
+        var args = command.GetCommand().Parse(["--raw-mcp-tool-input", "{\"projectName\": \"test\",\"services\": []}"]);
         var context = new CommandContext(_serviceProvider);
         var response = await command.ExecuteAsync(context, args);
         Assert.NotNull(response);
@@ -115,7 +115,7 @@ public class ArchitectureDiagramTests
             }
         };
 
-        var args = command.GetCommand().Parse(["--rawMcpToolInput", JsonSerializer.Serialize(appTopology)]);
+        var args = command.GetCommand().Parse(["--raw-mcp-tool-input", JsonSerializer.Serialize(appTopology)]);
         var context = new CommandContext(_serviceProvider);
         var response = await command.ExecuteAsync(context, args);
         Assert.NotNull(response);

@@ -326,7 +326,7 @@ public class CommandExtensionsTests
     {
         // Arrange
         var command = new Command("test");
-        var scriptOption = new Option<string>("--rawMcpToolInput") { IsRequired = true };
+        var scriptOption = new Option<string>("--raw-mcp-tool-input") { IsRequired = true };
         command.AddOption(scriptOption);
 
         var arguments = new Dictionary<string, JsonElement>
