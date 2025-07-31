@@ -184,7 +184,7 @@ public sealed class CommandFactoryToolLoader(
             if (options.Count == 1 && options[0].Name == RawMcpToolInputOptionName)
             {
                 var arguments = JsonNode.Parse(options[0].Description ?? "{}") as JsonObject ?? new JsonObject();
-                tool.InputSchema = JsonSerializer.SerializeToElement(arguments, ServerJsonContext.Default.ToolInputSchema);
+                tool.InputSchema = JsonSerializer.SerializeToElement(arguments, ServerJsonContext.Default.JsonObject);
                 return tool;
             }
             else
