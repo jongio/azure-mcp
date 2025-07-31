@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System.Diagnostics;
+using System.Text.Json.Nodes;
 using AzureMcp.Core.Areas.Server;
 using AzureMcp.Core.Areas.Server.Models;
 using AzureMcp.Core.Areas.Server.Options;
@@ -107,7 +108,7 @@ public sealed class CommandFactoryToolLoader(
 
         var realCommand = command.GetCommand();
         ParseResult? commandOptions = null;
-        
+
         if (realCommand.Options.Count == 1 && realCommand.Options[0].Name == RawMcpToolInputOptionName)
         {
             commandOptions = realCommand.ParseFromRawMcpToolInput(request.Params.Arguments);
@@ -183,10 +184,11 @@ public sealed class CommandFactoryToolLoader(
             if (options.Count == 1 && options[0].Name == RawMcpToolInputOptionName)
             {
                 var arguments = JsonNode.Parse(options[0].Description ?? "{}") as JsonObject ?? new JsonObject();
-                schema = arguments;
+                tool.InputSchema = JsonSerializer.SerializeToElement(arguments, ServerJsonContext.Default.ToolInputSchema);
+                return tool;
             }
             else
-            { 
+            {
                 foreach (var option in options)
                 {
                     schema.Properties.Add(option.Name, new ToolPropertySchema

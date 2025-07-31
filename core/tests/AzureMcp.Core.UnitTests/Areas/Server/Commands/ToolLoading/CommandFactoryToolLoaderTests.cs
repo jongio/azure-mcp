@@ -294,11 +294,11 @@ public class CommandFactoryToolLoaderTests
     [Fact]
     public async Task GetsToolsWithRawMcpInputOption()
     {
-        var multiServiceOptions = new ServiceStartOptions
+        var filteredOptions = new ToolLoaderOptions
         {
-            Namespace = new[] { "deploy" }  // Real Azure service groups from the codebase
+            Namespace = new[] { "deploy" }  // Assuming there's a deploy service group
         };
-        var (toolLoader, commandFactory) = CreateToolLoader(multiServiceOptions);
+        var (toolLoader, _) = CreateToolLoader(filteredOptions);
         var request = CreateRequest();
         var result = await toolLoader.ListToolsHandler(request, CancellationToken.None);
 

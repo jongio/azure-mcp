@@ -40,7 +40,6 @@
     <PackageVersion Include="Azure.ResourceManager.AppService" Version="1.4.0" />
     <PackageVersion Include="Azure.ResourceManager.AppContainers" Version="1.4.0" />
     <PackageVersion Include="Azure.ResourceManager.Resources" Version="1.11.0" />
-    <PackageVersion Include="Azure.ResourceManager" Version="1.13.1" />
     <PackageVersion Include="Azure.ResourceManager.Compute" Version="1.10.0" />
     <PackageVersion Include="Azure.ResourceManager.MachineLearning" Version="1.2.2" />
     <PackageVersion Include="Azure.ResourceManager.Network" Version="1.11.1" />
