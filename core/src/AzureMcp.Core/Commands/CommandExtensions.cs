@@ -95,7 +95,7 @@ public static class CommandExtensions
 
         return command.Parse(args.ToArray());
     }
-    
+
     /// <summary>
     /// Determines if an option expects a collection type that should be treated as an array
     /// </summary>
