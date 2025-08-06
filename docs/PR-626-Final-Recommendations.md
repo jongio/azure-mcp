@@ -1,4 +1,4 @@
-# PR #626 Final Recommendations - Deploy and Quota Commands
+# PR #626 Final Recommendations - Deploy and Quota Commands (Test inprogress)
 
 ## Executive Summary
 
@@ -480,7 +480,7 @@ public class PlanAnalysisResult
 
 ### Comprehensive Manual Test Cases (30 Scenarios)
 
-#### Command Registration and Help Tests
+#### Command Registration and Help Tests [PASS]
 
 1. **Deploy Command Group Help**
    - **Command**: `azmcp deploy --help`
@@ -507,7 +507,7 @@ public class PlanAnalysisResult
    - **Expected**: Shows pipeline subcommands (guidance)
    - **Validation**: guidance command is available
 
-#### Quota Command Tests
+#### Quota Command Tests 
 
 6. **Quota Usage Check - Valid Subscription**
    - **Command**: `azmcp quota usage check --subscription-id 12345678-1234-1234-1234-123456789abc`
@@ -534,7 +534,7 @@ public class PlanAnalysisResult
     - **Expected**: Returns quota usage filtered to resource group
     - **Validation**: Scoped quota information
 
-#### Deploy App Commands Tests
+#### Deploy App Commands Tests [PASS: Covered in automation]
 
 11. **App Logs Get - Valid AZD Environment**
     - **Command**: `azmcp deploy app logs get --workspace-folder ./myapp --azd-env-name dev`
@@ -723,21 +723,27 @@ The following prompts can be used with GitHub Copilot or VS Code Copilot to test
    - **Prompt**: "Check my Azure quota usage for subscription 12345678-1234-1234-1234-123456789abc"
    - **Expected**: Copilot uses `azmcp quota usage check` command
    - **Validation**: Returns structured quota information
+   - **Test Result**: Pass
+   - **Test Observation**: Agent call the tool to check quota usage for the resource types that inferred from the project. 
+        It would call this tool multiple times for different regions as it is not specified in the prompt.
 
 2. **Region Availability Query**
    - **Prompt**: "What regions are available for virtual machines in Azure?"
    - **Expected**: Copilot uses `azmcp quota region availability list` command
    - **Validation**: Returns list of regions with VM availability
+   - **Test Result**: Pass
 
 3. **Resource-Specific Quota**
    - **Prompt**: "Check quota limits for compute resources in my Azure subscription"
    - **Expected**: Copilot uses quota commands with appropriate filters
    - **Validation**: Returns compute-specific quota data
+   - **Test Result**: Pass
 
 4. **Regional Capacity Planning**
    - **Prompt**: "I need to deploy 100 VMs - which Azure regions have capacity?"
    - **Expected**: Copilot uses region availability and quota commands
    - **Validation**: Provides capacity recommendations
+   - **Test Result**: Pass
 
 #### Deployment Planning Prompts
 
@@ -745,11 +751,25 @@ The following prompts can be used with GitHub Copilot or VS Code Copilot to test
    - **Prompt**: "Help me plan deployment for my .NET web application to Azure"
    - **Expected**: Copilot uses `azmcp deploy plan get` command
    - **Validation**: Returns deployment recommendations for .NET apps
+   - **Model**: Claude Sonnet 4
+   - **Project Context**: ESHOPWEB project with .NET. Bicep files are present.
+   - **Test Result**: Pass
+   - **Test Observation**: 
+  Tools called during the plan creation: deploy plan get, bicep schema get, bestpractices get
+  Terminals called during the plan execution: az account show, azd auth login --check-status, azd env list, azd init --environment eshop-dev, azd env set AZURE_LOCATION eastus, azd provision --preview, azd up
 
 6. **Microservices Architecture Planning**
    - **Prompt**: "Generate a deployment plan for my microservices application"
    - **Expected**: Copilot uses deployment planning tools
    - **Validation**: Returns multi-service deployment strategy
+   - **Model**: Claude Sonnet 4
+   - **Project Context**: EXAMPLE-VOTING-APP project with .NET, python. Three micro services. Bicep files not present.
+   - **Test Result**: Pass
+   - **Test Observation**: 
+  Plan generated correctly with the microservices defined as container apps in one environment.
+  Tools called during the plan creation: deploy plan get, iac rules get
+  Tools called during the plan execution: iac rules get
+  Terminals called during the plan execution: azd version, azd init, azd env list, azd up
 
 7. **Infrastructure as Code Guidance**
    - **Prompt**: "What are the best practices for Bicep templates in my project?"
