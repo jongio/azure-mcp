@@ -103,7 +103,7 @@ The Azure MCP Server provides tools for interacting with **28 Azure service area
 - ⚙️ **Azure App Configuration** - Configuration management
 - 🛡️ **Azure Best Practices** - Secure, production-grade guidance
 - 🖥️ **Azure CLI Extension** - Direct Azure CLI command execution
-- � **Azure Container Registry (ACR)** - Container registry management
+- 📦 **Azure Container Registry (ACR)** - Container registry management
 - �📊 **Azure Cosmos DB** - NoSQL database operations
 - 🧮 **Azure Data Explorer** - Analytics queries and KQL
 - 🐘 **Azure Database for PostgreSQL** - PostgreSQL database management
