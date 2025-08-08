@@ -16,6 +16,27 @@ All new Azure services and their commands should use the Area pattern:
 
 This keeps all code, options, models, and tests for an area together. See `areas/storage` for a reference implementation.
 
+## ⚠️ Test Infrastructure Requirements
+
+**CRITICAL DECISION POINT**: Does your command interact with Azure resources?
+
+### **Azure Service Commands (REQUIRES Test Infrastructure)**
+If your command interacts with Azure resources (storage accounts, databases, VMs, etc.):
+- ✅ **MUST create** `areas/{area-name}/tests/test-resources.bicep`
+- ✅ **MUST include** RBAC role assignments for test application
+- ✅ **MUST validate** with `az bicep build --file areas/{area-name}/tests/test-resources.bicep`
+- ✅ **MUST test deployment** with `./eng/scripts/Deploy-TestResources.ps1 -Area {area-name}`
+
+### **Non-Azure Commands (No Test Infrastructure Needed)**
+If your command is a wrapper/utility (CLI tools, best practices, documentation):
+- ❌ **Skip** Bicep template creation
+- ❌ **Skip** live test infrastructure
+- ✅ **Focus on** unit tests and mock-based testing
+
+**Examples of each type**:
+- **Azure Service Commands**: ACR Registry List, SQL Database Show, Storage Account List
+- **Non-Azure Commands**: Azure CLI wrapper, Best Practices guidance, Documentation tools
+
 ## Command Architecture
 
 ### Command Design Principles
@@ -1351,6 +1372,7 @@ catch (Exception ex)
 1. Do not:
    - **CRITICAL**: Use `subscriptionId` as parameter name - Always use `subscription` to support both IDs and names
    - **CRITICAL**: Use `OptionDefinitions.Common.ResourceGroup` for optional resource group filtering - Create area-specific `OptionalResourceGroup` with `IsRequired = false`
+   - **CRITICAL**: Skip live test infrastructure for Azure service commands - Create `test-resources.bicep` template early in development
    - Redefine base class properties in Options classes
    - Skip base.RegisterOptions() call
    - Skip base.Dispose() call
@@ -1367,6 +1389,7 @@ catch (Exception ex)
 2. Always:
    - Create a static {Area}OptionDefinitions class for the area
    - **For optional resource group filtering**: Create custom `OptionalResourceGroup` option in area's OptionDefinitions with `IsRequired = false`
+   - **For Azure service commands**: Create test infrastructure (`test-resources.bicep`) before implementing live tests
    - Use OptionDefinitions for options
    - Follow exact file structure
    - Implement all base members
@@ -1397,6 +1420,13 @@ catch (Exception ex)
   1. Add `<PackageVersion Include="Azure.ResourceManager.{Service}" Version="{version}" />` to `Directory.Packages.props`
   2. Add `<PackageReference Include="Azure.ResourceManager.{Service}" />` to project file
 - **Prevention**: Follow the two-step package addition process documented in Implementation Guidelines
+
+**Issue: Missing live test infrastructure for Azure service commands**
+- **Cause**: Forgetting to create `test-resources.bicep` template during development
+- **Solution**: Create Bicep template early in development process, not as an afterthought
+- **Fix**: Create `areas/{area-name}/tests/test-resources.bicep` following established patterns
+- **Prevention**: Check "Test Infrastructure Requirements" section at top of this document before starting implementation
+- **Validation**: Run `az bicep build --file areas/{area-name}/tests/test-resources.bicep` to validate template
 
 **Issue: Test project compilation errors with missing imports**
 - **Cause**: Missing using statements for test frameworks and core libraries
@@ -1545,6 +1575,20 @@ Before submitting:
 - [ ] Error handling implemented
 - [ ] Documentation complete
 
+### **CRITICAL: Live Test Infrastructure (Required for Azure Service Commands)**
+
+**⚠️ MANDATORY for any command that interacts with Azure resources:**
+
+- [ ] **Live test infrastructure created** (`test-resources.bicep` template in `areas/{area-name}/tests`)
+- [ ] **Bicep template validated** with `az bicep build --file areas/{area-name}/tests/test-resources.bicep`
+- [ ] **Live test resource template tested** with `./eng/scripts/Deploy-TestResources.ps1 -Area {area-name}`
+- [ ] **RBAC permissions configured** for test application in Bicep template (use appropriate built-in roles)
+- [ ] **Live tests use deployed resources** via `Settings.ResourceBaseName` pattern
+- [ ] **Resource outputs defined** in Bicep template for test consumption
+- [ ] **Cost optimization verified** (use Basic/Standard SKUs, minimal configurations)
+
+**Skip this section ONLY if your command does not interact with Azure resources (e.g., CLI wrappers, best practices tools).**
+
 ### Package and Project Setup
 - [ ] Azure Resource Manager package added to both `Directory.Packages.props` and `AzureMcp.{Area}.csproj`
 - [ ] **Package version consistency**: Same version used in both `Directory.Packages.props` and project references
@@ -1566,13 +1610,6 @@ Before submitting:
 - [ ] Resource access patterns use collections (e.g., `.GetSqlServers().GetAsync()`)
 - [ ] Subscription resolution uses `ISubscriptionService.GetSubscription()`
 - [ ] Service constructor includes `ISubscriptionService` injection for Azure resources
-
-### Test Infrastructure
-- [ ] Live test infrastructure created (`test-resources.bicep` template in `areas/{area-name}/tests`)
-- [ ] Live test resource template test with `./eng/scripts/Deploy-TestResources.ps1 -Area {area-name}`
-- [ ] RBAC permissions configured for test application in Bicep template
-- [ ] Live tests use deployed resources via `Settings.ResourceBaseName` pattern
-- [ ] Resource outputs defined in Bicep template for `test-resources-post.ps1` script consumption
 
 ### Documentation Requirements
 
