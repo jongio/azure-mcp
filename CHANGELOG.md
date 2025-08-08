@@ -4,7 +4,7 @@
 
 ### Features Added
 
-- Added Azure Container Registry (ACR) area with `azmcp acr registry list` command to list container registries in a subscription, with optional resource group filtering. [[#XXX](https://github.com/Azure/azure-mcp/issues/XXX)]
+- Added Azure Container Registry (ACR) area with `azmcp acr registry list` command to list container registries in a subscription, with optional resource group filtering. [[#915](https://github.com/Azure/azure-mcp/issues/915)]
 
 ### Breaking Changes
 

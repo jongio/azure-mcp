@@ -1516,7 +1516,7 @@ var subscriptionResource = await _subscriptionService.GetSubscription(subscripti
       <IsTestProject>true</IsTestProject>
       <OutputType>Exe</OutputType>
     </PropertyGroup>
-    
+
     <ItemGroup>
       <ProjectReference Include="..\..\src\AzureMcp.{Area}\AzureMcp.{Area}.csproj" />
       <ProjectReference Include="..\..\..\..\core\src\AzureMcp.Cli\AzureMcp.Cli.csproj" />
