@@ -23,6 +23,7 @@ This keeps all code, options, models, and tests for an area together. See `areas
 ### **Azure Service Commands (REQUIRES Test Infrastructure)**
 If your command interacts with Azure resources (storage accounts, databases, VMs, etc.):
 - ✅ **MUST create** `areas/{area-name}/tests/test-resources.bicep`
+- ✅ **MUST create** `areas/{area-name}/tests/test-resources-post.ps1` (required even if basic template)
 - ✅ **MUST include** RBAC role assignments for test application
 - ✅ **MUST validate** with `az bicep build --file areas/{area-name}/tests/test-resources.bicep`
 - ✅ **MUST test deployment** with `./eng/scripts/Deploy-TestResources.ps1 -Area {area-name}`
@@ -117,9 +118,9 @@ A complete command requires:
 7. Integration test: `areas/{area-name}/tests/AzureMcp.{AreaName}.LiveTests/{AreaName}CommandTests.cs`
 8. Command registration in RegisterCommands(): `areas/{area-name}/src/AzureMcp.{AreaName}/{AreaName}Setup.cs`
 9. Area registration in RegisterAreas(): `core/src/AzureMcp.Cli/Program.cs`
-10. **Live test infrastructure** (if needed):
+10. **Live test infrastructure** (for Azure service commands):
    - Bicep template: `/areas/{area-name}/tests/test-resources.bicep`
-   - Optional post-deployment script: `/areas/{area-name}/tests/test-resources-post.ps1`
+   - Post-deployment script: `/areas/{area-name}/tests/test-resources-post.ps1` (required, even if basic template)
 
 ### File and Class Naming Convention
 
@@ -851,7 +852,7 @@ dotnet test --verbosity normal
 ```
 
 ### Integration Tests
-Areas requiring test resource deployment should add a bicep template, `tests/test-resources.bicep`,  to their area directory. If additional logic needs to be performed after resource deployment, but before any live tests are run, add a `test-resources-post.ps1` in the same directory. See `/areas/storage/tests/test-resources.bicep` and `/areas/storage/tests/test-resources-post.ps1` for canonical examples.
+Azure service commands requiring test resource deployment must add a bicep template, `tests/test-resources.bicep`, to their area directory. Additionally, all Azure service commands must include a `test-resources-post.ps1` file in the same directory, even if it contains only the basic template without custom logic. See `/areas/storage/tests/test-resources.bicep` and `/areas/storage/tests/test-resources-post.ps1` for canonical examples.
 
 #### Live Test Resource Infrastructure
 
@@ -939,9 +940,9 @@ output testResourceName string = serviceResource::testResource.name
 - Ensure names are unique within resource group scope
 - Check existing `test-resources.bicep` files for consistent patterns
 
-**2. Optional: Post-Deployment Script (`/area/{area-name}/tests/test-resources-post.ps1`)**
+**2. Required: Post-Deployment Script (`/areas/{area-name}/tests/test-resources-post.ps1`)**
 
-Create if additional setup is needed after resource deployment:
+All Azure service commands must include this script, even if it contains only the basic template. Create with the standard template and add custom setup logic if needed:
 
 ```powershell
 #!/usr/bin/env pwsh
@@ -1428,6 +1429,13 @@ catch (Exception ex)
 - **Prevention**: Check "Test Infrastructure Requirements" section at top of this document before starting implementation
 - **Validation**: Run `az bicep build --file areas/{area-name}/tests/test-resources.bicep` to validate template
 
+**Issue: Pipeline fails with "SelfContainedPostScript is not supported if there is no test-resources-post.ps1"**
+- **Cause**: Missing required `test-resources-post.ps1` file for Azure service commands
+- **Solution**: Create the post-deployment script file, even if it contains only the basic template
+- **Fix**: Create `areas/{area-name}/tests/test-resources-post.ps1` using the standard template from existing areas
+- **Prevention**: All Azure service commands must include this file - it's required by the test infrastructure
+- **Note**: The file is mandatory even if no custom post-deployment logic is needed
+
 **Issue: Test project compilation errors with missing imports**
 - **Cause**: Missing using statements for test frameworks and core libraries
 - **Solution**: Add required imports for test projects:
@@ -1610,6 +1618,7 @@ Before submitting:
 **⚠️ MANDATORY for any command that interacts with Azure resources:**
 
 - [ ] **Live test infrastructure created** (`test-resources.bicep` template in `areas/{area-name}/tests`)
+- [ ] **Post-deployment script created** (`test-resources-post.ps1` in `areas/{area-name}/tests` - required even if basic template)
 - [ ] **Bicep template validated** with `az bicep build --file areas/{area-name}/tests/test-resources.bicep`
 - [ ] **Live test resource template tested** with `./eng/scripts/Deploy-TestResources.ps1 -Area {area-name}`
 - [ ] **RBAC permissions configured** for test application in Bicep template (use appropriate built-in roles)
