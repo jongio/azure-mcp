@@ -76,7 +76,7 @@ This keeps all code, options, models, and tests for an area together. See `areas
    **AVOID ANTI-PATTERNS**: When designing commands, avoid mixing resource names with operations in a single command. Instead, use proper command group hierarchy:
    - ✅ Good: `azmcp postgres server param set` (command groups: server → param, operation: set)
    - ❌ Bad: `azmcp postgres server setparam` (mixed operation `setparam` at same level as resource operations)
-   - ✅ Good: `azmcp storage container permission set` 
+   - ✅ Good: `azmcp storage container permission set`
    - ❌ Bad: `azmcp storage container setpermission`
 
    This pattern improves discoverability, maintains consistency, and allows for better grouping of related operations.
@@ -139,6 +139,8 @@ This convention ensures:
 - **Live test infrastructure**: Add Bicep template to `/areas/{area-name}/tests`
 - **Test resource deployment**: Ensure resources are properly configured with RBAC for test application
 - **Resource naming**: Follow consistent naming patterns - many services use just `baseName`, while others may need suffixes for disambiguation (e.g., `{baseName}-suffix`)
+- **Solution file integration**: Add new projects to `AzureMcp.sln` with proper GUID generation to avoid conflicts
+- **Program.cs registration**: Register the new area in `Program.cs` `RegisterAreas()` method in alphabetical order
 
 ## Implementation Guidelines
 
@@ -151,6 +153,8 @@ When creating commands that interact with Azure services, you'll need to:
   - Example: `<PackageVersion Include="Azure.ResourceManager.Sql" Version="1.3.0" />`
 - Add the package reference in `AzureMcp.{AreaName}.csproj`
   - Example: `<PackageReference Include="Azure.ResourceManager.Sql" />`
+- **Version Consistency**: Ensure the package version in `Directory.Packages.props` matches across all projects
+- **Build Order**: Add the package to `Directory.Packages.props` first, then reference it in project files to avoid build errors
 
 **Subscription Resolution:**
 - Always use `ISubscriptionService.GetSubscription()` to resolve subscription ID or name
@@ -226,6 +230,42 @@ IMPORTANT:
   - Keep parameter names consistent with Azure SDK parameters when possible
   - If services share similar operations (e.g., ListDatabases), use the same parameter order and names
 
+### Optional Resource Group Pattern
+
+**For commands that need optional resource group filtering (e.g., list commands that can filter by resource group):**
+
+1. **Create a custom optional resource group option** in your area's OptionDefinitions:
+
+```csharp
+// In {Area}OptionDefinitions.cs
+public static readonly Option<string> OptionalResourceGroup = new(
+    $"--{OptionDefinitions.Common.ResourceGroupName}",
+    "The name of the Azure resource group. This is a logical container for Azure resources."
+)
+{
+    IsRequired = false  // ← Key difference from OptionDefinitions.Common.ResourceGroup
+};
+```
+
+2. **Override the base _resourceGroupOption field** in your command:
+
+```csharp
+// In your command class
+private readonly new Option<string> _resourceGroupOption = {Area}OptionDefinitions.OptionalResourceGroup;
+```
+
+3. **Examples from existing codebase:**
+   - **Extension Area**: `ExtensionOptionDefinitions.Azqr.OptionalResourceGroup` (for azqr command)
+   - **Monitor Area**: `MonitorOptionDefinitions.Metrics.OptionalResourceGroup` (for metrics commands)
+   - **ACR Area**: `AcrOptionDefinitions.OptionalResourceGroup` (for registry list command)
+
+**❌ Common Mistake**: Using `OptionDefinitions.Common.ResourceGroup` which has `IsRequired = true`
+**✅ Correct Pattern**: Create area-specific optional resource group option with `IsRequired = false`
+
+This allows commands to work both ways:
+- `azmcp {area} {resource} {operation} --subscription <sub>` (all resources in subscription)
+- `azmcp {area} {resource} {operation} --subscription <sub> --resource-group <rg>` (filtered by resource group)
+
 ### 3. Command Class
 
 ```csharp
@@ -253,7 +293,7 @@ public sealed class {Resource}{Operation}Command(ILogger<{Resource}{Operation}Co
     public override ToolMetadata Metadata => new()
     {
         Destructive = false,    // Set to true for commands that modify resources
-        ReadOnly = true         // Set to false for commands that modify resources  
+        ReadOnly = true         // Set to false for commands that modify resources
     };
 
     protected override void RegisterOptions(Command command)
@@ -595,7 +635,7 @@ private void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFacto
         "{Resource} operations");
     service.AddSubGroup(resource);
 
-    resource.AddCommand("operation", new {Area}.{Resource}{Operation}Command(
+    resource.AddCommand("{operation}", new {Resource}{Operation}Command(
         loggerFactory.CreateLogger<{Resource}{Operation}Command>()));
 }
 ```
@@ -604,71 +644,86 @@ private void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFacto
 - ✅ Good: `"entraadmin"`, `"resourcegroup"`, `"storageaccount"`, `"entra-admin"`
 - ❌ Bad: `"entra_admin"`, `"resource_group"`, `"storage_account"`
 
-### 8. Area registration
+### 9. Area Registration
 ```csharp
     private static IAreaSetup[] RegisterAreas()
     {
         return [
-            new AzureMcp.AppConfig.AppConfigSetup(),
+            // Register core areas
+            new AzureMcp.AzureBestPractices.AzureBestPracticesSetup(),
+            new AzureMcp.Extension.ExtensionSetup(),
+
+            // Register Azure service areas
             new AzureMcp.{Area}.{Area}Setup(),
             new AzureMcp.Storage.StorageSetup(),
         ];
     }
 ```
 
-The area list in should `RegisterAreas()` should stay sorted alphabetically.
+The area list in `RegisterAreas()` should stay sorted alphabetically.
 
 ## Error Handling
 
 Commands in Azure MCP follow a standardized error handling approach using the base `HandleException` method inherited from `BaseCommand`. Here are the key aspects:
 
 ### 1. Status Code Mapping
-The base implementation handles common status codes:
+The base implementation returns 500 for all exceptions by default:
 ```csharp
-protected virtual int GetStatusCode(Exception ex) => ex switch
+protected virtual int GetStatusCode(Exception ex) => 500;
+```
+
+Commands should override this to provide appropriate status codes:
+```csharp
+protected override int GetStatusCode(Exception ex) => ex switch
 {
-    // Common error response codes
-    AuthenticationFailedException => 401,   // Unauthorized
-    RequestFailedException rfEx => rfEx.Status,  // Service-reported status
-    HttpRequestException => 503,   // Service unavailable
+    Azure.RequestFailedException reqEx => reqEx.Status,  // Use Azure-reported status
+    Azure.Identity.AuthenticationFailedException => 401,   // Unauthorized
     ValidationException => 400,    // Bad request
-    _ => 500  // Unknown errors
+    _ => base.GetStatusCode(ex) // Fall back to 500
 };
 ```
 
 ### 2. Error Message Formatting
-Error messages should be user-actionable and help debug issues:
+The base implementation returns the exception message:
 ```csharp
-protected virtual string GetErrorMessage(Exception ex) => ex switch
+protected virtual string GetErrorMessage(Exception ex) => ex.Message;
+```
+
+Commands should override this to provide user-actionable messages:
+```csharp
+protected override string GetErrorMessage(Exception ex) => ex switch
 {
-    AuthenticationFailedException authEx =>
+    Azure.Identity.AuthenticationFailedException authEx =>
         $"Authentication failed. Please run 'az login' to sign in. Details: {authEx.Message}",
-    RequestFailedException rfEx => rfEx.Message,
-    HttpRequestException httpEx =>
-        $"Service unavailable or connectivity issues. Details: {httpEx.Message}",
-    _ => ex.Message
+    Azure.RequestFailedException reqEx when reqEx.Status == 404 =>
+        "Resource not found. Verify the resource name and that you have access.",
+    Azure.RequestFailedException reqEx when reqEx.Status == 403 =>
+        $"Access denied. Ensure you have appropriate RBAC permissions. Details: {reqEx.Message}",
+    Azure.RequestFailedException reqEx => reqEx.Message,
+    _ => base.GetErrorMessage(ex)
 };
 ```
 
 ### 3. Response Format
-The base `HandleException` combines status, message and details:
+The base `HandleException` method in BaseCommand handles the response formatting:
 ```csharp
 protected virtual void HandleException(CommandContext context, Exception ex)
 {
-    // Create a strongly typed exception result
+    context.Activity?.SetStatus(ActivityStatusCode.Error)?.AddTag(TagName.ErrorDetails, ex.Message);
+
+    var response = context.Response;
     var result = new ExceptionResult(
         Message: ex.Message,
         StackTrace: ex.StackTrace,
         Type: ex.GetType().Name);
 
     response.Status = GetStatusCode(ex);
-    // Add link to troubleshooting guide
-    response.Message = GetErrorMessage(ex) +
-        ". To mitigate this issue, please refer to the troubleshooting guidelines at https://aka.ms/azmcp/troubleshooting.";
-    response.Results = ResponseResult.Create(
-        result, JsonSourceGenerationContext.Default.ExceptionResult);
+    response.Message = GetErrorMessage(ex) + ". To mitigate this issue, please refer to the troubleshooting guidelines here at https://aka.ms/azmcp/troubleshooting.";
+    response.Results = ResponseResult.Create(result, JsonSourceGenerationContext.Default.ExceptionResult);
 }
 ```
+
+Commands should call `HandleException(context, ex)` in their catch blocks.
 
 ### 4. Service-Specific Errors
 Commands should override error handlers to add service-specific mappings:
@@ -692,7 +747,7 @@ catch (Exception ex)
     _logger.LogError(ex,
         "Error in {Operation}. Resource: {Resource}, Options: {@Options}",
         Name, resourceId, options);
-    HandleException(context.Response, ex);
+    HandleException(context, ex);
 }
 ```
 
@@ -1018,6 +1073,170 @@ public class MyCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper o
 
 Failure to call `base.Dispose()` will prevent request and response data from `CallCommand` from being written to failing test results.
 
+## Code Quality and Unused Using Statements
+
+### Preventing Unused Using Statements
+
+Unused using statements are a common issue that clutters code and can lead to unnecessary dependencies. Here are strategies to prevent and detect them:
+
+#### 1. **Use Minimal Using Statements When Creating Files**
+
+When creating new C# files, start with only the using statements you actually need:
+
+```csharp
+// Start minimal - only add what you actually use
+using AzureMcp.Core.Commands;
+using Microsoft.Extensions.Logging;
+
+// Add more using statements as you implement the code
+// Don't copy-paste using blocks from other files
+```
+
+#### 2. **Leverage ImplicitUsings**
+
+The project already has `<ImplicitUsings>enable</ImplicitUsings>` in `Directory.Build.props`, which automatically includes common using statements for .NET 9:
+
+**Implicit Using Statements (automatically included):**
+- `using System;`
+- `using System.Collections.Generic;`
+- `using System.IO;`
+- `using System.Linq;`
+- `using System.Net.Http;`
+- `using System.Threading;`
+- `using System.Threading.Tasks;`
+
+**Don't manually add these - they're already included!**
+
+#### 3. **Detection and Cleanup Commands**
+
+Use these commands to detect and remove unused using statements:
+
+```powershell
+# Format specific area files (recommended during development)
+dotnet format --include="areas/{area-name}/**/*.cs" --verbosity normal
+
+# Format entire solution (use sparingly - takes longer)
+dotnet format ./AzureMcp.sln --verbosity normal
+
+# Check for analyzer warnings including unused usings
+dotnet build --verbosity normal | Select-String "warning"
+```
+
+#### 4. **Common Unused Using Patterns to Avoid**
+
+❌ **Don't copy using blocks from other files:**
+```csharp
+// Copied from another file but not all are needed
+using System.CommandLine;
+using System.CommandLine.Parsing;
+using AzureMcp.Acr.Commands;         // ← May not be needed
+using AzureMcp.Acr.Options;          // ← May not be needed
+using AzureMcp.Acr.Options.Registry; // ← May not be needed
+using AzureMcp.Acr.Services;
+// ... 15 more using statements
+```
+
+✅ **Start minimal and add as needed:**
+```csharp
+// Only what's actually used in this file
+using AzureMcp.Acr.Services;
+using Microsoft.Extensions.Logging;
+```
+
+✅ **Add using statements for better readability:**
+```csharp
+using Azure.ResourceManager.ContainerRegistry.Models;
+
+// Clean and readable - even if used only once
+public ContainerRegistryResource Resource { get; set; }
+
+// This is much better than:
+// public Azure.ResourceManager.ContainerRegistry.Models.ContainerRegistryResource Resource { get; set; }
+```
+
+#### 6. **Integration with Build Process**
+
+The project checklist already includes cleaning up unused using statements:
+
+- [ ] **Remove unnecessary using statements from all C# files** (use IDE cleanup or `dotnet format`)
+
+**Make this part of your development workflow:**
+1. Write code with minimal using statements
+2. Add using statements only as you need them
+3. Run `dotnet format --include="areas/{area-name}/**/*.cs"` before committing
+4. Use IDE features to clean up automatically
+
+## Common Implementation Issues and Solutions
+
+### Service Method Design
+
+**Issue: Inconsistent method signatures across services**
+- **Solution**: Follow established patterns for method signatures with proper parameter alignment
+- **Pattern**:
+```csharp
+// Correct - parameters aligned with line breaks
+Task<List<ResourceModel>> GetResources(
+    string subscription,
+    string? resourceGroup = null,
+    string? tenant = null,
+    RetryPolicyOptions? retryPolicy = null);
+```
+
+**Issue: Wrong subscription resolution pattern**
+- **Solution**: Always use `ISubscriptionService.GetSubscription()` instead of manual ARM client creation
+- **Pattern**:
+```csharp
+// Correct pattern
+var subscriptionResource = await _subscriptionService.GetSubscription(subscription, null, retryPolicy);
+```
+
+### Command Option Patterns
+
+**Issue: Using required ResourceGroup for optional filtering**
+- **Problem**: Commands use `OptionDefinitions.Common.ResourceGroup` (required) when they should support optional resource group filtering
+- **Solution**: Create area-specific optional resource group option
+- **Pattern**:
+```csharp
+// In OptionDefinitions
+public static readonly Option<string> OptionalResourceGroup = new(
+    $"--{OptionDefinitions.Common.ResourceGroupName}",
+    "The name of the Azure resource group."
+)
+{
+    IsRequired = false
+};
+
+// In Command class
+private readonly new Option<string> _resourceGroupOption = {Area}OptionDefinitions.OptionalResourceGroup;
+```
+
+### Error Handling Patterns
+
+**Issue: Generic error handling without service-specific context**
+- **Solution**: Override base error handling methods for better user experience
+- **Pattern**:
+```csharp
+protected override string GetErrorMessage(Exception ex) => ex switch
+{
+    Azure.RequestFailedException reqEx when reqEx.Status == 404 =>
+        "Resource not found. Verify the resource exists and you have access.",
+    Azure.RequestFailedException reqEx when reqEx.Status == 403 =>
+        $"Authorization failed. Details: {reqEx.Message}",
+    _ => base.GetErrorMessage(ex)
+};
+```
+
+**Issue: Missing HandleException call**
+- **Solution**: Always call `HandleException(context, ex)` in command catch blocks
+- **Pattern**:
+```csharp
+catch (Exception ex)
+{
+    _logger.LogError(ex, "Error in {Operation}", Name);
+    HandleException(context, ex);
+}
+```
+
 ## Best Practices
 
 1. Command Structure:
@@ -1131,6 +1350,7 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
 
 1. Do not:
    - **CRITICAL**: Use `subscriptionId` as parameter name - Always use `subscription` to support both IDs and names
+   - **CRITICAL**: Use `OptionDefinitions.Common.ResourceGroup` for optional resource group filtering - Create area-specific `OptionalResourceGroup` with `IsRequired = false`
    - Redefine base class properties in Options classes
    - Skip base.RegisterOptions() call
    - Skip base.Dispose() call
@@ -1146,11 +1366,12 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
 
 2. Always:
    - Create a static {Area}OptionDefinitions class for the area
+   - **For optional resource group filtering**: Create custom `OptionalResourceGroup` option in area's OptionDefinitions with `IsRequired = false`
    - Use OptionDefinitions for options
    - Follow exact file structure
    - Implement all base members
    - Add both unit and integration tests
-   - Register in CommandFactory
+   - Register in area setup RegisterCommands method
    - Handle all error cases
    - Use primary constructors
    - Make command classes sealed
@@ -1159,7 +1380,33 @@ Failure to call `base.Dispose()` will prevent request and response data from `Ca
    - Output resource identifiers from Bicep templates
    - Use concatenated all lowercase names for command groups (no dashes)
 
-## Troubleshooting Common Issues
+### Troubleshooting Common Issues
+
+### Project Setup and Integration Issues
+
+**Issue: Solution file GUID conflicts**
+- **Cause**: Duplicate project GUIDs in the solution file causing build failures
+- **Solution**: Generate unique GUIDs for new projects when adding to `AzureMcp.sln`
+- **Fix**: Use Visual Studio or `dotnet sln add` command to properly add projects with unique GUIDs
+- **Prevention**: Always check for GUID uniqueness when manually editing solution files
+
+**Issue: Missing package references cause compilation errors**
+- **Cause**: Azure Resource Manager package not added to `Directory.Packages.props` before being referenced
+- **Solution**: Add package version to `Directory.Packages.props` first, then reference in project files
+- **Fix**:
+  1. Add `<PackageVersion Include="Azure.ResourceManager.{Service}" Version="{version}" />` to `Directory.Packages.props`
+  2. Add `<PackageReference Include="Azure.ResourceManager.{Service}" />` to project file
+- **Prevention**: Follow the two-step package addition process documented in Implementation Guidelines
+
+**Issue: Test project compilation errors with missing imports**
+- **Cause**: Missing using statements for test frameworks and core libraries
+- **Solution**: Add required imports for test projects:
+  - `using System.Text.Json;` for JSON serialization
+  - `using Xunit;` for test framework
+  - `using NSubstitute;` for mocking
+  - `using AzureMcp.Tests;` for test base classes
+- **Fix**: Review test project template and ensure all necessary imports are included
+- **Prevention**: Use existing test projects as templates for import statements
 
 ### Azure Resource Manager Compilation Errors
 
@@ -1238,9 +1485,32 @@ var subscriptionResource = await _subscriptionService.GetSubscription(subscripti
 
 ### Service Implementation Issues
 
+**Issue: JSON Serialization Context missing new types**
+- **Cause**: New model classes not included in `{Area}JsonContext` causing serialization failures
+- **Solution**: Add all new model types to the JSON serialization context
+- **Fix**: Update `{Area}JsonContext.cs` to include `[JsonSerializable(typeof(NewModelType))]` attributes
+- **Prevention**: Always update JSON context when adding new model classes
+
+**Issue: Area not registered in Program.cs**
+- **Cause**: New area setup not added to `RegisterAreas()` method in `Program.cs`
+- **Solution**: Add area registration to the array in alphabetical order
+- **Fix**: Add `new AzureMcp.{Area}.{Area}Setup(),` to the `RegisterAreas()` return array
+- **Prevention**: Follow the complete area setup checklist including Program.cs registration
+
+**Issue: Using required ResourceGroup option for optional filtering**
+- **Cause**: Using `OptionDefinitions.Common.ResourceGroup` which has `IsRequired = true` for commands that should support optional resource group filtering
+- **Solution**: Create custom optional resource group option in area's OptionDefinitions
+- **Fix**:
+  1. Add `OptionalResourceGroup` option with `IsRequired = false` to `{Area}OptionDefinitions.cs`
+  2. Override base `_resourceGroupOption` field with `new` keyword in command class
+  3. Use the pattern: `private readonly new Option<string> _resourceGroupOption = {Area}OptionDefinitions.OptionalResourceGroup;`
+- **Prevention**: Check if resource group should be optional (e.g., for list commands) and use the optional pattern
+- **Examples**: Extension (AZQR), Monitor (Metrics), and ACR areas all implement this pattern correctly
+
 **Issue: HandleException parameter mismatch**
-- **Cause**: Different base classes have different HandleException signatures
-- **Solution**: Check base class implementation; use `HandleException(context.Response, ex)` not `HandleException(context, ex)`
+- **Cause**: Confusion about the correct HandleException signature
+- **Solution**: Always use `HandleException(context, ex)` - this is the correct signature in BaseCommand
+- **Fix**: The method signature is `HandleException(CommandContext context, Exception ex)`, not `HandleException(context.Response, ex)`
 
 **Issue: Missing AddSubscriptionInformation**
 - **Cause**: Subscription commands need telemetry context
@@ -1263,34 +1533,46 @@ var subscriptionResource = await _subscriptionService.GetSubscription(subscripti
 
 Before submitting:
 
+### Core Implementation
 - [ ] Options class follows inheritance pattern
 - [ ] Command class implements all required members
 - [ ] Command uses proper OptionDefinitions
 - [ ] Service interface and implementation complete
 - [ ] Unit tests cover all paths
 - [ ] Integration tests added
-- [ ] Registered in CommandFactory
+- [ ] Command registered in area setup RegisterCommands method
 - [ ] Follows file structure exactly
 - [ ] Error handling implemented
 - [ ] Documentation complete
+
+### Package and Project Setup
+- [ ] Azure Resource Manager package added to both `Directory.Packages.props` and `AzureMcp.{Area}.csproj`
+- [ ] **Package version consistency**: Same version used in both `Directory.Packages.props` and project references
+- [ ] **Solution file integration**: Projects added to `AzureMcp.sln` with unique GUIDs (no GUID conflicts)
+- [ ] **Area registration**: Added to `Program.cs` `RegisterAreas()` method in alphabetical order
+- [ ] JSON serialization context includes all new model types
+
+### Build and Code Quality
 - [ ] No compiler warnings
 - [ ] Tests pass (run specific tests: `dotnet test --filter "FullyQualifiedName~YourCommandTests"`)
 - [ ] Build succeeds with `dotnet build`
 - [ ] Code formatting applied with `dotnet format`
 - [ ] Spelling check passes with `.\eng\common\spelling\Invoke-Cspell.ps1`
-- [ ] **Remove unnecessary using statements from all C# files** (use IDE cleanup or `dotnet format analyzers`)
-- [ ] Azure Resource Manager package added to both `Directory.Packages.props` and `AzureMcp.{Area}.csproj`
+- [ ] **Clean up unused using statements**: Run `dotnet format --include="areas/{area-name}/**/*.cs"` to remove unnecessary imports and ensure consistent formatting
+- [ ] Fix formatting issues with `dotnet format ./AzureMcp.sln` and ensure no warnings
+
+### Azure SDK Integration
 - [ ] All Azure SDK property names verified and correct
 - [ ] Resource access patterns use collections (e.g., `.GetSqlServers().GetAsync()`)
 - [ ] Subscription resolution uses `ISubscriptionService.GetSubscription()`
 - [ ] Service constructor includes `ISubscriptionService` injection for Azure resources
-- [ ] JSON serialization context includes all new model types
+
+### Test Infrastructure
 - [ ] Live test infrastructure created (`test-resources.bicep` template in `areas/{area-name}/tests`)
 - [ ] Live test resource template test with `./eng/scripts/Deploy-TestResources.ps1 -Area {area-name}`
 - [ ] RBAC permissions configured for test application in Bicep template
 - [ ] Live tests use deployed resources via `Settings.ResourceBaseName` pattern
 - [ ] Resource outputs defined in Bicep template for `test-resources-post.ps1` script consumption
-- [ ] Fix formatting issues with `dotnet format ./AzureMcp.sln` and ensure no warnings
 
 ### Documentation Requirements
 
@@ -1301,6 +1583,7 @@ Before submitting:
 - [ ] **README.md**: Update the supported services table and add example prompts demonstrating the new command(s) in the appropriate area section
 - [ ] **eng/vscode/README.md**: Update the VSIX README with new service area (if applicable) and add sample prompts to showcase new command capabilities
 - [ ] **e2eTests/e2eTestPrompts.md**: Add test prompts for end-to-end validation of the new command(s)
+- [ ] **.github/CODEOWNERS**: Add new area to CODEOWNERS file for proper ownership and review assignments
 
 **Documentation Standards**:
 - Use consistent command paths in all documentation (e.g., `azmcp sql db show`, not `azmcp sql database show`)
@@ -1316,11 +1599,33 @@ Before submitting:
   - Tool Names within each table must be sorted alphabetically
   - When adding new tools, insert them in the correct alphabetical position to maintain sort order
 
-**README.md Table Formatting Standards**:
-- Badge text must use the pattern `Install_{namespace}` (e.g., `Install_storage`, `Install_cosmos`)
-- All badge URLs must use stable `vscode.dev` format with proper URL encoding
-- Use blue badge color `#0098FF` consistently across all install buttons
-- Service descriptions should be concise (under 50 characters), action-oriented, and end with a period
-- Follow the pattern: "Manage/Query/Monitor [what] [and/or additional context]."
-- Examples: "Manage storage accounts and blob data.", "Query AI Search services and indexes."
-- Ensure proper URL encoding in badge links (e.g., `Azure%20Foundry` not `Azure%Foundry`)
+## Summary of Key Improvements to Prevent Common Issues
+
+Based on real implementation experience, this documentation now includes:
+
+### 1. **Project Setup and Integration**
+- **Solution file management**: Clear guidance on GUID conflicts and proper project addition
+- **Package management workflow**: Two-step process (Directory.Packages.props first, then project reference)
+- **Area registration**: Mandatory Program.cs registration step with alphabetical ordering
+
+### 2. **Test Project Requirements**
+- **Import statements**: Specific required using statements for test projects
+- **Test framework setup**: Complete list of necessary dependencies for unit and live tests
+- **Template guidance**: Use existing test projects as templates to avoid missing imports
+
+### 3. **Build Process Optimization**
+- **Incremental testing**: Commands for running specific test classes during development
+- **Build validation**: Step-by-step build verification process
+- **Error resolution**: Specific error patterns and their solutions
+
+### 4. **Azure SDK Integration**
+- **Resource access patterns**: Correct collection-based access methods
+- **Subscription resolution**: Mandatory use of ISubscriptionService for consistency
+- **Property name validation**: Common property naming differences and verification methods
+
+### 5. **Enhanced Checklist**
+- **Categorized requirements**: Organized by implementation phase
+- **Validation steps**: Specific commands and tools for verification
+- **Critical dependencies**: Order-dependent steps clearly marked
+
+These improvements address the most common issues encountered during new area implementation and provide clear prevention strategies for future developers.

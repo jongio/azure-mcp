@@ -4,6 +4,8 @@
 
 ### Features Added
 
+- Added Azure Container Registry (ACR) area with `azmcp acr registry list` command to list container registries in a subscription, with optional resource group filtering. [[#XXX](https://github.com/Azure/azure-mcp/issues/XXX)]
+
 ### Breaking Changes
 
 - Storage: `azmcp-storage-account-list` now returns account metadata objects instead of plain strings. Each item includes:
