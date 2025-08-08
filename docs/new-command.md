@@ -1498,6 +1498,36 @@ var subscriptionResource = await _subscriptionService.GetSubscription(subscripti
 - **Solution**:
   - Review deployment logs and error messages
   - Use `./eng/scripts/Deploy-TestResources.ps1 -Area {area-name} -Debug` for verbose deployment logs including resource provider errors.
+
+### Live Test Project Configuration Issues
+
+**Issue: Live tests fail with "MCP server process exited unexpectedly" and "azmcp.exe not found"**
+- **Cause**: Incorrect project configuration in `AzureMcp.{Area}.LiveTests.csproj`
+- **Common Problem**: Referencing the area project (`AzureMcp.{Area}`) instead of the CLI project
+- **Solution**: Live test projects must reference `AzureMcp.Cli.csproj` and include specific project properties
+- **Required Configuration**:
+  ```xml
+  <Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+      <TargetFramework>net9.0</TargetFramework>
+      <ImplicitUsings>enable</ImplicitUsings>
+      <Nullable>enable</Nullable>
+      <IsPackable>false</IsPackable>
+      <IsTestProject>true</IsTestProject>
+      <OutputType>Exe</OutputType>
+    </PropertyGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\..\src\AzureMcp.{Area}\AzureMcp.{Area}.csproj" />
+      <ProjectReference Include="..\..\..\..\core\src\AzureMcp.Cli\AzureMcp.Cli.csproj" />
+    </ItemGroup>
+  </Project>
+  ```
+- **Key Requirements**:
+  - `OutputType=Exe` - Required for live test execution
+  - `IsTestProject=true` - Marks as test project
+  - Reference to `AzureMcp.Cli.csproj` - Provides the executable for MCP server
+  - Reference to area project - Provides the commands to test
 - **Common fixes**:
   - Adjust `@minLength`/`@maxLength` for service naming limits
   - Ensure unique resource names within scope
@@ -1583,6 +1613,10 @@ Before submitting:
 - [ ] **Bicep template validated** with `az bicep build --file areas/{area-name}/tests/test-resources.bicep`
 - [ ] **Live test resource template tested** with `./eng/scripts/Deploy-TestResources.ps1 -Area {area-name}`
 - [ ] **RBAC permissions configured** for test application in Bicep template (use appropriate built-in roles)
+- [ ] **Live test project configuration correct**:
+  - [ ] References `AzureMcp.Cli.csproj` (not just the area project)
+  - [ ] Includes `OutputType=Exe` property
+  - [ ] Includes `IsTestProject=true` property
 - [ ] **Live tests use deployed resources** via `Settings.ResourceBaseName` pattern
 - [ ] **Resource outputs defined** in Bicep template for test consumption
 - [ ] **Cost optimization verified** (use Basic/Standard SKUs, minimal configurations)
