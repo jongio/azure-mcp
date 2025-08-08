@@ -334,8 +334,8 @@ This file contains prompts used for end-to-end testing to ensure each tool is in
 |:----------|:----------|
 | azmcp-deploy-plan-get | Create a plan to deploy this application to azure |
 | azmcp-deploy-iac-rules-get | Show me the rules to generate bicep scripts  |
-| azmcp-deploy-azd-app-log-get | Show me the log of the application deployed by azd  |
-| azmcp-deploy-cicd-pipeline-guidance-get | How can I create a CI/CD pipeline to deploy this app to Azure? |
+| azmcp-deploy-app-logs-get | Show me the log of the application deployed by azd  |
+| azmcp-deploy-pipeline-guidance-get | How can I create a CI/CD pipeline to deploy this app to Azure? |
 | azmcp-deploy-architecture-diagram-generate | Generate the azure architecture diagram for this application |
 
 ## Quota

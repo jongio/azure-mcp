@@ -17,7 +17,7 @@ public sealed class DiagramGenerateCommand(ILogger<DiagramGenerateCommand> logge
     private const string CommandTitle = "Generate Architecture Diagram";
     private readonly ILogger<DiagramGenerateCommand> _logger = logger;
 
-    public override string Name => "diagram";
+    public override string Name => "generate";
 
     private readonly Option<string> _rawMcpToolInputOption = DeployOptionDefinitions.RawMcpToolInput.RawMcpToolInputOption;
 

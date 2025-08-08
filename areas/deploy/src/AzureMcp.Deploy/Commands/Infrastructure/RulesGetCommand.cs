@@ -21,7 +21,7 @@ public sealed class RulesGetCommand(ILogger<RulesGetCommand> logger)
     private readonly Option<string> _iacTypeOption = DeployOptionDefinitions.IaCRules.IacType;
     private readonly Option<string> _resourceTypesOption = DeployOptionDefinitions.IaCRules.ResourceTypes;
 
-    public override string Name => "rules";
+    public override string Name => "get";
     public override string Title => CommandTitle;
     public override ToolMetadata Metadata => new() { Destructive = false, ReadOnly = true };
 

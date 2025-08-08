@@ -22,7 +22,7 @@ public sealed class AvailabilityListCommand(ILogger<AvailabilityListCommand> log
     private readonly Option<string> _cognitiveServiceModelVersionOption = QuotaOptionDefinitions.RegionCheck.CognitiveServiceModelVersion;
     private readonly Option<string> _cognitiveServiceDeploymentSkuNameOption = QuotaOptionDefinitions.RegionCheck.CognitiveServiceDeploymentSkuName;
 
-    public override string Name => "availability";
+    public override string Name => "list";
 
     public override string Description =>
         """

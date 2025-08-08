@@ -22,7 +22,7 @@ public sealed class GuidanceGetCommand(ILogger<GuidanceGetCommand> logger)
     private readonly Option<string> _repositoryNameOption = DeployOptionDefinitions.PipelineGenerateOptions.RepositoryName;
     private readonly Option<string> _githubEnvironmentNameOption = DeployOptionDefinitions.PipelineGenerateOptions.GithubEnvironmentName;
 
-    public override string Name => "guidance";
+    public override string Name => "get";
 
     public override string Description =>
         """

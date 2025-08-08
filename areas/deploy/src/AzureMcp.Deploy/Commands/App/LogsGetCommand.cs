@@ -20,7 +20,7 @@ public sealed class LogsGetCommand(ILogger<LogsGetCommand> logger) : Subscriptio
     private readonly Option<string> _azdEnvNameOption = DeployOptionDefinitions.AzdAppLogOptions.AzdEnvName;
     private readonly Option<int> _limitOption = DeployOptionDefinitions.AzdAppLogOptions.Limit;
 
-    public override string Name => "logs";
+    public override string Name => "get";
     public override string Title => CommandTitle;
     public override ToolMetadata Metadata => new() { Destructive = false, ReadOnly = true };
 
