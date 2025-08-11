@@ -15,8 +15,10 @@ using AzureMcp.Storage.Commands.Table;
 namespace AzureMcp.Storage.Commands;
 
 [JsonSerializable(typeof(BlobListCommand.BlobListCommandResult))]
+[JsonSerializable(typeof(BlobDetailsCommand.BlobDetailsCommandResult))]
 [JsonSerializable(typeof(BatchSetTierCommand.BatchSetTierCommandResult))]
 [JsonSerializable(typeof(AccountListCommand.AccountListCommandResult), TypeInfoPropertyName = "AccountListCommandResult")]
+[JsonSerializable(typeof(AccountCreateCommand.AccountCreateCommandResult), TypeInfoPropertyName = "AccountCreateCommandResult")]
 [JsonSerializable(typeof(TableListCommand.TableListCommandResult))]
 [JsonSerializable(typeof(ContainerListCommand.ContainerListCommandResult))]
 [JsonSerializable(typeof(ContainerDetailsCommand.ContainerDetailsCommandResult))]
