@@ -35,8 +35,8 @@ public class AcrCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper 
     }
 
     [Theory]
-    [InlineData("--invalid-param")]
-    [InlineData("--subscription invalidSub")]
+    [InlineData("--subscription invalidSub --invalid-param oops")] // unknown option triggers parse error; subscription present
+    [InlineData("--subscription invalidSub")] // present but invalid value => handled during execution
     public async Task Should_Return400_WithInvalidInput(string args)
     {
         var result = await CallToolAsync(
@@ -44,7 +44,6 @@ public class AcrCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper 
             ParseArguments(args));
 
         Assert.NotNull(result);
-        // For invalid input, we expect either null result or specific error handling
     }
 
     private static Dictionary<string, object?> ParseArguments(string args)
