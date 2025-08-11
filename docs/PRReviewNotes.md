@@ -11,7 +11,7 @@ This report reviews PR #626 against the guidance in `docs/PR-626-Final-Recommend
 - [ ] AOT/trimming safety validated (no RequiresDynamicCode violations)
 - [ ] Uses System.Text.Json (no Newtonsoft)
 - [ ] Tests updated and sufficient coverage
-- [ ] Documentation updated (commands and prompts)  
+- [ ] Documentation updated (commands and prompts)
   Note: No migration-from-legacy section is required; we only document the new hierarchical structure.
 - [ ] CHANGELOG and spelling checks updated
 

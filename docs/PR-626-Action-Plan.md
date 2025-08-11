@@ -107,6 +107,7 @@ This plan consolidates concrete follow-ups to take PR #626 from “draft” to �
 - Build: `dotnet build` and `./eng/scripts/Build-Local.ps1 -UsePaths -VerifyNpx` pass
 - Spelling: `./eng/common/spelling/Invoke-Cspell.ps1` clean
 - Tests: unit + live tests pass, including new edge cases
+- Manual E2E: execute all prompts in `docs/PR-626-Manual-Testing-Plan.md` (Deploy + Quota features from PR #626 only). Record pass/fail notes; all must pass. Create issues for any failures and cross-link to this document and PR #626.
 - Help/smoke: `azmcp deploy --help` and `azmcp quota --help` show expected hierarchy; examples are copyable and correct
 - Docs: CHANGELOG and azmcp-commands updated
 
