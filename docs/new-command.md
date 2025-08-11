@@ -1188,6 +1188,70 @@ The project checklist already includes cleaning up unused using statements:
 3. Run `dotnet format --include="areas/{area-name}/**/*.cs"` before committing
 4. Use IDE features to clean up automatically
 
+### Build Verification and AOT Compatibility
+
+After implementing your commands, verify that your implementation works correctly with both regular builds and AOT (Ahead-of-Time) compilation:
+
+**1. Regular Build Verification:**
+```powershell
+# Build the solution
+dotnet build
+
+# Run specific tests
+dotnet test --filter "FullyQualifiedName~YourCommandTests"
+```
+
+**2. AOT Compilation Verification:**
+
+AOT (Ahead-of-Time) compilation is required for all new areas to ensure compatibility with native builds:
+
+```powershell
+# Test AOT compatibility - this is REQUIRED for all new areas
+./eng/scripts/Build-Local.ps1 -BuildNative
+```
+
+**Expected Outcome**: If your area is properly implemented, the build should succeed. However, if AOT compilation fails (which is very likely for new areas), follow these steps:
+
+**3. AOT Compilation Issue Resolution:**
+
+When AOT compilation fails for your new area, you need to exclude it from native builds:
+
+**Step 1: Move area setup under BuildNative condition in Program.cs**
+```csharp
+// Find your area setup call in Program.cs
+// Move it inside the #if !BUILD_NATIVE block
+
+#if !BUILD_NATIVE
+    // ... other area setups ...
+    builder.Services.Add{YourArea}Setup();  // ← Move this line here
+#endif
+```
+
+**Step 2: Add ProjectReference-Remove condition in AzureMcp.Cli.csproj**
+```xml
+<!-- Add this to core/src/AzureMcp.Cli/AzureMcp.Cli.csproj -->
+<ItemGroup Condition="'$(BuildNative)' == 'true'">
+  <ProjectReference Remove="..\..\areas\{area-name}\src\AzureMcp.{AreaName}\AzureMcp.{AreaName}.csproj" />
+</ItemGroup>
+```
+
+**Step 3: Verify the fix**
+```powershell
+# Test that AOT compilation now succeeds
+./eng/scripts/Build-Local.ps1 -BuildNative
+
+# Verify regular build still works
+dotnet build
+```
+
+**Why AOT Compilation Often Fails:**
+- Azure SDK libraries may not be fully AOT-compatible
+- Reflection-based operations in service implementations
+- Third-party dependencies that don't support AOT
+- Dynamic JSON serialization without source generators
+
+**Important**: This is a common and expected issue for new Azure service areas. The exclusion pattern is the standard solution and doesn't impact regular builds or functionality.
+
 ## Common Implementation Issues and Solutions
 
 ### Service Method Design
@@ -1597,6 +1661,35 @@ var subscriptionResource = await _subscriptionService.GetSubscription(subscripti
 **Issue: Missing using statements for TrimAnnotations**
 - **Solution**: Add `using AzureMcp.Core.Commands;` for `TrimAnnotations.CommandAnnotations`
 
+### AOT Compilation Issues
+
+**Issue: AOT compilation fails with runtime dependencies**
+- **Cause**: Some Azure SDK packages or dependencies are not AOT (Ahead-of-Time) compilation compatible
+- **Symptoms**: Build errors when running `./eng/scripts/Build-Local.ps1 -BuildNative`
+- **Solution**: Exclude non-AOT safe projects and packages for native builds
+- **Fix Steps**:
+  1. **Move area setup under conditional compilation** in `core/src/AzureMcp.Cli/Program.cs`:
+     ```csharp
+     #if !BUILD_NATIVE
+         new AzureMcp.{Area}.{Area}Setup(),
+     #endif
+     ```
+  2. **Add conditional project exclusion** in `core/src/AzureMcp.Cli/AzureMcp.Cli.csproj`:
+     ```xml
+     <ItemGroup Condition="'$(BuildNative)' == 'true'">
+       <ProjectReference Remove="..\..\..\areas\{area-name}\src\AzureMcp.{Area}\AzureMcp.{Area}.csproj" />
+     </ItemGroup>
+     ```
+  3. **Remove problematic package references** when building native (if applicable):
+     ```xml
+     <ItemGroup Condition="'$(BuildNative)' == 'true'">
+       <PackageReference Remove="ProblematicPackage" />
+     </ItemGroup>
+     ```
+- **Examples**: See Cosmos, Monitor, Postgres, Search, VirtualDesktop, and BicepSchema areas in Program.cs and AzureMcp.Cli.csproj
+- **Prevention**: Test AOT compilation early in development using `./eng/scripts/Build-Local.ps1 -BuildNative`
+- **Note**: Areas excluded from AOT builds are still available in regular builds and deployments
+
 ## Checklist
 
 Before submitting:
@@ -1645,6 +1738,7 @@ Before submitting:
 - [ ] Build succeeds with `dotnet build`
 - [ ] Code formatting applied with `dotnet format`
 - [ ] Spelling check passes with `.\eng\common\spelling\Invoke-Cspell.ps1`
+- [ ] **AOT compilation verified** with `./eng/scripts/Build-Local.ps1 -BuildNative`
 - [ ] **Clean up unused using statements**: Run `dotnet format --include="areas/{area-name}/**/*.cs"` to remove unnecessary imports and ensure consistent formatting
 - [ ] Fix formatting issues with `dotnet format ./AzureMcp.sln` and ensure no warnings
 

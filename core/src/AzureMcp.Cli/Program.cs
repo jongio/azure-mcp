@@ -63,7 +63,6 @@ internal class Program
             new AzureMcp.Core.Areas.Tools.ToolsSetup(),
 
             // Register Azure service areas
-            new AzureMcp.Acr.AcrSetup(),
             new AzureMcp.Aks.AksSetup(),
             new AzureMcp.AppConfig.AppConfigSetup(),
             new AzureMcp.Authorization.AuthorizationSetup(),
@@ -81,6 +80,7 @@ internal class Program
             new AzureMcp.AzureTerraformBestPractices.AzureTerraformBestPracticesSetup(),
             new AzureMcp.LoadTesting.LoadTestingSetup(),
 #if !BUILD_NATIVE
+            new AzureMcp.Acr.AcrSetup(),
             new AzureMcp.BicepSchema.BicepSchemaSetup(),
             new AzureMcp.Cosmos.CosmosSetup(),
             new AzureMcp.Monitor.MonitorSetup(),
