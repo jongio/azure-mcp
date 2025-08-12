@@ -81,10 +81,6 @@ public sealed class DiagramGenerateCommand(ILogger<DiagramGenerateCommand> logge
             {
                 throw new InvalidOperationException("Failed to generate architecture diagram. The chart content is empty.");
             }
-            var encodedDiagram = EncodeMermaid.GetEncodedMermaidChart(chart).Replace("+", "-").Replace("/", "_"); // replace '+' with '-' and "/" with "_" for URL safety and consistency with mermaid.live URL encoding
-
-            var mermaidUrl = $"https://mermaid.live/view#pako:{encodedDiagram}";
-            _logger.LogInformation("Generated architecture diagram successfully. Mermaid URL: {MermaidUrl}", mermaidUrl);
 
             var usedServiceTypes = appTopology.Services
                 .SelectMany(service => service.Dependencies)
@@ -99,8 +95,8 @@ public sealed class DiagramGenerateCommand(ILogger<DiagramGenerateCommand> logge
                 ? string.Join(", ", usedServiceTypes)
                 : null;
 
-            context.Response.Message = $"Help the user open up this URI to preview their app topology using tool open_simple_browser: {mermaidUrl} \n"
-                + "Ask user if the topology is expected, if not, you should call this tool with the user's updated instructions. "
+            context.Response.Message = $"Here is the user's mermaid diagram. Please write this into .azure/architecture.copilot.md. Make changes if these do not fulfill requirements:\n ```mermaid\n{chart}\n``` \n"
+                + "Ask user if the topology is expected, if not, you should directly update the generated diagram with the user's updated instructions. Remind the user to install a Mermaid preview extension to be able to render the diagram. "
                 + "Please inform the user that here are the supported hosting technologies: "
                 + $"{string.Join(", ", Enum.GetNames<AzureServiceConstants.AzureComputeServiceType>())}. ";
             if (!string.IsNullOrWhiteSpace(usedServiceTypesString))

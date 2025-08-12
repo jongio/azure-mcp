@@ -3,6 +3,7 @@
 
 using System.Collections.Immutable;
 using System.Text;
+using Azure.ResourceManager.Network.Models;
 using AzureMcp.Deploy.Options;
 using Microsoft.Extensions.ObjectPool;
 
@@ -13,6 +14,9 @@ public static class GenerateMermaidChart
     // used to create a subgraph for AKS cluster in the chart
     private const string aksClusterInternalName = "akscluster";
     private const string aksClusterName = "Azure Kubernetes Service (AKS) Cluster";
+
+    private const string acaEnvInternalName = "acaenvironment";
+    private const string acaEnvName = "Azure Container Apps Environment";
 
     public static string GenerateChart(string workspaceFolder, AppTopology appTopology)
     {
@@ -32,7 +36,8 @@ public static class GenerateMermaidChart
         }
 
         var services = new List<string> { "%% Services" };
-        var resources = new List<string> { "%% Resources" };
+        var resources = new List<string> { "%% Compute Resources" };
+        var dependencyResources = new List<string> { "%% Binding Resources" };
         var relationships = new List<string> { "%% Relationships" };
 
         foreach (var service in appTopology.Services)
@@ -56,12 +61,14 @@ public static class GenerateMermaidChart
 
             var serviceInternalName = $"svc-{service.Name}";
 
-            services.Add(CreateComponentName(serviceInternalName, string.Join("\n", serviceName), "service", NodeShape.Rectangle));
+            services.Add(CreateComponentName(serviceInternalName, string.Join("\n", serviceName), NodeShape.Rectangle));
 
             relationships.Add(CreateRelationshipString(serviceInternalName, $"{FlattenServiceType(service.AzureComputeHost)}_{service.Name}", "hosted on", ArrowType.Solid));
         }
 
         var aksClusterExists = false;
+        var containerAppEnvExists = false;
+
         foreach (var service in appTopology.Services)
         {
             string serviceResourceInternalName = $"{FlattenServiceType(service.AzureComputeHost)}_{service.Name}";
@@ -74,18 +81,34 @@ public static class GenerateMermaidChart
                     // containerized services share the same AKS cluster
                     foreach (var aksservice in appTopology.Services.Where(s => s.AzureComputeHost == "aks"))
                     {
-                        resources.Add(CreateComponentName($"{aksservice.AzureComputeHost}_{aksservice.Name}", $"{aksservice.Name} (Containerized Service)", "compute", NodeShape.RoundedRectangle));
+                        resources.Add(CreateComponentName($"{aksservice.AzureComputeHost}_{aksservice.Name}", $"{aksservice.Name} (Containerized Service)", NodeShape.RoundedRectangle));
                     }
                     resources.Add("end");
                     resources.Add($"{aksClusterInternalName}:::cluster");
                     aksClusterExists = true;
                 }
             }
+            else if (service.AzureComputeHost == "containerapp")
+            {
+                if (!containerAppEnvExists)
+                {
+                    // Add Container App Environment as a subgraph
+                    resources.Add($"subgraph {acaEnvInternalName} [\"{acaEnvName}\"]");
+                    // containerized services share the same Container App Environment
+                    foreach (var containerAppService in appTopology.Services.Where(s => s.AzureComputeHost == "containerapp"))
+                    {
+                        resources.Add(CreateComponentName($"{containerAppService.AzureComputeHost}_{containerAppService.Name}", $"{containerAppService.Name} (Container App)", NodeShape.RoundedRectangle));
+                    }
+                    resources.Add("end");
+                    containerAppEnvExists = true;
+                }
+            }
             // each service should have a compute resource type
             else if (!resources.Any(r => r.Contains(serviceResourceInternalName)))
             {
-                resources.Add(CreateComponentName(serviceResourceInternalName, $"{service.Name} ({GetFormalName(service.AzureComputeHost)})", "compute", NodeShape.RoundedRectangle));
+                resources.Add(CreateComponentName(serviceResourceInternalName, $"{service.Name} ({GetFormalName(service.AzureComputeHost)})", NodeShape.RoundedRectangle));
             }
+
             foreach (var dependency in service.Dependencies)
             {
                 var instanceInternalName = $"{FlattenServiceType(dependency.ServiceType)}.{dependency.Name}";
@@ -95,12 +118,12 @@ public static class GenerateMermaidChart
                 {
                     if (!resources.Any(r => r.Contains(EnsureUrlFriendlyName(instanceInternalName))))
                     {
-                        resources.Add(CreateComponentName(instanceInternalName, instanceName, "compute", NodeShape.RoundedRectangle));
+                        resources.Add(CreateComponentName(instanceInternalName, instanceName, NodeShape.RoundedRectangle));
                     }
                 }
                 else
                 {
-                    resources.Add(CreateComponentName(instanceInternalName, instanceName, "binding", NodeShape.Circle));
+                    dependencyResources.Add(CreateComponentName(instanceInternalName, instanceName, NodeShape.Rectangle));
                 }
 
                 relationships.Add(CreateRelationshipString(serviceResourceInternalName, instanceInternalName, dependency.ConnectionType, ArrowType.Dotted));
@@ -109,15 +132,25 @@ public static class GenerateMermaidChart
 
         chartComponents.AddRange(services);
         chartComponents.AddRange(resources);
+
+
+        chartComponents.Add("subgraph \"Compute Resources\"");
+        chartComponents.AddRange(resources);
+        chartComponents.Add("end");
+
+        chartComponents.Add("subgraph \"Dependency Resources\"");
+        chartComponents.AddRange(dependencyResources);
+        chartComponents.Add("end");
+
         chartComponents.AddRange(relationships);
 
         return string.Join("\n", chartComponents);
     }
 
-    private static string CreateComponentName(string internalName, string name, string type, NodeShape nodeShape)
+    private static string CreateComponentName(string internalName, string name, NodeShape nodeShape)
     {
         var nodeShapeBrackets = GetNodeShapeBrackets(nodeShape);
-        return $"{EnsureUrlFriendlyName(internalName)}{nodeShapeBrackets[0]}\"`{name}`\"{nodeShapeBrackets[1]}:::{type}";
+        return $"{EnsureUrlFriendlyName(internalName)}{nodeShapeBrackets[0]}\"`{name}`\"{nodeShapeBrackets[1]}";
     }
 
     private static string CreateRelationshipString(string sourceName, string targetName, string connectionDescription, ArrowType arrowType)
@@ -200,7 +233,6 @@ public static class GenerateMermaidChart
         { "azureservicebus", "Azure Service Bus" },
         { "azurewebpubsub", "Azure Web PubSub"}
     };
-
 }
 
 public enum NodeShape
