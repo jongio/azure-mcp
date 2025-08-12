@@ -12,53 +12,57 @@ This plan consolidates concrete follow-ups to take PR #626 from “draft” to �
 ## P0 (must complete before merge)
 
 - Naming, descriptions, and docs
-  - [ ] CHANGELOG: switch examples to hierarchical CLI usage (e.g., `azmcp deploy plan get`, `azmcp quota region availability list`), optionally keep MCP tool ids in a separate subsection
-  - [ ] Remove any legacy/hyphenated names from command group descriptions and help
+  - [x] CHANGELOG: switch examples to hierarchical CLI usage (e.g., `azmcp deploy plan get`, `azmcp quota region availability list`), optionally keep MCP tool ids in a separate subsection
+  - [x] Remove any legacy/hyphenated names from command group descriptions and help
     - Files:
       - DeploySetup.cs: https://github.com/qianwens/azure-mcp/blob/qianwen/deploy/areas/deploy/src/AzureMcp.Deploy/DeploySetup.cs#L26-L31
       - QuotaSetup.cs: https://github.com/qianwens/azure-mcp/blob/qianwen/deploy/areas/quota/src/AzureMcp.Quota/QuotaSetup.cs#L23-L27
-  - [ ] docs/azmcp-commands.md: ensure examples match current hierarchy; fix duplicated token cases.
+  - [x] docs/azmcp-commands.md: ensure examples match current hierarchy; fix duplicated token cases.
     - Quota usage example (approx lines): https://github.com/qianwens/azure-mcp/blob/qianwen/deploy/docs/azmcp-commands.md#L897-L905
     - Quota region availability example (approx lines): https://github.com/qianwens/azure-mcp/blob/qianwen/deploy/docs/azmcp-commands.md#L902-L908
     - Deploy section header (approx line): https://github.com/qianwens/azure-mcp/blob/qianwen/deploy/docs/azmcp-commands.md#L909
     - Deploy app logs example (approx lines): https://github.com/qianwens/azure-mcp/blob/qianwen/deploy/docs/azmcp-commands.md#L924-L929
 
 - Repo hygiene and gates
-  - [ ] Run spelling: `./eng/common/spelling/Invoke-Cspell.ps1` and fix findings
-  - [ ] Run local verification: `./eng/scripts/Build-Local.ps1 -UsePaths -VerifyNpx` and fix issues
-  - [ ] Ensure `dotnet build AzureMcp.sln` passes cleanly (warnings-as-errors respected)
+  - [x] Run spelling: `./eng/common/spelling/Invoke-Cspell.ps1` and fix findings
+  - [x] Run local verification: `./eng/scripts/Build-Local.ps1 -UsePaths -VerifyNpx` and fix issues
+  - [x] Ensure `dotnet build AzureMcp.sln` passes cleanly (warnings-as-errors respected)
 
 - Robustness and platform compliance
-  - [ ] Add `CancellationToken` plumbing to long-running operations (logs, region/usage queries) and propagate from commands to services
-  - [ ] Replace `Console.WriteLine` usages with `ILogger` (structured, leveled logging)
-  - [ ] Replace static `HttpClient` with `IHttpClientFactory` via DI for direct REST calls
-  - [ ] Ensure sovereign cloud support: avoid hard-coded `https://management.azure.com`; prefer ARM SDK or derive authority from `ArmEnvironment` for PostgreSQL usage checker
-  - [ ] Verify consistent exit codes and clear, actionable error messages
+  - [x] Add `CancellationToken` plumbing to long-running operations (logs, region/usage queries) and propagate from commands to services
+  - [x] Replace `Console.WriteLine` usages with `ILogger` (structured, leveled logging)
+  - [x] Replace static `HttpClient` with `IHttpClientFactory` via DI for direct REST calls
+  - [x] Ensure sovereign cloud support: avoid hard-coded `https://management.azure.com`; prefer ARM SDK or derive authority from `ArmEnvironment` for PostgreSQL usage checker
+  - [x] Verify consistent exit codes and clear, actionable error messages
 
 ## P1 (should complete for maintainability)
 
 - Integration and abstraction
-  - [ ] Introduce an interface (e.g., `IAppLogService`/`IAzdLogService`) and put current logs implementation behind it
-  - [ ] Add a short deprecation note in code/docs indicating intent to delegate to `azd` native logs when available; plan to route via extension service (e.g., `IAzdService`)
+  - [x] Introduce an interface (e.g., `IAppLogService`/`IAzdLogService`) and put current logs implementation behind it
+  **The command will be replaced by azd extension command so no need to refactor to call azd**
+  - [x] Add a short deprecation note in code/docs indicating intent to delegate to `azd` native logs when available; plan to route via extension service (e.g., `IAzdService`)
 
 - Tests and schemas
-  - [ ] Diagram command: add tests for malformed/invalid `raw-mcp-tool-input` and oversize payload handling (safe URL limits)
-  - [ ] Quota commands: add tests for empty/whitespace resource types, mixed casing, and very long lists
-  - [ ] Add JSON round-trip tests to prove STJ source-gen coverage (no reflection fallback)
+  - [x] Diagram command: add tests for malformed/invalid `raw-mcp-tool-input` and oversize payload handling (safe URL limits)
+  - [x] Quota commands: add tests for empty/whitespace resource types, mixed casing, and very long lists
+  - [x] Add JSON round-trip tests to prove STJ source-gen coverage (no reflection fallback)
 
 - Documentation polish
-  - [ ] Per-command help examples (include one example with `raw-mcp-tool-input`)
-  - [ ] Troubleshooting notes (auth, timeouts, diagram URL length)
+  - [x] Per-command help examples (include one example with `raw-mcp-tool-input`)
+  **Schema is defined in the description of the command**
+  - [x] Troubleshooting notes (auth, timeouts, diagram URL length)
 
 ## P2 (nice to have)
 
 - Performance and caching
-  - [ ] Cache region availability results per subscription/provider (short TTL) to reduce redundant queries
-  - [ ] Cache embedded templates in `TemplateService`
+  - [x] Cache region availability results per subscription/provider (short TTL) to reduce redundant queries
+  **As this is a local tool, caching is not needed**
+  - [x] Cache embedded templates in `TemplateService`
+  **As this is a local tool, caching is not needed**
 
 - UX and contracts
-  - [ ] Optional `--verbose` flag following repo logging conventions
-  - [ ] Document output contracts (shape, casing) and link JSON schemas in docs
+  - [x] Optional `--verbose` flag following repo logging conventions
+  - [x] Document output contracts (shape, casing) and link JSON schemas in docs
 
 ## File-level edits (suggested targets)
 
@@ -98,9 +102,9 @@ This plan consolidates concrete follow-ups to take PR #626 from “draft” to �
 
 ## AOT/trimming and cloud checks
 
-- [ ] Run `eng/scripts/Analyze-AOT-Compact.ps1`; resolve any warnings (linker config if needed)
-- [ ] Ensure only System.Text.Json is used and DTOs are covered by source-gen contexts
-- [ ] Confirm usage of Azure SDK defaults (retries/timeouts) and respect cloud/authority from environment (sovereign-ready)
+- [x] Run `eng/scripts/Analyze-AOT-Compact.ps1`; resolve any warnings (linker config if needed)
+- [x] Ensure only System.Text.Json is used and DTOs are covered by source-gen contexts
+- [x] Confirm usage of Azure SDK defaults (retries/timeouts) and respect cloud/authority from environment (sovereign-ready)
 
 ## Validation checklist (green-before-merge)
 
