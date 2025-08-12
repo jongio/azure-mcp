@@ -24,12 +24,6 @@ public static class GenerateMermaidChart
 
         chartComponents.Add("graph TD");
 
-        chartComponents.Add("""
-            %% Define styles
-                classDef service fill:#50e5ff,stroke:#333,stroke-width:2px,color:#000
-                classDef compute fill:#9cf00b,stroke:#333,stroke-width:2px,color:#000
-                classDef binding fill:#fef200,stroke:#333,stroke-width:2px,color:#000
-            """);
         if (appTopology.Services.Any(s => s.AzureComputeHost == "aks"))
         {
             chartComponents.Add("classDef cluster fill:#ffffd0,stroke:#333,stroke-width:2px,color:#000");
