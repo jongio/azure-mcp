@@ -70,3 +70,70 @@ Notes
 48. Produce a deployment diagram highlighting ingress, app services/containers, and storage.
 49. Draw a diagram including a queue-based worker, the API, and a public web frontend.
 50. Generate a diagram for a microservices layout with internal service-to-service calls and a shared VNet.
+
+## Test Execution Log (Populate During Manual Run)
+
+Instructions
+- For each prompt, after executing via Copilot, mark Pass (✔) or Fail (✖). Leave the other column blank.
+- If a test is blocked (environment/setup), write BLOCKED in Notes with reason.
+- If Fail, include the observed command/tool invocation (or absence) and error snippet.
+- Use additional rows if you repeat a prompt under different conditions (append .1, .2 to ID).
+
+| # | Prompt Summary | Pass | Fail | Notes |
+|---|----------------|------|------|-------|
+| 1 | Quota usage VM eastus specific sub + resource type | | | |
+| 2 | VM quota westus2 default subscription | | | |
+| 3 | Quota ContainerRegistry eastus2 | | | |
+| 4 | App Service plan quotas centralus | | | |
+| 5 | GPU VM (Standard_NC) quota eastus | | | |
+| 6 | Compute/network/storage quotas eastus+westus | | | |
+| 7 | Validate deploy 50 D4s_v5 eastus | | | |
+| 8 | Functions quota westus consumption/premium | | | |
+| 9 | Public IP quota canadacentral | | | |
+| 10 | PostgreSQL flexible servers westeurope | | | |
+| 11 | Regions support virtualMachines | | | |
+| 12 | Regions Container Apps | | | |
+| 13 | Regions PostgreSQL Flexible Server | | | |
+| 14 | Regions Premium SSD v2 disks | | | |
+| 15 | Regions Azure OpenAI | | | |
+| 16 | Regions AKS availability + restrictions | | | |
+| 17 | Regions App Service Linux plans | | | |
+| 18 | Regions Cognitive Services vision | | | |
+| 19 | Regions VM Availability Zones support | | | |
+| 20 | Regions zone-redundant Container Apps env | | | |
+| 21 | Deployment plan .NET web app | | | |
+| 22 | Plan Node.js API + React frontend | | | |
+| 23 | Plan microservices 5 containers + Postgres | | | |
+| 24 | Plan FastAPI + static web | | | |
+| 25 | Cost-optimized MVP scalable | | | |
+| 26 | HIPAA-aware plan PHI | | | |
+| 27 | Multi-env dev/stage/prod separation | | | |
+| 28 | Background worker + queue + public API | | | |
+| 29 | No IaC simplest azd path | | | |
+| 30 | High traffic 100k DAU with CDN autoscale | | | |
+| 31 | Review Bicep infra best practices | | | |
+| 32 | Inspect Terraform Azure improvements | | | |
+| 33 | Baseline IaC rules security/tagging/naming | | | |
+| 34 | Secrets & connection strings in IaC | | | |
+| 35 | IaC rules multi-region DR | | | |
+| 36 | CI/CD guidance GitHub .NET API | | | |
+| 37 | Azure DevOps pipeline container app | | | |
+| 38 | Monorepo pipeline independent services | | | |
+| 39 | Pipeline secrets/env vars/approvals | | | |
+| 40 | CI/CD PR build test deploy on merge | | | |
+| 41 | App logs dev env API last 30m | | | |
+| 42 | Logs worker staging diagnose timeouts | | | |
+| 43 | Error-only logs web frontend 1h | | | |
+| 44 | Combined logs all services prod | | | |
+| 45 | Exceptions database connectivity 24h | | | |
+| 46 | Diagram web + API + database | | | |
+| 47 | Diagram 3-service container app + DB | | | |
+| 48 | Diagram ingress, app services/containers, storage | | | |
+| 49 | Diagram queue worker + API + web | | | |
+| 50 | Diagram microservices internal calls + VNet | | | |
+
+Legend
+- Pass: Expected azmcp command invoked; output structurally valid; no unexpected errors.
+- Fail: Tool not invoked, wrong command, incorrect output structure, or unhandled error.
+- Notes: Include remediation ideas if fail; link to logs or screenshots if applicable.
+
