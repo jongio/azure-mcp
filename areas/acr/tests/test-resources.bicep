@@ -65,6 +65,23 @@ resource appAcrPushRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-
   }
 }
 
+// Reader role ensures subscription-level list of registries returns this registry for the principal
+resource readerRoleDefinition 'Microsoft.Authorization/roleDefinitions@2018-01-01-preview' existing = {
+  scope: subscription()
+  // Reader role
+  name: 'acdd72a7-3385-48ef-bd42-f606fba81ae7'
+}
+
+resource appReaderRoleAssignment 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid(readerRoleDefinition.id, testApplicationOid, acrRegistry.id)
+  scope: acrRegistry
+  properties: {
+    principalId: testApplicationOid
+    roleDefinitionId: readerRoleDefinition.id
+    description: 'Reader role for testApplicationOid to allow listing'
+  }
+}
+
 // Outputs for test consumption
 output acrRegistryName string = acrRegistry.name
 output acrLoginServer string = acrRegistry.properties.loginServer

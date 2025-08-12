@@ -17,7 +17,7 @@ public class AcrCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper 
 {
     [Theory]
     [InlineData(AuthMethod.Credential)]
-    public async Task Should_ListRegistries_Successfully(AuthMethod authMethod)
+    public async Task Should_list_acr_registries_by_subscription(AuthMethod authMethod)
     {
         // Arrange & Act
         var result = await CallToolAsync(
@@ -31,36 +31,85 @@ public class AcrCommandTests(LiveTestFixture liveTestFixture, ITestOutputHelper 
         // Assert
         var registries = result.AssertProperty("registries");
         Assert.Equal(JsonValueKind.Array, registries.ValueKind);
-        // Note: We don't assert specific registries exist since test environment may not have any
-    }
 
-    [Theory]
-    [InlineData("--subscription invalidSub --invalid-param oops")] // unknown option triggers parse error; subscription present
-    [InlineData("--subscription invalidSub")] // present but invalid value => handled during execution
-    public async Task Should_Return400_WithInvalidInput(string args)
-    {
-        var result = await CallToolAsync(
-            "azmcp_acr_registry_list",
-            ParseArguments(args));
-
-        Assert.NotNull(result);
-    }
-
-    private static Dictionary<string, object?> ParseArguments(string args)
-    {
-        var parts = args.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-        var dict = new Dictionary<string, object?>();
-
-        for (int i = 0; i < parts.Length; i += 2)
+        var registryItems = registries.EnumerateArray().ToList();
+        if (registryItems.Count == 0)
         {
-            if (i + 1 < parts.Length)
-            {
-                var key = parts[i].TrimStart('-');
-                var value = parts[i + 1];
-                dict[key] = value;
-            }
+            // Fallback: attempt with resource group filter (test RG hosts the registry via bicep)
+            var rgResult = await CallToolAsync(
+                "azmcp_acr_registry_list",
+                new()
+                {
+                    { "subscription", Settings.SubscriptionId },
+                    { "resource-group", Settings.ResourceGroupName },
+                    { "auth-method", authMethod.ToString() }
+                });
+
+            var rgRegistries = rgResult.AssertProperty("registries");
+            Assert.Equal(JsonValueKind.Array, rgRegistries.ValueKind);
+            registryItems = rgRegistries.EnumerateArray().ToList();
         }
 
-        return dict;
+        Assert.NotEmpty(registryItems); // After fallback we must have the test registry
+
+        foreach (var item in registryItems)
+        {
+            // Enforce new object shape { name, location?, loginServer?, skuName?, skuTier? }
+            Assert.Equal(JsonValueKind.Object, item.ValueKind);
+            Assert.True(item.TryGetProperty("name", out var nameProp));
+            var objName = nameProp.GetString();
+            Assert.False(string.IsNullOrWhiteSpace(objName));
+            Assert.Matches("^[a-z0-9]+(-[a-z0-9]+)*$", objName!); // Basic ACR naming pattern
+
+            if (item.TryGetProperty("location", out var locationProp))
+            {
+                Assert.False(string.IsNullOrWhiteSpace(locationProp.GetString()));
+            }
+            if (item.TryGetProperty("loginServer", out var loginServerProp))
+            {
+                Assert.False(string.IsNullOrWhiteSpace(loginServerProp.GetString()));
+            }
+        }
+    }
+
+    [Fact]
+    public async Task Should_handle_empty_subscription_gracefully()
+    {
+        // Empty subscription should trigger validation failure (400) -> null results
+        var result = await CallToolAsync(
+            "azmcp_acr_registry_list",
+            new()
+            {
+                { "subscription", "" }
+            });
+
+        Assert.Null(result);
+    }
+
+    [Fact]
+    public async Task Should_handle_invalid_subscription_gracefully()
+    {
+        // Invalid identifier should reach execution and return structured error details (HasValue)
+        var result = await CallToolAsync(
+            "azmcp_acr_registry_list",
+            new()
+            {
+                { "subscription", "invalid-subscription" }
+            });
+
+        Assert.NotNull(result);
+        var message = result.AssertProperty("message");
+        Assert.Contains("invalid-subscription", message.GetString(), StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task Should_validate_required_subscription_parameter()
+    {
+        // Missing subscription option entirely should behave like other areas (validation -> null)
+        var result = await CallToolAsync(
+            "azmcp_acr_registry_list",
+            new Dictionary<string, object?>());
+
+        Assert.Null(result);
     }
 }

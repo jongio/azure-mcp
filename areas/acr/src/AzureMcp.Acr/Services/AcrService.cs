@@ -8,11 +8,11 @@ using AzureMcp.Core.Services.Azure.Tenant;
 
 namespace AzureMcp.Acr.Services;
 
-public class AcrService(ISubscriptionService subscriptionService, ITenantService tenantService) : BaseAzureService(tenantService), IAcrService
+public sealed class AcrService(ISubscriptionService subscriptionService, ITenantService tenantService) : BaseAzureService(tenantService), IAcrService
 {
     private readonly ISubscriptionService _subscriptionService = subscriptionService ?? throw new ArgumentNullException(nameof(subscriptionService));
 
-    public async Task<List<string>> ListRegistries(
+    public async Task<List<Models.AcrRegistryInfo>> ListRegistries(
         string subscription,
         string? resourceGroup = null,
         string? tenant = null,
@@ -21,39 +21,41 @@ public class AcrService(ISubscriptionService subscriptionService, ITenantService
         ValidateRequiredParameters(subscription);
 
         var subscriptionResource = await _subscriptionService.GetSubscription(subscription, tenant, retryPolicy);
-        var registries = new List<string>();
+        var registries = new List<Models.AcrRegistryInfo>();
 
-        try
+        // Select enumeration source based on optional resource group
+        if (!string.IsNullOrWhiteSpace(resourceGroup))
         {
-            if (!string.IsNullOrEmpty(resourceGroup))
+            var resourceGroupResource = await subscriptionResource.GetResourceGroupAsync(resourceGroup);
+            await foreach (var registry in resourceGroupResource.Value.GetContainerRegistries().GetAllAsync())
             {
-                // List registries in a specific resource group
-                var resourceGroupResource = await subscriptionResource.GetResourceGroupAsync(resourceGroup);
-                await foreach (var registry in resourceGroupResource.Value.GetContainerRegistries().GetAllAsync())
-                {
-                    if (registry?.Data?.Name != null)
-                    {
-                        registries.Add(registry.Data.Name);
-                    }
-                }
+                AddProjectionIfValid(registries, registry);
             }
-            else
+        }
+        else
+        {
+            await foreach (var registry in subscriptionResource.GetContainerRegistriesAsync())
             {
-                // List all registries in the subscription
-                await foreach (var registry in subscriptionResource.GetContainerRegistriesAsync())
-                {
-                    if (registry?.Data?.Name != null)
-                    {
-                        registries.Add(registry.Data.Name);
-                    }
-                }
+                AddProjectionIfValid(registries, registry);
             }
+        }
 
-            return registries;
-        }
-        catch (Exception ex)
+        return registries;
+    }
+
+    private static void AddProjectionIfValid(List<Models.AcrRegistryInfo> list, ContainerRegistryResource? registry)
+    {
+        var data = registry?.Data;
+        if (data?.Name is null)
         {
-            throw new Exception($"Error retrieving Azure Container Registries: {ex.Message}", ex);
+            return;
         }
+
+        list.Add(new Models.AcrRegistryInfo(
+            data.Name,
+            data.Location,
+            data.LoginServer,
+            data.Sku?.Name.ToString(),
+            data.Sku?.Tier?.ToString()));
     }
 }

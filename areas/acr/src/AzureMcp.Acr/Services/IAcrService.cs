@@ -5,7 +5,7 @@ namespace AzureMcp.Acr.Services;
 
 public interface IAcrService
 {
-    Task<List<string>> ListRegistries(
+    Task<List<Models.AcrRegistryInfo>> ListRegistries(
         string subscription,
         string? resourceGroup = null,
         string? tenant = null,

@@ -20,9 +20,9 @@ public sealed class RegistryListCommand(ILogger<RegistryListCommand> logger) : B
 
     public override string Description =>
         $"""
-        List all Azure Container Registries in a subscription. This command retrieves all container registries available
-        in the specified subscription. If a resource group is specified, only registries
-        in that resource group are returned. Results include registry names and are returned as a JSON array.
+        List Azure Container Registries in a subscription. Optionally filter by resource group. Each registry result
+        includes: name, location, loginServer, skuName, skuTier. If no registries are found the tool returns null results
+        (consistent with other list commands).
         """;
 
     public override string Title => CommandTitle;
@@ -63,7 +63,7 @@ public sealed class RegistryListCommand(ILogger<RegistryListCommand> logger) : B
                 options.RetryPolicy);
 
             context.Response.Results = registries?.Any() == true
-                ? ResponseResult.Create(new RegistryListCommandResult(registries), AcrJsonContext.Default.RegistryListCommandResult)
+                ? ResponseResult.Create<RegistryListCommandResult>(new RegistryListCommandResult(registries), AcrJsonContext.Default.RegistryListCommandResult)
                 : null;
         }
         catch (Exception ex)
@@ -77,5 +77,5 @@ public sealed class RegistryListCommand(ILogger<RegistryListCommand> logger) : B
         return context.Response;
     }
 
-    internal record RegistryListCommandResult(List<string> Registries);
+    internal record RegistryListCommandResult(List<Models.AcrRegistryInfo> Registries);
 }

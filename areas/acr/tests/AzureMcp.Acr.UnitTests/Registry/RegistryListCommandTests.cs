@@ -53,7 +53,11 @@ public class RegistryListCommandTests
         if (shouldSucceed)
         {
             _service.ListRegistries(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
-                .Returns(new List<string> { "registry1", "registry2" });
+                .Returns(new List<AzureMcp.Acr.Models.AcrRegistryInfo>
+                {
+                    new("registry1", "eastus", "registry1.azurecr.io", "Basic", "Basic"),
+                    new("registry2", "eastus2", "registry2.azurecr.io", "Standard", "Standard")
+                });
         }
 
         var parseResult = _parser.Parse(args.Split(' ', StringSplitOptions.RemoveEmptyEntries));
@@ -78,7 +82,7 @@ public class RegistryListCommandTests
     {
         // Arrange
         _service.ListRegistries(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
-            .Returns(Task.FromException<List<string>>(new Exception("Test error")));
+            .Returns(Task.FromException<List<AzureMcp.Acr.Models.AcrRegistryInfo>>(new Exception("Test error")));
 
         var parseResult = _parser.Parse(["--subscription", "sub"]);
 
@@ -95,7 +99,7 @@ public class RegistryListCommandTests
     public async Task ExecuteAsync_FiltersById_ReturnsFilteredRegistries()
     {
         // Arrange
-        var expectedRegistries = new List<string> { "registry1" };
+        var expectedRegistries = new List<AzureMcp.Acr.Models.AcrRegistryInfo> { new("registry1", null, null, null, null) };
         _service.ListRegistries("sub", "rg", Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
             .Returns(expectedRegistries);
 
@@ -108,5 +112,40 @@ public class RegistryListCommandTests
         Assert.Equal(200, response.Status);
         Assert.NotNull(response.Results);
         await _service.Received(1).ListRegistries("sub", "rg", Arg.Any<string>(), Arg.Any<RetryPolicyOptions>());
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_EmptyList_ReturnsNullResults()
+    {
+        // Arrange
+        _service.ListRegistries("sub", null, Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
+            .Returns(new List<AzureMcp.Acr.Models.AcrRegistryInfo>());
+
+        var parseResult = _parser.Parse(["--subscription", "sub"]);
+
+        // Act
+        var response = await _command.ExecuteAsync(_context, parseResult);
+
+        // Assert
+        Assert.Equal(200, response.Status);
+        Assert.Null(response.Results);
+    }
+
+    [Fact]
+    public async Task ExecuteAsync_ReturnsExpectedRegistryProperties()
+    {
+        // Arrange
+        var registry = new AzureMcp.Acr.Models.AcrRegistryInfo("myregistry", "eastus", "myregistry.azurecr.io", "Basic", "Basic");
+        _service.ListRegistries("sub", null, Arg.Any<string>(), Arg.Any<RetryPolicyOptions>())
+            .Returns(new List<AzureMcp.Acr.Models.AcrRegistryInfo> { registry });
+
+        var parseResult = _parser.Parse(["--subscription", "sub"]);
+
+        // Act
+        var response = await _command.ExecuteAsync(_context, parseResult);
+
+        // Assert
+        Assert.Equal(200, response.Status);
+        Assert.NotNull(response.Results);
     }
 }
