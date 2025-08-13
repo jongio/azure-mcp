@@ -19,9 +19,6 @@ public abstract class BaseVirtualDesktopCommand<
     protected override void RegisterOptions(Command command)
     {
         base.RegisterOptions(command);
-        // Resource group is optional for Virtual Desktop commands (used for filtering)
         UseResourceGroup();
     }
-
-    protected override TOptions BindOptions(ParseResult parseResult) => base.BindOptions(parseResult);
 }

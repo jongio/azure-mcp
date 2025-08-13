@@ -76,7 +76,7 @@ public sealed class MetricsQueryCommand(ILogger<MetricsQueryCommand> logger)
             string metricNamesValue = commandResult.GetValueForOption(_metricNamesOption)!;
 
             // Validate the metric names
-            string[] metricNames = metricNamesValue.Split(',').Select(t => t.Trim()).ToArray();
+            string[] metricNames = [.. metricNamesValue.Split(',').Select(t => t.Trim())];
 
             if (metricNames.Length == 0 || metricNames.Any(s => string.IsNullOrWhiteSpace(s)))
             {
@@ -105,7 +105,7 @@ public sealed class MetricsQueryCommand(ILogger<MetricsQueryCommand> logger)
                 return context.Response;
             }
 
-            string[] metricNames = options.MetricNames!.Split(',').Select(t => t.Trim()).ToArray();
+            string[] metricNames = [.. options.MetricNames!.Split(',').Select(t => t.Trim())];
 
             // Get the metrics service from DI
             var service = context.GetService<IMonitorMetricsService>();

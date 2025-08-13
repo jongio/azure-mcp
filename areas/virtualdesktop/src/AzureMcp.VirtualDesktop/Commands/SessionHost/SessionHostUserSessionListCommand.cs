@@ -71,13 +71,9 @@ public sealed class SessionHostUserSessionListCommand(ILogger<SessionHostUserSes
                     options.RetryPolicy);
             }
 
-            // Only set Results if there are user sessions
-            if (userSessions.Count > 0)
-            {
-                context.Response.Results = ResponseResult.Create(
-                    new SessionHostUserSessionListCommandResult(userSessions.ToList()),
-                    VirtualDesktopJsonContext.Default.SessionHostUserSessionListCommandResult);
-            }
+            context.Response.Results = userSessions.Count > 0
+                 ? ResponseResult.Create(new SessionHostUserSessionListCommandResult([.. userSessions]), VirtualDesktopJsonContext.Default.SessionHostUserSessionListCommandResult)
+                 : null;
         }
         catch (Exception ex)
         {
