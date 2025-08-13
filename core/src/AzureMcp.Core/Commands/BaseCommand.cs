@@ -13,7 +13,7 @@ public abstract class BaseCommand : IBaseCommand
     private const string MissingRequiredOptionsPrefix = "Missing Required options: ";
     private const int ValidationErrorStatusCode = 400;
     private const string TroubleshootingUrl = "https://aka.ms/azmcp/troubleshooting";
-    
+
     private readonly Command _command;
     private bool _usesResourceGroup;
     private bool _requiresResourceGroup;
