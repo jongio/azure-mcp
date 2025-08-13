@@ -32,22 +32,9 @@ public sealed class MetricsQueryCommand(ILogger<MetricsQueryCommand> logger)
     public override string Name => "query";
 
     public override string Description =>
-        $"""
-        Query Azure Monitor metrics for a resource. Returns time series data for the specified metrics.
-        Required options:
-        - {_resourceNameOption.Name}: {_resourceNameOption.Description}
-        - {_metricNamespaceOption.Name}: {_metricNamespaceOption.Description}
-        - {_metricNamesOption.Name}: {_metricNamesOption.Description}
-        Optional options:
-        - {_resourceGroupOption.Name}: {_resourceGroupOption.Description}
-        - {_resourceTypeOption.Name}: {_resourceTypeOption.Description}
-        - {_startTimeOption.Name}: {_startTimeOption.Description}
-        - {_endTimeOption.Name}: {_endTimeOption.Description}
-        - {_intervalOption.Name}: {_intervalOption.Description}
-        - {_aggregationOption.Name}: {_aggregationOption.Description}
-        - {_filterOption.Name}: {_filterOption.Description}
-        - {_maxBucketsOption.Name}: {_maxBucketsOption.Description}
-        """;
+            $"""
+                Query Azure Monitor metrics for a resource. Returns time series data for the specified metrics.
+                """;
 
     public override string Title => CommandTitle;
 
