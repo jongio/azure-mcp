@@ -41,7 +41,7 @@ public sealed class ValidateSystemRequirementsAndSetupHyperVCommandTests
     public void Constructor_InitializesCommandCorrectly()
     {
         var command = _command.GetCommand();
-        Assert.Equal("validate-system-requirements-hyperv", command.Name);
+        Assert.Equal("setup-system-requirement", command.Name);
         Assert.NotNull(command.Description);
         Assert.NotEmpty(command.Description);
     }
@@ -59,7 +59,7 @@ public sealed class ValidateSystemRequirementsAndSetupHyperVCommandTests
         _arcService.ValidateSystemRequirementsAndSetupHyperVAsync(Arg.Any<string>())
             .Returns(expectedResult);
 
-        var args = "--path /temp";
+        var args = "--user-provided-path /temp";
         var parseResult = _parser.Parse(args);
 
         // Act
@@ -83,7 +83,7 @@ public sealed class ValidateSystemRequirementsAndSetupHyperVCommandTests
         _arcService.ValidateSystemRequirementsAndSetupHyperVAsync(Arg.Any<string>())
             .Returns(expectedResult);
 
-        var args = "--path /temp";
+        var args = "--user-provided-path /temp";
         var parseResult = _parser.Parse(args);
 
         // Act
@@ -102,7 +102,7 @@ public sealed class ValidateSystemRequirementsAndSetupHyperVCommandTests
         _arcService.ValidateSystemRequirementsAndSetupHyperVAsync(Arg.Any<string>())
             .ThrowsAsync(new Exception(exceptionMessage));
 
-        var args = "--path /temp";
+        var args = "--user-provided-path /temp";
         var parseResult = _parser.Parse(args);
 
         // Act
@@ -127,7 +127,7 @@ public sealed class ValidateSystemRequirementsAndSetupHyperVCommandTests
         _arcService.ValidateSystemRequirementsAndSetupHyperVAsync(Arg.Any<string>())
             .Returns(expectedResult);
 
-        var args = $"--path {userProvidedPath}";
+        var args = $"--user-provided-path {userProvidedPath}";
         var parseResult = _parser.Parse(args);
 
         // Act

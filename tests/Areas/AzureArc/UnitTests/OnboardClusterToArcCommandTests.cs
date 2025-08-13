@@ -42,7 +42,7 @@ public sealed class OnboardClusterToArcCommandTests
     public void Constructor_InitializesCommandCorrectly()
     {
         var command = _command.GetCommand();
-        Assert.Equal("onboard-cluster-to-arc", command.Name);
+        Assert.Equal("connect-arc", command.Name);
         Assert.NotNull(command.Description);
         Assert.NotEmpty(command.Description);
     }
@@ -62,7 +62,7 @@ public sealed class OnboardClusterToArcCommandTests
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<string>()).Returns(expectedResult);
 
-        var args = "--cluster-name test-cluster --resource-group-name test-rg --location eastus --subscription-id sub123 --tenant-id tenant123 --kube-config-path /path/to/config --user-provided-path /temp";
+        var args = "--cluster-name test-cluster --resource-group test-rg --location eastus --subscription sub123 --tenant tenant123 --kube-config-path /path/to/config --user-provided-path /temp";
         var parseResult = _parser.Parse(args);
 
         // Act
@@ -88,7 +88,7 @@ public sealed class OnboardClusterToArcCommandTests
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<string>()).Returns(expectedResult);
 
-        var args = "--cluster-name test-cluster --resource-group-name test-rg --location eastus --subscription-id sub123 --tenant-id tenant123 --kube-config-path /path/to/config --user-provided-path /temp";
+        var args = "--cluster-name test-cluster --resource-group test-rg --location eastus --subscription sub123 --tenant tenant123 --kube-config-path /path/to/config --user-provided-path /temp";
         var parseResult = _parser.Parse(args);
 
         // Act
@@ -109,7 +109,7 @@ public sealed class OnboardClusterToArcCommandTests
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<string>()).ThrowsAsync(new Exception(exceptionMessage));
 
-        var args = "--cluster-name test-cluster --resource-group-name test-rg --location eastus --subscription-id sub123 --tenant-id tenant123 --kube-config-path /path/to/config --user-provided-path /temp";
+        var args = "--cluster-name test-cluster --resource-group test-rg --location eastus --subscription sub123 --tenant tenant123 --kube-config-path /path/to/config --user-provided-path /temp";
         var parseResult = _parser.Parse(args);
 
         // Act
@@ -138,7 +138,7 @@ public sealed class OnboardClusterToArcCommandTests
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<string>()).Returns(expectedResult);
 
-        var args = $"--cluster-name {clusterName} --resource-group-name {resourceGroupName} --location {location} --subscription-id {subscriptionId} --tenant-id {tenantId} --kube-config-path {kubeConfigPath} --user-provided-path {userProvidedPath}";
+        var args = $"--cluster-name {clusterName} --resource-group {resourceGroupName} --location {location} --subscription {subscriptionId} --tenant {tenantId} --kube-config-path {kubeConfigPath} --user-provided-path {userProvidedPath}";
         var parseResult = _parser.Parse(args);
 
         // Act

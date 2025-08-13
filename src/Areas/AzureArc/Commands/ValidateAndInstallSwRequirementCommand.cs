@@ -2,18 +2,19 @@
 // Licensed under the MIT License.
 
 using AzureMcp.Areas.AzureArc.Services;
+using AzureMcp.Commands.Subscription;
 using AzureMcp.Options.Arc;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class ValidateAndInstallSwRequirementCommand(ILogger<ValidateAndInstallSwRequirementCommand> logger) : GlobalCommand<ArcConnectOptions>
+public sealed class ValidateAndInstallSwRequirementCommand(ILogger<ValidateAndInstallSwRequirementCommand> logger) : SubscriptionCommand<ArcConnectOptions>
 {
     private const string _commandTitle = "Validate and Install Software Requirements";
 
-    private readonly Option<string> _pathOption = new Option<string>("--path", "The path to validate and install software requirements") { IsRequired = true };
+    private readonly Option<string> _userProvidedPathOption = new("--user-provided-path", "The path to validate and install software requirements") { IsRequired = true };
 
-    public override string Name => "validate-install-software-requirements";
+    public override string Name => "setup-software-requirement";
 
     public override string Description =>
         "Validates and installs software requirements for AKS Edge. This command checks for required software components and installs them if missing.";
@@ -23,13 +24,13 @@ public sealed class ValidateAndInstallSwRequirementCommand(ILogger<ValidateAndIn
     protected override void RegisterOptions(Command command)
     {
         base.RegisterOptions(command);
-        command.AddOption(_pathOption);
+        command.AddOption(_userProvidedPathOption);
     }
 
     protected override ArcConnectOptions BindOptions(ParseResult parseResult)
     {
         var options = base.BindOptions(parseResult);
-        options.UserProvidedPath = parseResult.GetValueForOption(_pathOption);
+        options.UserProvidedPath = parseResult.GetValueForOption(_userProvidedPathOption);
         return options;
     }
 
@@ -45,7 +46,7 @@ public sealed class ValidateAndInstallSwRequirementCommand(ILogger<ValidateAndIn
 
             if (string.IsNullOrEmpty(options.UserProvidedPath))
             {
-                throw new ArgumentException("The --path option is required.");
+                throw new ArgumentException("The --user-provided-path option is required.");
             }
 
             var arcService = context.GetService<IArcServices>();

@@ -23,12 +23,12 @@ public class AzureArcSetup : IAreaSetup
         rootGroup.AddSubGroup(arc);
 
         // Register Azure Arc commands
-        arc.AddCommand("onboard-cluster-to-arc", new OnboardClusterToArcCommand(loggerFactory.CreateLogger<OnboardClusterToArcCommand>()));
-        arc.AddCommand("disconnect-from-azure-arc", new DisconnectFromAzureArcCommand(loggerFactory.CreateLogger<DisconnectFromAzureArcCommand>()));
-        arc.AddCommand("remove-Aks-Edge-installation", new RemoveAksEdgeCommand(loggerFactory.CreateLogger<RemoveAksEdgeCommand>()));
-        arc.AddCommand("validate-prerequisites-aksee-cluster", new ValidatePrerequisitesForAksEdgeClusterCommand(loggerFactory.CreateLogger<ValidatePrerequisitesForAksEdgeClusterCommand>()));
-        arc.AddCommand("validate-system-requirements-hyperv", new ValidateSystemRequirementsAndSetupHyperVCommand(loggerFactory.CreateLogger<ValidateSystemRequirementsAndSetupHyperVCommand>()));
-        arc.AddCommand("validate-install-software-requirements", new ValidateAndInstallSwRequirementCommand(loggerFactory.CreateLogger<ValidateAndInstallSwRequirementCommand>()));
-        arc.AddCommand("quick-deploy-aks-edge-essentials", new QuickDeployAksEdgeEssentialsCommand(loggerFactory.CreateLogger<QuickDeployAksEdgeEssentialsCommand>()));
+        arc.AddCommand("connect-arc", new OnboardClusterToArcCommand(loggerFactory.CreateLogger<OnboardClusterToArcCommand>()));
+        arc.AddCommand("disconnect-arc", new DisconnectFromAzureArcCommand(loggerFactory.CreateLogger<DisconnectFromAzureArcCommand>()));
+        arc.AddCommand("remove-edge-essentials", new RemoveAksEdgeCommand(loggerFactory.CreateLogger<RemoveAksEdgeCommand>()));
+        arc.AddCommand("describe-prereqs-edge-cluster", new ValidatePrerequisitesForAksEdgeClusterCommand(loggerFactory.CreateLogger<ValidatePrerequisitesForAksEdgeClusterCommand>()));
+        arc.AddCommand("setup-system-requirement", new ValidateSystemRequirementsAndSetupHyperVCommand(loggerFactory.CreateLogger<ValidateSystemRequirementsAndSetupHyperVCommand>()));
+        arc.AddCommand("setup-software-requirement", new ValidateAndInstallSwRequirementCommand(loggerFactory.CreateLogger<ValidateAndInstallSwRequirementCommand>()));
+        arc.AddCommand("deploy-edge-essentials", new QuickDeployAksEdgeEssentialsCommand(loggerFactory.CreateLogger<QuickDeployAksEdgeEssentialsCommand>()));
     }
 }

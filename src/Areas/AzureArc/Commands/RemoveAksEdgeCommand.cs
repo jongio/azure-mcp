@@ -3,33 +3,37 @@
 
 using AzureMcp.Areas.AzureArc.Services;
 using AzureMcp.Options.Arc;
+using AzureMcp.Models.Option;
+using AzureMcp.Commands.Subscription;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class RemoveAksEdgeCommand(ILogger<RemoveAksEdgeCommand> logger) : GlobalCommand<ArcConnectOptions>
+public sealed class RemoveAksEdgeCommand(ILogger<RemoveAksEdgeCommand> logger) : SubscriptionCommand<ArcConnectOptions>
 {
-    private const string _commandTitle = "Remove installation for existing cluster";
+    private const string _commandTitle = "Remove installations for existing edge cluster from local";
 
-    public override string Name => "remove-Aks-Edge-installation";
+    public override string Name => "remove-edge-essentials";
 
     public override string Description =>
         "Completely removes AKS Edge Essentials from the machine. Ensures that any existing installation is removed and settings are preset for new installation.";
 
     public override string Title => _commandTitle;
 
-    private readonly Option<string> _pathOption = new Option<string>("--path", "The path to use for script execution") { IsRequired = true };
+    private readonly Option<string> _userProvidedPathOption = new("--user-provided-path", "The path to use for script execution") { IsRequired = true };
 
     protected override void RegisterOptions(Command command)
     {
         base.RegisterOptions(command);
-        command.AddOption(_pathOption);
+        command.AddOption(_resourceGroupOption);
+        command.AddOption(_userProvidedPathOption);
     }
 
     protected override ArcConnectOptions BindOptions(ParseResult parseResult)
     {
         var options = base.BindOptions(parseResult);
-        options.UserProvidedPath = parseResult.GetValueForOption(_pathOption);
+        options.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
+        options.UserProvidedPath = parseResult.GetValueForOption(_userProvidedPathOption);
         return options;
     }
 

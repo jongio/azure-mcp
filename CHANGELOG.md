@@ -8,12 +8,7 @@
 - Support for Azure Data Lake Storage Gen2 operations - List paths in Data Lake file systems via the command: `azmcp storage datalake file-system list-paths`. [#608](https://github.com/Azure/azure-mcp/pull/608)
 - Added new commands for Azure Function code generation and deployment best practices (https://github.com/Azure/azure-mcp/pull/630)
 - Add `azmcp sql firewall-rule list` command to list SQL server firewall rules. [[#610](https://github.com/Azure/azure-mcp/pull/610)]
-- Pre-requisites for onboarding cluster to Arc. [#650](https://github.com/Azure/azure-mcp/pull/650)
-- Validating and installing system requirements. [#650](https://github.com/Azure/azure-mcp/pull/650)
-- Validating and installing software dependencies. [#650](https://github.com/Azure/azure-mcp/pull/650)
-- Quick Deploy AKS Edge Essentials and connect to Arc. [#650](https://github.com/Azure/azure-mcp/pull/650)
-- Onboard existing cluster to Arc. [#650](https://github.com/Azure/azure-mcp/pull/650)
-- Disconnect cluster from Arc. [#650](https://github.com/Azure/azure-mcp/pull/650)
+- Added new commands for onboarding cluster to Arc, and managing clusters using AKS Edge Essentials. [#650](https://github.com/Azure/azure-mcp/pull/650)
 
 ### Breaking Changes
 

@@ -41,7 +41,7 @@ public sealed class QuickDeployAksEdgeEssentialsCommandTests
     public void Constructor_InitializesCommandCorrectly()
     {
         var command = _command.GetCommand();
-        Assert.Equal("quick-deploy-aks-edge-essentials", command.Name);
+        Assert.Equal("deploy-edge-essentials", command.Name);
         Assert.NotNull(command.Description);
         Assert.NotEmpty(command.Description);
     }
@@ -141,7 +141,7 @@ public sealed class QuickDeployAksEdgeEssentialsCommandTests
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
             .Returns(expectedResult);
 
-        var args = $"--cluster-name {clusterName} --resource-group-name {resourceGroupName} --subscription-id {subscriptionId} --tenant-id {tenantId} --location {location} --user-provided-path {userProvidedPath}";
+        var args = $"--cluster-name {clusterName} --resource-group {resourceGroupName} --subscription {subscriptionId} --tenant {tenantId} --location {location} --user-provided-path {userProvidedPath}";
         var parseResult = _parser.Parse(args);
 
         // Act

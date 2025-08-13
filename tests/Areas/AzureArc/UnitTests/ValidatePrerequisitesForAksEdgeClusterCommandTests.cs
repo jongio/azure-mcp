@@ -41,7 +41,7 @@ public sealed class ValidatePrerequisitesForAksEdgeClusterCommandTests
     public void Constructor_InitializesCommandCorrectly()
     {
         var command = _command.GetCommand();
-        Assert.Equal("validate-prerequisites-aksee-cluster", command.Name);
+        Assert.Equal("describe-prereqs-edge-cluster", command.Name);
         Assert.NotNull(command.Description);
         Assert.NotEmpty(command.Description);
     }

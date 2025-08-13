@@ -43,24 +43,24 @@ This file contains prompts used for end-to-end testing to ensure each tool is in
 
 | Tool Name | Test Prompt |
 |:----------|:----------|
-| azmcp-arc-validate-prerequisites-aksee-cluster | dispay prerequisites for installing AKS Edge Essentials cluster and prompt for next steps |
-| azmcp-arc-validate-prerequisites-aksee-cluster | Show me the prerequisites for AKS Edge Essentials cluster installation |
-| azmcp-arc-validate-system-requirements-hyperv | Validate system requirements and setup Hyper-V for AKS Edge Essentials. Use <path> for set up |
-| azmcp-arc-validate-system-requirements-hyperv | Check my system requirements for AKS Edge Essentials and configure Hyper-V if required. Use <path> for set up  |
-| azmcp-arc-validate-install-software-requirements | Validate and install software requirements for AKS Edge Essentials. Use <path> for set up  |
-| azmcp-arc-validate-install-software-requirements | Check and install required software components for AKS Edge. Use <path> for set up  |
-| azmcp-arc-remove-Aks-Edge-installation | Remove existing AKS Edge Essentials installation. Use <path> for set up  |
-| azmcp-arc-remove-Aks-Edge-installation | Clean up AKS Edge Essentials installation in from my system. Use <path> for set up |
-| azmcp-arc-remove-Aks-Edge-installation | Completely remove AKS Edge Essentials from my machine. Use <path> for set up  |
-| azmcp-arc-quick-deploy-aks-edge-essentials | Quick deploy AKS Edge Essentials cluster <cluster_name> and connect to Azure Arc. Use <path> for set up |
-| azmcp-arc-quick-deploy-aks-edge-essentials | Deploy AKS Edge Essentials cluster and connect to arc. Use <path> for set up  |
-| azmcp-arc-quick-deploy-aks-edge-essentials | Set up AKS Edge Essentials cluster in location. Use <path> for set up  |
-| azmcp-arc-onboard-cluster-to-arc | Onboard existing cluster <cluster_name> to Azure Arc. Use <path> for set up  |
-| azmcp-arc-onboard-cluster-to-arc | Connect my existing Kubernetes cluster <cluster_name> to Azure Arc |
-| azmcp-arc-onboard-cluster-to-arc | Register cluster <cluster_name> with Azure Arc in resource group <resource_group_name> |
-| azmcp-arc-disconnect-from-azure-arc | Disconnect cluster <cluster_name> from Azure Arc. Use <path> for set up  |
-| azmcp-arc-disconnect-from-azure-arc | Remove cluster <cluster_name> from Azure Arc. Use <path> for set up  |
-| azmcp-arc-disconnect-from-azure-arc | Unregister my Arc-enabled cluster <cluster_name>, Use <path> for set up  |
+| azmcp-arc-describe-prereqs-edge-cluster | dispay prerequisites for installing AKS Edge Essentials cluster and prompt for next steps |
+| azmcp-arc-describe-prereqs-edge-cluster | Show me the prerequisites for AKS Edge Essentials cluster installation |
+| azmcp-arc-setup-system-requirement | Validate system requirements and setup Hyper-V for AKS Edge Essentials. Use <user-provided-path> for set up |
+| azmcp-arc-setup-system-requirement | Check my system requirements for AKS Edge Essentials and configure Hyper-V if required. Use <user-provided-path> for set up  |
+| azmcp-arc-setup-software-requirement | Validate and install software requirements for AKS Edge Essentials. Use <user-provided-path> for set up  |
+| azmcp-arc-setup-software-requirement | Check and install required software components for AKS Edge. Use <user-provided-path> for set up  |
+| azmcp-arc-remove-edge-essentials | Remove existing AKS Edge Essentials installation. Use <user-provided-path> for set up  |
+| azmcp-arc-remove-edge-essentials | Clean up AKS Edge Essentials installation in from my system. Use <user-provided-path> for set up |
+| azmcp-arc-remove-edge-essentials | Completely remove AKS Edge Essentials from my machine. Use <user-provided-path> for set up  |
+| azmcp-arc-deploy-edge-essentials | Quick deploy AKS Edge Essentials cluster <cluster_name> and connect to Azure Arc. Use <user-provided-path> for set up |
+| azmcp-arc-deploy-edge-essentials | Deploy AKS Edge Essentials cluster and connect to arc. Use <user-provided-path> for set up  |
+| azmcp-arc-deploy-edge-essentials | Set up AKS Edge Essentials cluster in location. Use <user-provided-path> for set up  |
+| azmcp-arc-connect-arc | Onboard existing cluster <cluster_name> to Azure Arc. Use <user-provided-path> for set up  |
+| azmcp-arc-connect-arc | Connect my existing Kubernetes cluster <cluster_name> to Azure Arc |
+| azmcp-arc-connect-arc | Register cluster <cluster_name> with Azure Arc in resource group <resource_group_name> |
+| azmcp-arc-disconnect-arc | Disconnect cluster <cluster_name> from Azure Arc. Use <user-provided-path> for set up  |
+| azmcp-arc-disconnect-arc | Remove cluster <cluster_name> from Azure Arc. Use <user-provided-path> for set up  |
+| azmcp-arc-disconnect-arc | Unregister my Arc-enabled cluster <cluster_name>, Use <user-provided-path> for set up  |
 
 ## Azure CLI
 

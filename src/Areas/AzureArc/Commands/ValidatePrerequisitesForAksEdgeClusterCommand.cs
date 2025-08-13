@@ -2,16 +2,17 @@
 // Licensed under the MIT License.
 
 using AzureMcp.Areas.AzureArc.Services;
+using AzureMcp.Commands.Subscription;
 using AzureMcp.Options.Arc;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class ValidatePrerequisitesForAksEdgeClusterCommand(ILogger<ValidatePrerequisitesForAksEdgeClusterCommand> logger) : GlobalCommand<ArcConnectOptions>
+public sealed class ValidatePrerequisitesForAksEdgeClusterCommand(ILogger<ValidatePrerequisitesForAksEdgeClusterCommand> logger) : SubscriptionCommand<ArcConnectOptions>
 {
-    private const string _commandTitle = "Validate prerequisites for AKS Edge Essentials Cluster";
+    private const string _commandTitle = "Describes prerequisites needed for AKS Edge Essentials Cluster and available tools";
 
-    public override string Name => "validate-prerequisites-aksee-cluster";
+    public override string Name => "describe-prereqs-edge-cluster";
 
     public override string Description =>
         "Validates prerequisites for installing AKS Edge Essentials cluster by loading steps from the resource file and suggesting next steps";

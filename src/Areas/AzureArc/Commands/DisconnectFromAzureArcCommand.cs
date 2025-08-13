@@ -3,20 +3,21 @@
 
 using AzureMcp.Areas.AzureArc.Services;
 using AzureMcp.Options.Arc;
+using AzureMcp.Models.Option;
+using AzureMcp.Commands.Subscription;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Commands.Arc;
 
-public sealed class DisconnectFromAzureArcCommand(ILogger<DisconnectFromAzureArcCommand> logger) : GlobalCommand<ArcConnectOptions>
+public sealed class DisconnectFromAzureArcCommand(ILogger<DisconnectFromAzureArcCommand> logger) : SubscriptionCommand<ArcConnectOptions>
 {
-    private const string _commandTitle = "Disconnects a cluster from Azure Arc";
+    private const string _commandTitle = "Disconnects connected cluster from Azure Arc";
 
     // Define options as fields
     private readonly Option<string> _clusterNameOption = new("--cluster-name", "Name of the cluster to disconnect from Azure Arc");
-    private readonly Option<string> _resourceGroupNameOption = new("--resource-group-name", "Name of the resource group");
     private readonly Option<string> _userProvidedPathOption = new("--user-provided-path", "Path to the user-provided files");
 
-    public override string Name => "disconnect-from-azure-arc";
+    public override string Name => "disconnect-arc";
 
     public override string Description =>
         "Disconnects an arc connected cluster from Azure Arc. It deletes all extensions and removes the cluster from Arc. The --user-provided-path option is required.";
@@ -28,8 +29,8 @@ public sealed class DisconnectFromAzureArcCommand(ILogger<DisconnectFromAzureArc
         base.RegisterOptions(command);
 
         // Add options to the command
+        command.AddOption(_resourceGroupOption);
         command.AddOption(_clusterNameOption);
-        command.AddOption(_resourceGroupNameOption);
         command.AddOption(_userProvidedPathOption);
     }
 
@@ -39,8 +40,10 @@ public sealed class DisconnectFromAzureArcCommand(ILogger<DisconnectFromAzureArc
 
         // Use the defined Option instances
         options.ClusterName = parseResult.GetValueForOption(_clusterNameOption);
-        options.ResourceGroupName = parseResult.GetValueForOption(_resourceGroupNameOption);
         options.UserProvidedPath = parseResult.GetValueForOption(_userProvidedPathOption);
+
+        // Manually bind ResourceGroup since the base class doesn't do it
+        options.ResourceGroup = parseResult.GetValueForOption(_resourceGroupOption);
 
         return options;
     }
@@ -58,7 +61,7 @@ public sealed class DisconnectFromAzureArcCommand(ILogger<DisconnectFromAzureArc
 
             var arcService = context.GetService<IArcServices>();
             var result = await arcService.DisconnectFromAzureArcAsync(
-                options.ResourceGroupName!,
+                options.ResourceGroup!,
                 options.ClusterName!,
                 options.UserProvidedPath!);
 

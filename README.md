@@ -21,6 +21,7 @@ Here's a short (16 seconds) video to help you get the Azure MCP Server installed
 | Name         | Description                                      | Read/Write Tools | Read Only Tools |
 |--------------|--------------------------------------------------|-----------|-----------|
 | All | All Azure MCP tools in a single server.          | [![Install](https://img.shields.io/badge/VS_Code-Install_all-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=Azure%20Server&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22@azure%2Fmcp%40latest%22%2C%22server%22%2C%22start%22%5D%7D) | [![Install](https://img.shields.io/badge/VS_Code-Install_all-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=Azure%20Server%20Read%20Only&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22@azure%2Fmcp%40latest%22%2C%22server%22%2C%22start%22%2C%22--read-only%22%5D%7D) |
+| Azure Arc | Onboard and manage clusters with AKS Edge Essentials and Arc Services. | [![Install](https://img.shields.io/badge/VS_Code-Install_arc-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=Azure%20Arc&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22@azure%2Fmcp%40latest%22%2C%22server%22%2C%22start%22%2C%22--namespace%22%2C%22arc%22%5D%7D) | [![Install](https://img.shields.io/badge/VS_Code-Install_arc-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=Azure%20Arc%20Read%20Only&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22@azure%2Fmcp%40latest%22%2C%22server%22%2C%22start%22%2C%22--namespace%22%2C%22arc%22%2C%22--read-only%22%5D%7D) |
 | Azure Kubernetes Service (AKS) | List and manage clusters.                        | [![Install](https://img.shields.io/badge/VS_Code-Install_aks-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=Azure%20AKS&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22@azure%2Fmcp%40latest%22%2C%22server%22%2C%22start%22%2C%22--namespace%22%2C%22aks%22%5D%7D) | [![Install](https://img.shields.io/badge/VS_Code-Install_aks-24bfa5?style=flat-square&logo=visualstudiocode&logoColor=white)](https://insiders.vscode.dev/redirect/mcp/install?name=Azure%20AKS%20Read%20Only&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22@azure%2Fmcp%40latest%22%2C%22server%22%2C%22start%22%2C%22--namespace%22%2C%22aks%22%2C%22--read-only%22%5D%7D) |
 | App Configuration | Manage configuration stores and key-value pairs. | [![Install](https://img.shields.io/badge/VS_Code-Install_appconfig-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=Azure%20App%20Config&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22@azure%2Fmcp%40latest%22%2C%22server%22%2C%22start%22%2C%22--namespace%22%2C%22appconfig%22%5D%7D) | [![Install](https://img.shields.io/badge/VS_Code-Install_appconfig-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=Azure%20App%20Config%20Read%20Only&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22@azure%2Fmcp%40latest%22%2C%22server%22%2C%22start%22%2C%22--namespace%22%2C%22appconfig%22%2C%22--read-only%22%5D%7D) |
 | Azure Data Explorer        | Query and manage clusters and databases.         | [![Install](https://img.shields.io/badge/VS_Code-Install_kusto-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=Azure%20Kusto&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22@azure%2Fmcp%40latest%22%2C%22server%22%2C%22start%22%2C%22--namespace%22%2C%22kusto%22%5D%7D) | [![Install](https://img.shields.io/badge/VS_Code-Install_kusto-0098FF?style=flat-square&logo=visualstudiocode&logoColor=white)](https://vscode.dev/redirect/mcp/install?name=Azure%20Kusto%20Read%20Only&config=%7B%22command%22%3A%22npx%22%2C%22args%22%3A%5B%22-y%22%2C%22@azure%2Fmcp%40latest%22%2C%22server%22%2C%22start%22%2C%22--namespace%22%2C%22kusto%22%2C%22--read-only%22%5D%7D) |
@@ -97,21 +98,15 @@ The Azure MCP Server supercharges your agents with Azure context. Here are some 
 <details>
 <summary>The Azure MCP Server provides tools for interacting with the following Azure services</summary>
 
-### Azure Arc Tools
-
-Azure MCP now supports the following Azure Arc tools:
-
-- Pre-requisites for onboarding cluster to Arc.
-- Validating and installing system requirements.
-- Validating and installing software dependencies.
-- Quick Deploy AKS Edge Essentials and connect to Arc.
-- Onboard existing cluster to Arc.
-- Disconnect cluster from Arc.
-
 ### 🔎 Azure AI Search (search engine/vector database)
 - List Azure AI Search services
 - List indexes and look at their schema and configuration
 - Query search indexes
+
+### ☸️ Azure Arc
+- Validate and set up prerequisites 
+- Deploy AKS Edge Essentials clusters
+- Onboard and disconnect clusters from Arc
 
 ### ⚙️ Azure App Configuration
 - List App Configuration stores

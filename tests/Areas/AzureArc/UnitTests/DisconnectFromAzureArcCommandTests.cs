@@ -41,7 +41,7 @@ public sealed class DisconnectFromAzureArcCommandTests
     public void Constructor_InitializesCommandCorrectly()
     {
         var command = _command.GetCommand();
-        Assert.Equal("disconnect-from-azure-arc", command.Name);
+        Assert.Equal("disconnect-arc", command.Name);
         Assert.NotNull(command.Description);
         Assert.NotEmpty(command.Description);
     }
@@ -128,7 +128,7 @@ public sealed class DisconnectFromAzureArcCommandTests
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>())
             .Returns(expectedResult);
 
-        var args = $"--resource-group-name {resourceGroupName} --cluster-name {clusterName} --user-provided-path {userProvidedPath}";
+        var args = $"--resource-group {resourceGroupName} --cluster-name {clusterName} --user-provided-path {userProvidedPath}";
         var parseResult = _parser.Parse(args);
 
         // Act
