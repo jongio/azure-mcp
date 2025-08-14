@@ -25,7 +25,8 @@ public sealed class QuotaSetup : IAreaSetup
 
     public void RegisterCommands(CommandGroup rootGroup, ILoggerFactory loggerFactory)
     {
-        var quota = new CommandGroup("quota", "Quota commands for Azure resource quota checking and usage analysis");
+        var quota = new CommandGroup("quota", "Quota commands for getting the available regions of specific Azure resource types"
+                    + " or checking Azure resource quota and usage");
         rootGroup.AddSubGroup(quota);
 
         var usageGroup = new CommandGroup("usage", "Resource usage and quota operations");

@@ -931,7 +931,7 @@ azmcp deploy pipeline guidance get [--use-azd-pipeline-config <use-azd-pipeline-
                                         [--repository-name <repository-name>] \
                                         [--github-environment-name <github-environment-name>]
 
-# Generate a mermaid architecture diagram for the application topology
+# Generate a mermaid architecture diagram for the application topology follow the schema defined in [deploy-app-topology-schema.json](../areas/deploy/src/AzureMcp.Deploy/Schemas/deploy-app-topology-schema.json)
 azmcp deploy architecture diagram generate --raw-mcp-tool-input <app-topology>
 ```
 

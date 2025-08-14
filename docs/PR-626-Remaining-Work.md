@@ -51,7 +51,7 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [AzureUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureUsageChecker.cs)
        - [PostgreSQLUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/Usage/PostgreSQLUsageChecker.cs)
    - Justification (if waived): _<add rationale>_
-6. [ ] Documentation corrections
+6. [x] Documentation corrections
    - Verify `docs/azmcp-commands.md` has no duplicated tokens (e.g., earlier “quota quota”) & reflects final hierarchical command names consistently (e.g., ensure `deploy infrastructure rules get` vs lingering `iac rules get` examples).
    - Add brief JSON schema / shape description for `--raw-mcp-tool-input` (architecture diagram + plan) within command docs or link to schema file.
    - Status: Quota section is already correct (shows `azmcp quota usage check` and `azmcp quota region availability list` once each). Remaining fixes are limited to (a) updating any deploy examples still using `deploy iac rules get` to `deploy infrastructure rules get`, and (b) adding the JSON shape/schema description for `--raw-mcp-tool-input`.
@@ -60,7 +60,8 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [DiagramGenerateCommand.cs](../areas/deploy/src/AzureMcp.Deploy/Commands/Architecture/DiagramGenerateCommand.cs)
        - [Plan GetCommand.cs](../areas/deploy/src/AzureMcp.Deploy/Commands/Plan/GetCommand.cs)
    - Justification (if waived): _<add rationale>_
-7. [ ] Source generation coverage review
+   The command is `deploy iac rules get` instead of `deploy infrastructure rules get`
+7. [x] Source generation coverage review
    - Confirm all JSON-deserialized types used in deploy diagram & plan flows are included in `DeployJsonContext` / `QuotaJsonContext` (nested DTOs, collections). Add any missing types.
     - Linked Files:
        - [DeployJsonContext.cs](../areas/deploy/src/AzureMcp.Deploy/Commands/DeployJsonContext.cs)
@@ -77,7 +78,7 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
    - Justification (if waived): _<add rationale>_
    Run the script. The result show no AOT issue with "deploy/quota" areas.
    ![alt text](image.png)
-9. [-] Test gaps (minimum additions)
+9. [x] Test gaps (minimum additions)
    - Diagram: invalid JSON, empty service list, over-sized payload (return clear message).
    - Quota: empty / whitespace `resource-types`, mixed casing, unsupported provider => returns “No Limit” entry.
    - Usage checker: network failure path returns descriptive `UsageInfo.Description`.
@@ -86,8 +87,8 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [Quota tests folder](../areas/quota/tests/)
        - [DiagramGenerateCommandTests.cs] (add if missing under deploy tests)
    - Justification (if waived): _<add rationale>_
-   Diagram test is waiting for changes/confirmation
-10. [ ] Security & sovereignty
+   Diagram tool updated with no url output so over-sized payload test not needed.
+10. [] Security & sovereignty
     - Ensure no region / subscription IDs are written to logs at Information or above without user intent.
     - Confirm no USGov / China cloud breakage due to hard-coded public cloud URLs (see item 2).
       - Linked Files:
@@ -95,7 +96,7 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
          - [PostgreSQLUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/Usage/PostgreSQLUsageChecker.cs)
          - [AzureRegionChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureRegionChecker.cs)
     - Justification (if waived): _<add rationale>_
-11. [ ] CHANGELOG / spelling / build gates
+11. [x] CHANGELOG / spelling / build gates
     - Re-run: `./eng/common/spelling/Invoke-Cspell.ps1` and `./eng/scripts/Build-Local.ps1 -UsePaths -VerifyNpx` post edits; update CHANGELOG if additional user-facing behavior changes (e.g., final command names).
       - Linked Files / Scripts:
          - [CHANGELOG.md](../CHANGELOG.md)
@@ -103,16 +104,16 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
          - [Build-Local.ps1](../eng/scripts/Build-Local.ps1)
          - [AzureMcp.sln](../AzureMcp.sln)
     - Justification (if waived): _<add rationale>_
-
+      need to remove the PR md file to pass.
 ## P1 (Post‑merge, near term)
-1. [ ] Log retrieval abstraction
+1. [-] Log retrieval abstraction
    - Introduce `IAzdAppLogService` (or extend existing interface) wrapping current implementation; mark with `// TODO: Replace with native azd logs command when available`.
     - Linked Files:
        - [LogsGetCommand.cs](../areas/deploy/src/AzureMcp.Deploy/Commands/App/LogsGetCommand.cs)
        - [Services folder](../areas/deploy/src/AzureMcp.Deploy/Services/)
    - Justification (if waived): _<add rationale>_
-   No azd logs command now.
-2. [ ] Extension service reuse
+   No azd logs command now. will delete this tool when azd log supported.
+2. [x] Extension service reuse
    - Evaluate delegating AZD / AZ related operations via existing extension services (`IAzdService`, `IAzService`) to avoid duplication & ease future azd MCP server integration.
     - Linked Files:
        - [Extension AzdCommand.cs](../areas/extension/src/AzureMcp.Extension/Commands/AzdCommand.cs)
@@ -120,14 +121,15 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [Deploy Services folder](../areas/deploy/src/AzureMcp.Deploy/Services/)
    - Justification (if waived): _<add rationale>_
       No reuse/conflict with existing IAzdService/IAzService. The Deploy service works as a workflow which guide users to use azd/az command.
-3. [ ] Improve quota provider extensibility
+3. [-] Improve quota provider extensibility
    - Replace switch/enum mapping with pluggable strategy registration; add test demonstrating adding new provider without core code change.
     - Linked Files:
        - [AzureUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureUsageChecker.cs)
        - [Usage provider classes](../areas/quota/src/AzureMcp.Quota/Services/Util/Usage/)
    - Justification (if waived): _<add rationale>_
    Current switch mode provide enough extensibility and adding new provider will not impact existing provider logic.
-4. [ ] Unified cancellation & timeout strategy
+   No need to use pluggable strategy registration since this method is not shared code.
+4. [-] Unified cancellation & timeout strategy
    - Standardize default timeouts (e.g., 30s) with graceful fallback message; document in command help.
     - Linked Files:
        - [Command files (deploy)](../areas/deploy/src/AzureMcp.Deploy/Commands/)
