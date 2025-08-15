@@ -8,6 +8,7 @@ using AzureMcp.Core.Commands;
 using AzureMcp.Core.Helpers;
 using AzureMcp.Deploy.Options;
 using AzureMcp.Deploy.Options.Architecture;
+using AzureMcp.Deploy.Services.Templates;
 using Microsoft.Extensions.Logging;
 
 namespace AzureMcp.Deploy.Commands.Architecture;
@@ -95,12 +96,9 @@ public sealed class DiagramGenerateCommand(ILogger<DiagramGenerateCommand> logge
                 ? string.Join(", ", usedServiceTypes)
                 : null;
 
-            context.Response.Message = $"Here is the user's mermaid diagram. Write a reminder to the user to install a Mermaid preview extension to be able to render the diagram. "
-                + $"Please write this into .azure/architecture.copilotmd WITHOUT additional explanations on the deployment. Explain only the architecture and data flow. "
-                + $"Make changes if these do not fulfill requirements (do not use </br> in strings when generating the diagram):\n ```mermaid\n{chart}\n``` \n"
-                + "Ask user if the topology is expected, if not, you should directly update the generated diagram with the user's updated instructions. "
-                + "Please inform the user that here are the supported hosting technologies: "
-                + $"{string.Join(", ", Enum.GetNames<AzureServiceConstants.AzureComputeServiceType>())}.";
+            var response = TemplateService.LoadTemplate("Architecture/architecture-diagram");
+            context.Response.Message = response.Replace("{{chart}}", chart)
+                .Replace("{{hostings}}", string.Join(", ", Enum.GetNames<AzureServiceConstants.AzureComputeServiceType>()));
             if (!string.IsNullOrWhiteSpace(usedServiceTypesString))
             {
                 context.Response.Message += $"Here is the full list of supported component service types for the topology: {usedServiceTypesString}.";

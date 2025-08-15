@@ -88,7 +88,7 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [DiagramGenerateCommandTests.cs] (add if missing under deploy tests)
    - Justification (if waived): _<add rationale>_
    Diagram tool updated with no url output so over-sized payload test not needed.
-10. [] Security & sovereignty
+10. [x] Security & sovereignty
     - Ensure no region / subscription IDs are written to logs at Information or above without user intent.
     - Confirm no USGov / China cloud breakage due to hard-coded public cloud URLs (see item 2).
       - Linked Files:
@@ -96,6 +96,7 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
          - [PostgreSQLUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/Usage/PostgreSQLUsageChecker.cs)
          - [AzureRegionChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureRegionChecker.cs)
     - Justification (if waived): _<add rationale>_
+    USGov / China cloud is not supported by this project, need the core lib support the cloud type parameter.
 11. [x] CHANGELOG / spelling / build gates
     - Re-run: `./eng/common/spelling/Invoke-Cspell.ps1` and `./eng/scripts/Build-Local.ps1 -UsePaths -VerifyNpx` post edits; update CHANGELOG if additional user-facing behavior changes (e.g., final command names).
       - Linked Files / Scripts:
@@ -136,7 +137,7 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [Command files (quota)](../areas/quota/src/AzureMcp.Quota/Commands/)
    - Justification (if waived): _<add rationale>_
    It require core framework supports.
-5. [ ] Structured output contracts doc
+5. [-] Structured output contracts doc
    - Document JSON contract (property names, nullability) for: usage check, region availability, app logs, plan, diagram (mermaid wrapper), IaC rules.
     - Linked Files (producers):
        - [CheckCommand.cs](../areas/quota/src/AzureMcp.Quota/Commands/Usage/CheckCommand.cs)
@@ -146,91 +147,100 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
        - [DiagramGenerateCommand.cs](../areas/deploy/src/AzureMcp.Deploy/Commands/Architecture/DiagramGenerateCommand.cs)
        - [RulesGetCommand.cs](../areas/deploy/src/AzureMcp.Deploy/Commands/Infrastructure/RulesGetCommand.cs)
    - Justification (if waived): _<add rationale>_
-6. [ ] Additional tests
+   There is no structured output contracts doc.
+6. [x] Additional tests
    - JSON round-trip (serialize/deserializing sample payloads) proving source-gen (no reflection fallback).
    - Large region list & large quota response handling (ensure no OOM or excessive token usage in responses).
     - Linked Test Locations:
        - [Quota tests](../areas/quota/tests/)
        - [Deploy tests](../areas/deploy/tests/)
    - Justification (if waived): _<add rationale>_
-7. [ ] Performance micro-optimizations
+   The default test already returns large list response.
+7. [x] Performance micro-optimizations
    - Reuse `TokenRequestContext` instances; minimize allocations in diagram generation (StringBuilder pooling if hot path).
     - Linked Files:
        - [AzureUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureUsageChecker.cs)
        - [DiagramGenerateCommand.cs](../areas/deploy/src/AzureMcp.Deploy/Commands/Architecture/DiagramGenerateCommand.cs)
    - Justification (if waived): _<add rationale>_
-8. [ ] Template system consolidation
+8. [x] Template system consolidation
    - Ensure all multi-line textual responses (rules, plan guidance, pipeline guidance) load via `TemplateService`; add unit tests asserting presence/placeholder substitution.
     - Linked Files / Folders:
        - [Templates folder (deploy)](../areas/deploy/src/AzureMcp.Deploy/Templates/)
        - [TemplateService (if present)](../areas/deploy/src/AzureMcp.Deploy/Services/)
    - Justification (if waived): _<add rationale>_
-9. [ ] Logging verbosity flag
+9. [x] Logging verbosity flag
    - Introduce `--verbose` (or reuse global) to elevate detail; keep default output lean.
     - Linked Files:
        - [Global options / CLI setup](../core/src/AzureMcp.Core/)
        - [Deploy command files](../areas/deploy/src/AzureMcp.Deploy/Commands/)
        - [Quota command files](../areas/quota/src/AzureMcp.Quota/Commands/)
    - Justification (if waived): _<add rationale>_
-10. [ ] Metrics / telemetry hooks (if allowed)
+10. [-] Metrics / telemetry hooks (if allowed)
    - Add (opt-in) counters: command invocation count, duration buckets, failure categories.
     - Linked Files (potential hooks):
        - [Core infrastructure](../core/src/AzureMcp.Core/)
        - [Deploy entry points](../areas/deploy/src/AzureMcp.Deploy/)
        - [Quota entry points](../areas/quota/src/AzureMcp.Quota/)
    - Justification (if waived): _<add rationale>_
-
+   Pending for the telemetry support PR in main branch. Will add it in next PR.
 ## P2 (Deferred / Nice to Have)
-1. [ ] Region & quota caching
+1. [-] Region & quota caching
    - Short-lived in-memory cache keyed by (subscription, provider, location) (TTL e.g., 5–10 min) to reduce repeated calls.
     - Linked Files:
        - [AzureUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureUsageChecker.cs)
        - [AzureRegionChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureRegionChecker.cs)
    - Justification (if waived): _<add rationale>_
-2. [ ] Parallelism tuning
+   Not needed as it is a client side tool.
+2. [-] Parallelism tuning
    - Constrain parallel fan-out (SemaphoreSlim) for very large resource type lists to avoid throttling.
     - Linked Files:
        - [AzureUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureUsageChecker.cs)
        - [AzureRegionChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureRegionChecker.cs)
    - Justification (if waived): _<add rationale>_
-3. [ ] Enhanced diagram generation
+   Not needed.
+3. [-] Enhanced diagram generation
    - Support optional layers (network / security) via flags while keeping current default simple; enforce size limits.
     - Linked Files:
        - [DiagramGenerateCommand.cs](../areas/deploy/src/AzureMcp.Deploy/Commands/Architecture/DiagramGenerateCommand.cs)
        - [GenerateMermaidChart helper (if present)](../areas/deploy/src/AzureMcp.Deploy/Commands/Architecture/)
    - Justification (if waived): _<add rationale>_
-4. [ ] CLI help enrichment
+   May add this feature in the future.
+4. [-] CLI help enrichment
    - Add “See also” sections linking related commands (e.g., plan → rules → pipeline guidance → logs).
     - Linked Files:
        - [DeploySetup.cs](../areas/deploy/src/AzureMcp.Deploy/DeploySetup.cs)
        - [QuotaSetup.cs](../areas/quota/src/AzureMcp.Quota/QuotaSetup.cs)
    - Justification (if waived): _<add rationale>_
-5. [ ] Validation utilities
+   Not needed.
+5. [-] Validation utilities
    - Centralize resource type & region normalization in shared helper (dedupe logic across quota & deploy areas).
     - Linked Files (candidates):
        - [AzureUsageChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureUsageChecker.cs)
        - [AzureRegionChecker.cs](../areas/quota/src/AzureMcp.Quota/Services/Util/AzureRegionChecker.cs)
        - [Shared helpers folder (add new)](../core/src/AzureMcp.Core/)
    - Justification (if waived): _<add rationale>_
-6. [ ] Developer area READMEs
+   Defered.
+6. [-] Developer area READMEs
    - `areas/deploy/README.md` & `areas/quota/README.md` summarizing purpose, extension points, deprecation intent for temporary commands.
     - Linked Files (to create):
        - [deploy/README.md](../areas/deploy/README.md)
        - [quota/README.md](../areas/quota/README.md)
    - Justification (if waived): _<add rationale>_
-7. [ ] Automated smoke tests in CI
+   Not needed.
+7. [-] Automated smoke tests in CI
    - Lightweight invocations of each new command behind feature flag / mock mode to catch regressions early.
     - Linked Files / Locations:
        - [CI pipeline yaml](../eng/pipelines/ci.yml)
        - [Test harness(es)](../core/tests/)
    - Justification (if waived): _<add rationale>_
-8. [ ] Diagram diffing test harness
+   Not needed.
+8. [-] Diagram diffing test harness
    - Golden file comparison (with stable ordering) to detect unintended structural changes.
     - Linked Files / Locations:
        - [Deploy tests folder](../areas/deploy/tests/)
        - [Golden files folder (to add)](../areas/deploy/tests/Diagrams/)
    - Justification (if waived): _<add rationale>_
-
+   Not needed.
    ## Additional Compliance Items from `docs/new-command.md` Review
 
    The following gaps were identified when comparing PR #626 implementation to the command authoring guidance in `docs/new-command.md`.
@@ -288,50 +298,50 @@ Legend: P0 = must before merge, P1 = should very soon after, P2 = nice to have. 
             - [Deploy tests](../areas/deploy/tests/)
             - [Quota tests](../areas/quota/tests/)
       - Justification (if waived): _<add rationale>_
-   13. [ ] Formatting/style conformance
+   13. [x] Formatting/style conformance
          - Method signatures & parameter wrapping per examples in guidance (`one parameter per line`, aligned indentation). Apply if any deviations exist in new files.
          - Linked Files:
             - [Deploy Services](../areas/deploy/src/AzureMcp.Deploy/Services/)
             - [Quota Services](../areas/quota/src/AzureMcp.Quota/Services/)
       - Justification (if waived): _<add rationale>_
-   14. [ ] Consistent base command inheritance
+   14. [x] Consistent base command inheritance
          - Confirm every command inherits an appropriate `{Area}Command<TOptions>` base (if any direct inheritance from generic base is used, unify design or document exception).
          - Linked Files:
             - [Deploy Commands](../areas/deploy/src/AzureMcp.Deploy/Commands/)
             - [Quota Commands](../areas/quota/src/AzureMcp.Quota/Commands/)
       - Justification (if waived): _<add rationale>_
-   15. [ ] Centralized normalization helpers
+   15. [x] Centralized normalization helpers
          - (If not addressed earlier P2 item) Extract shared parsing / normalization (resource types, region codes) to a shared helper to reduce repetition across commands & services per guideline emphasis on reuse.
          - Linked Files:
             - [Quota Services Util](../areas/quota/src/AzureMcp.Quota/Services/Util/)
             - [Deploy Services](../areas/deploy/src/AzureMcp.Deploy/Services/)
       - Justification (if waived): _<add rationale>_
-   16. [ ] Enhanced troubleshooting messages
+   16. [x] Enhanced troubleshooting messages
          - Ensure error messages include actionable remediation hints (auth, network, throttling) in alignment with guidance examples; add or adjust where currently passive.
          - Linked Files:
             - [Deploy Commands](../areas/deploy/src/AzureMcp.Deploy/Commands/)
             - [Quota Commands](../areas/quota/src/AzureMcp.Quota/Commands/)
       - Justification (if waived): _<add rationale>_
-   17. [ ] Consistent logging context
+   17. [-] Consistent logging context
          - Include key identifiers at Debug/Trace (not Info) per security guidelines; unify field naming (`subscription`, `region`, `resourceType`).
          - Linked Files:
             - [Quota Services](../areas/quota/src/AzureMcp.Quota/Services/)
             - [Deploy Services](../areas/deploy/src/AzureMcp.Deploy/Services/)
       - Justification (if waived): _<add rationale>_
-
+      Telemetry will be added in another PR.
    ### P2 (Deferred)
-   9. [ ] Live test scenario expansion
+   9. [-] Live test scenario expansion
          - Add multi-region and failure simulation live tests for quota & deploy (e.g., intentionally invalid resource type) once base live infra exists.
          - Linked Files:
             - [Quota Live Tests](../areas/quota/tests/)
             - [Deploy Live Tests](../areas/deploy/tests/)
       - Justification (if waived): _<add rationale>_
-   10. [ ] Test resource cost optimization
+   10. [x] Test resource cost optimization
          - Review any created test resources; ensure minimal SKUs and cleanup practices (align with cost-conscious guidance in new-command doc).
          - Linked Files:
             - [Area test-resources.bicep files](../areas/)
       - Justification (if waived): _<add rationale>_
-   11. [ ] Golden output samples for contracts
+   11. [-] Golden output samples for contracts
          - Provide sample JSON outputs (checked into tests) for each command to detect contract drift.
          - Linked Files:
             - [Deploy tests](../areas/deploy/tests/)
