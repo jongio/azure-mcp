@@ -475,7 +475,6 @@ azmcp arc deploy-edge-essentials --subscription-id <subscription-id> \
 azmcp arc connect-arc --resource-group-name <resource-group-name> \
                       --location <location> \
                       --cluster-name <cluster-name> \
-                      --kube-config-path <kube-config-path> \
                       --user-provided-path <user-provided-path> \
                       --subscription-id <subscription-id> \
                       --tenant-id <tenant-id>

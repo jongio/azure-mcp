@@ -16,7 +16,6 @@ public sealed class OnboardClusterToArcCommand(ILogger<OnboardClusterToArcComman
     // Define options as fields
     private readonly Option<string> _clusterNameOption = new("--cluster-name", "Name of the cluster to connect to Azure Arc");
     private readonly Option<string> _locationOption = new("--location", "Azure region");
-    private readonly Option<string> _kubeConfigPathOption = new("--kube-config-path", "Path to the kubeconfig file");
     private readonly Option<string> _userProvidedPathOption = new("--user-provided-path", "Path to the user-provided files");
 
     public override string Name => "connect-arc";
@@ -34,7 +33,6 @@ public sealed class OnboardClusterToArcCommand(ILogger<OnboardClusterToArcComman
         command.AddOption(_resourceGroupOption);
         command.AddOption(_clusterNameOption);
         command.AddOption(_locationOption);
-        command.AddOption(_kubeConfigPathOption);
         command.AddOption(_userProvidedPathOption);
     }
 
@@ -45,7 +43,6 @@ public sealed class OnboardClusterToArcCommand(ILogger<OnboardClusterToArcComman
         // Use the defined Option instances
         options.ClusterName = parseResult.GetValueForOption(_clusterNameOption);
         options.Location = parseResult.GetValueForOption(_locationOption);
-        options.KubeConfigPath = parseResult.GetValueForOption(_kubeConfigPathOption);
         options.UserProvidedPath = parseResult.GetValueForOption(_userProvidedPathOption);
 
         // Manually bind ResourceGroup since the base class doesn't do it
@@ -72,7 +69,6 @@ public sealed class OnboardClusterToArcCommand(ILogger<OnboardClusterToArcComman
                 options.Location!,
                 options.Subscription!,
                 options.Tenant!,
-                options.KubeConfigPath!,
                 options.UserProvidedPath!);
 
             context.Response.Status = result.Success ? 200 : 500;

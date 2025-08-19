@@ -59,7 +59,7 @@ public sealed class OnboardClusterToArcCommandTests
 
         _arcService.OnboardClusterToArcAsync(
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+            Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<string>()).Returns(expectedResult);
 
         var args = "--cluster-name test-cluster --resource-group test-rg --location eastus --subscription sub123 --tenant tenant123 --kube-config-path /path/to/config --user-provided-path /temp";
@@ -85,7 +85,7 @@ public sealed class OnboardClusterToArcCommandTests
 
         _arcService.OnboardClusterToArcAsync(
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+            Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<string>()).Returns(expectedResult);
 
         var args = "--cluster-name test-cluster --resource-group test-rg --location eastus --subscription sub123 --tenant tenant123 --kube-config-path /path/to/config --user-provided-path /temp";
@@ -106,7 +106,7 @@ public sealed class OnboardClusterToArcCommandTests
         var exceptionMessage = "Test exception";
         _arcService.OnboardClusterToArcAsync(
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+            Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<string>()).ThrowsAsync(new Exception(exceptionMessage));
 
         var args = "--cluster-name test-cluster --resource-group test-rg --location eastus --subscription sub123 --tenant tenant123 --kube-config-path /path/to/config --user-provided-path /temp";
@@ -135,7 +135,7 @@ public sealed class OnboardClusterToArcCommandTests
         var expectedResult = new DeploymentResult { Success = true, Steps = "Success" };
         _arcService.OnboardClusterToArcAsync(
             Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
-            Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>(),
+            Arg.Any<string>(), Arg.Any<string>(),
             Arg.Any<string>()).Returns(expectedResult);
 
         var args = $"--cluster-name {clusterName} --resource-group {resourceGroupName} --location {location} --subscription {subscriptionId} --tenant {tenantId} --kube-config-path {kubeConfigPath} --user-provided-path {userProvidedPath}";
@@ -146,6 +146,7 @@ public sealed class OnboardClusterToArcCommandTests
 
         // Assert
         await _arcService.Received(1).OnboardClusterToArcAsync(
-            clusterName, resourceGroupName, location, subscriptionId, tenantId, kubeConfigPath, userProvidedPath);
+            clusterName, resourceGroupName, location, subscriptionId, tenantId,
+             userProvidedPath);
     }
 }

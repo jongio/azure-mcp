@@ -21,7 +21,7 @@ namespace AzureMcp.Areas.AzureArc.Services
         private const string OnboardClusterToArc = "OnboardClusterToArc.ps1";
         private readonly Assembly _assembly = typeof(ArcServices).Assembly;
 
-        public async Task<DeploymentResult> OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string kubeConfigPath, string userProvidedPath)
+        public async Task<DeploymentResult> OnboardClusterToArcAsync(string clusterName, string resourceGroupName, string location, string subscriptionId, string tenantId, string userProvidedPath)
         {
             string tempScriptPath = Path.Combine(userProvidedPath, "OnboardClusterToArc.ps1");
             File.WriteAllText(tempScriptPath, LoadResourceFiles(OnboardClusterToArc));
@@ -38,8 +38,6 @@ namespace AzureMcp.Areas.AzureArc.Services
                 arguments += $" -TenantId {tenantId}";
             if (!string.IsNullOrEmpty(location))
                 arguments += $" -Location {location}";
-            if (!string.IsNullOrEmpty(kubeConfigPath))
-                arguments += $" -KubeConfigPath \"{kubeConfigPath}\"";
 
             var processStartInfo = new ProcessStartInfo
             {

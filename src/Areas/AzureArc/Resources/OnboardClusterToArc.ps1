@@ -7,15 +7,21 @@ param(
     [String] $Location,
     [String] $ResourceGroupName,
     [String] $ClusterName,
-    [String] $KubeConfigPath = $null  # Made optional
+    [String] $KubeConfigPath = $null
 )
 #Requires -RunAsAdministrator
 
 Write-Host "Connect AKS Edge to Azure Arc" -ForegroundColor Cyan
 Write-Host "=============================" -ForegroundColor Cyan
 
+# Start transcript
+$transcriptFile = "$PSScriptRoot\arc-onboard-$(Get-Date -Format 'yyMMdd-HHmm').txt"
+Start-Transcript -Path $transcriptFile | Out-Null
+
+
 # Step 1: Check kubeconfig and context
 Write-Host "`nStep 1: Checking kubeconfig" -ForegroundColor Yellow
+Start-Sleep -Seconds 5
 
 # Function to detect kubeconfig using kubectl
 function Find-KubeConfig {
@@ -25,12 +31,7 @@ function Find-KubeConfig {
     $currentContext = kubectl config current-context 2>$null
     if ($LASTEXITCODE -eq 0 -and $currentContext) {
         Write-Host "kubectl found working context: $currentContext" -ForegroundColor Green
-        
-        # Check if KUBECONFIG env var is set
-        if ($env:KUBECONFIG) {
-            Write-Host "Using KUBECONFIG environment variable: $env:KUBECONFIG" -ForegroundColor Green
-            return $env:KUBECONFIG
-        }
+      
         
         # Check default location
         $defaultPath = "$env:USERPROFILE\.kube\config"
@@ -93,184 +94,150 @@ function Search-KubeConfigFiles {
     return $null
 }
 
-# Ensure kubeconfig exists
-if ([string]::IsNullOrEmpty($KubeConfigPath) -or -not (Test-Path $KubeConfigPath)) {
-    Write-Host "Kubeconfig not provided or not found. Searching for kubeconfig..." -ForegroundColor Yellow
+try {
+    # Ensure kubeconfig exists
+    if ([string]::IsNullOrEmpty($KubeConfigPath) -or -not (Test-Path $KubeConfigPath)) {
+        Write-Host "Kubeconfig not provided or not found. Searching for kubeconfig..." -ForegroundColor Yellow
     
-    # Try to detect existing kubeconfig using kubectl
-    $detectedKubeConfig = Find-KubeConfig
+        # Try to detect existing kubeconfig using kubectl
+        $detectedKubeConfig = Find-KubeConfig
     
-    if ($detectedKubeConfig -and (Test-Path $detectedKubeConfig)) {
-        $KubeConfigPath = $detectedKubeConfig
-        Write-Host "Using detected kubeconfig: $KubeConfigPath" -ForegroundColor Green
-    }
-    else {
-        # Try searching for kubeconfig files
-        $searchedKubeConfig = Search-KubeConfigFiles
-        
-        if ($searchedKubeConfig -and (Test-Path $searchedKubeConfig)) {
-            $KubeConfigPath = $searchedKubeConfig
-            Write-Host "Using found kubeconfig: $KubeConfigPath" -ForegroundColor Green
+        if ($detectedKubeConfig -and (Test-Path $detectedKubeConfig)) {
+            $KubeConfigPath = $detectedKubeConfig
+            Write-Host "Using detected kubeconfig: $KubeConfigPath" -ForegroundColor Green
         }
         else {
-            Write-Host "No existing kubeconfig detected. Will get from AKS Edge..." -ForegroundColor Yellow
-            $KubeConfigPath = "$env:USERPROFILE\.kube\config"
+            # Try searching for kubeconfig files
+            $searchedKubeConfig = Search-KubeConfigFiles
+        
+            if ($searchedKubeConfig -and (Test-Path $searchedKubeConfig)) {
+                $KubeConfigPath = $searchedKubeConfig
+                Write-Host "Using found kubeconfig: $KubeConfigPath" -ForegroundColor Green
+            }
+            else {
+                Write-Host "No existing kubeconfig detected. Will get from AKS Edge..." -ForegroundColor Yellow
+                $KubeConfigPath = "$env:USERPROFILE\.kube\config"
+            }
+        }
+        Start-Sleep -Seconds 10
+        # like this : Import-Module "C:\Program Files\WindowsPowerShell\Modules\AksEdge\1.10.868.0\AksEdge.psd1" -Force
+        # Dynamically find the installed version of the AksEdge module
+        $aksEdgeModulePath = "C:\Program Files\WindowsPowerShell\Modules\AksEdge"
+        $aksEdgeVersion = (Get-ChildItem -Path $aksEdgeModulePath -Directory | Sort-Object Name -Descending | Select-Object -First 1).Name
+
+        if (-not $aksEdgeVersion) {
+            Write-Error "AksEdge module not found. Please ensure it is installed."
+            exit 1
+        }
+
+        $aksEdgePsModulePath = "$aksEdgeModulePath\$aksEdgeVersion\AksEdge.psd1"
+        Import-Module $aksEdgePsModulePath -Force
+
+        # Create directory if needed
+        $kubeDir = Split-Path $KubeConfigPath -Parent
+        if (-not (Test-Path $kubeDir)) {
+            New-Item -ItemType Directory -Path $kubeDir -Force | Out-Null
+        }
+
+        Get-AksEdgeKubeConfig -KubeConfigPath $KubeConfigPath
+    
+        # Verify the kubeconfig was created successfully
+        if (-not (Test-Path $KubeConfigPath)) {
+            Write-Error "Failed to retrieve kubeconfig from AKS Edge. Please check your AKS Edge deployment."
+            throw "Failed to retrieve kubeconfig from AKS Edge"
         }
     }
+    Start-Sleep -Seconds 10
 
-    # like this : Import-Module "C:\Program Files\WindowsPowerShell\Modules\AksEdge\1.10.868.0\AksEdge.psd1" -Force
-    # Dynamically find the installed version of the AksEdge module
-    $aksEdgeModulePath = "C:\Program Files\WindowsPowerShell\Modules\AksEdge"
-    $aksEdgeVersion = (Get-ChildItem -Path $aksEdgeModulePath -Directory | Sort-Object Name -Descending | Select-Object -First 1).Name
+    Write-Host "`nUsing kubeconfig: $KubeConfigPath" -ForegroundColor Cyan
 
-    if (-not $aksEdgeVersion) {
-        Write-Error "AksEdge module not found. Please ensure it is installed."
-        exit 1
-    }
-
-    $aksEdgePsModulePath = "$aksEdgeModulePath\$aksEdgeVersion\AksEdge.psd1"
-    Import-Module $aksEdgePsModulePath -Force
-
-    # Create directory if needed
-    $kubeDir = Split-Path $KubeConfigPath -Parent
-    if (-not (Test-Path $kubeDir)) {
-        New-Item -ItemType Directory -Path $kubeDir -Force | Out-Null
-    }
-
-    Get-AksEdgeKubeConfig -KubeConfigPath $KubeConfigPath
-    
-    # Verify the kubeconfig was created successfully
-    if (-not (Test-Path $KubeConfigPath)) {
-        Write-Error "Failed to retrieve kubeconfig from AKS Edge. Please check your AKS Edge deployment."
-        exit 1
-    }
-}
-Start-Sleep -Seconds 10
-
-Write-Host "`nUsing kubeconfig: $KubeConfigPath" -ForegroundColor Cyan
-
-# Function to validate kubeconfig using kubectl
-function Test-KubeConfig {
-    param([string]$ConfigPath)
-    
-    Write-Host "`nValidating kubeconfig using kubectl..." -ForegroundColor Yellow
-    
-    # Check current context
-    $currentContext = kubectl config current-context --kubeconfig $ConfigPath 2>$null
-    if ($LASTEXITCODE -eq 0 -and $currentContext) {
-        Write-Host "✓ Current context: $currentContext" -ForegroundColor Green
-        
-        # Check cluster connectivity
-        $clusterInfo = kubectl cluster-info --kubeconfig $ConfigPath 2>$null
-        if ($LASTEXITCODE -eq 0) {
-            Write-Host "✓ Cluster connectivity verified" -ForegroundColor Green
-            Write-Host "$clusterInfo" -ForegroundColor Gray
-        }
-        else {
-            Write-Warning "⚠ Context exists but cluster not reachable"
-        }
-        
-        # List all contexts
-        Write-Host "`nAvailable contexts:" -ForegroundColor Gray
-        kubectl config get-contexts --kubeconfig $ConfigPath
-        
-        return $true
-    }
-    else {
-        Write-Warning "✗ No current context set in kubeconfig"
-        return $false
-    }
-}
-
-# Validate the kubeconfig
-$isValidConfig = Test-KubeConfig -ConfigPath $KubeConfigPath
-
-if (-not $isValidConfig) {
-    Write-Warning "Kubeconfig validation failed. Proceeding with caution..."
-}
-
-Start-Sleep -Seconds 10
-# Step 2: Verify cluster access
-Write-Host "`nStep 2: Verifying cluster access" -ForegroundColor Yellow
-$nodes = kubectl get nodes --kubeconfig $KubeConfigPath 2>&1
-
-if ($LASTEXITCODE -eq 0) {
-    Write-Host "Cluster access verified:" -ForegroundColor Green
-    Write-Host $nodes -ForegroundColor Gray
-}
-else {
-    Write-Error "Cannot access cluster: $nodes"
-    Write-Host "`nTrying to fix kubeconfig..." -ForegroundColor Yellow
-
-    # Try to get a fresh kubeconfig
-    # if you know the kubeconfig path, you can set it directly: 
-    # like this : Import-Module "C:\Program Files\WindowsPowerShell\Modules\AksEdge\1.10.868.0\AksEdge.psd1" -Force
-    # Dynamically find the installed version of the AksEdge module
-    $aksEdgeModulePath = "C:\Program Files\WindowsPowerShell\Modules\AksEdge"
-    $aksEdgeVersion = (Get-ChildItem -Path $aksEdgeModulePath -Directory | Sort-Object Name -Descending | Select-Object -First 1).Name
-
-    if (-not $aksEdgeVersion) {
-        Write-Error "AksEdge module not found. Please ensure it is installed."
-        exit 1
-    }
-
-    $aksEdgePsModulePath = "$aksEdgeModulePath\$aksEdgeVersion\AksEdge.psd1"
-    Import-Module $aksEdgePsModulePath -Force
-    Remove-Item $KubeConfigPath -Force -ErrorAction SilentlyContinue
-    Get-AksEdgeKubeConfig -KubeConfigPath $KubeConfigPath
-
-    # Test again
+    Start-Sleep -Seconds 10
+    # Step 2: Verify cluster access
+    Write-Host "`nStep 2: Verifying cluster access" -ForegroundColor Yellow
     $nodes = kubectl get nodes --kubeconfig $KubeConfigPath 2>&1
-    if ($LASTEXITCODE -ne 0) {
-        Write-Error "Still cannot access cluster. Please check your AKS Edge deployment."
-        exit 1
+
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Cluster access verified:" -ForegroundColor Green
+        Write-Host $nodes -ForegroundColor Gray
     }
-}
-Start-Sleep -Seconds 10
-# Step 3: Azure CLI setup
-Write-Host "`nStep 3: Setting up Azure CLI" -ForegroundColor Yellow
+    else {
+        Write-Error "Cannot access cluster: $nodes"
+        Write-Host "`nTrying to fix kubeconfig..." -ForegroundColor Yellow
 
-# Check Azure CLI login
-$azAccount = az account show 2>$null | ConvertFrom-Json
-if (-not $azAccount) {
-    Write-Host "Please login to Azure:" -ForegroundColor Red
-    az login
-    $azAccount = az account show 2>$null | ConvertFrom-Json
-}
+        # Try to get a fresh kubeconfig
+        # if you know the kubeconfig path, you can set it directly: 
+        # like this : Import-Module "C:\Program Files\WindowsPowerShell\Modules\AksEdge\1.10.868.0\AksEdge.psd1" -Force
+        # Dynamically find the installed version of the AksEdge module
+        $aksEdgeModulePath = "C:\Program Files\WindowsPowerShell\Modules\AksEdge"
+        $aksEdgeVersion = (Get-ChildItem -Path $aksEdgeModulePath -Directory | Sort-Object Name -Descending | Select-Object -First 1).Name
 
-Write-Host "Logged in as: $($azAccount.user.name)" -ForegroundColor Green
+        if (-not $aksEdgeVersion) {
+            Write-Error "AksEdge module not found. Please ensure it is installed."
+            exit 1
+        }
 
-# Set subscription
-if ($azAccount.id -ne $SubscriptionId) {
-    Write-Host "Setting subscription..." -ForegroundColor Yellow
-    az account set --subscription $SubscriptionId
-}
+        $aksEdgePsModulePath = "$aksEdgeModulePath\$aksEdgeVersion\AksEdge.psd1"
+        Import-Module $aksEdgePsModulePath -Force
+        Remove-Item $KubeConfigPath -Force -ErrorAction SilentlyContinue
+        Get-AksEdgeKubeConfig -KubeConfigPath $KubeConfigPath
 
-# Install connectedk8s extension
-$extensions = az extension list --query "[?name=='connectedk8s'].name" -o tsv
-if (-not $extensions) {
-    Write-Host "Installing Azure CLI connectedk8s extension..." -ForegroundColor Yellow
-    az extension add --name connectedk8s
-}
-
-# Step 4: Clean up any existing Arc connection
-Write-Host "`nStep 4: Checking for existing Arc connections" -ForegroundColor Yellow
-
-# List all Arc clusters in the resource group
-$existingClusters = az connectedk8s list --resource-group $ResourceGroupName 2>$null | ConvertFrom-Json
-
-if ($existingClusters -and $existingClusters.Count -gt 0) {
-    Write-Host "Found existing Arc clusters:" -ForegroundColor Yellow
-    foreach ($cluster in $existingClusters) {
-        Write-Host "  - $($cluster.name) (Status: $($cluster.connectivityStatus))" -ForegroundColor Gray
-
-        # If there's a cluster with the same name, delete it first
-        if ($cluster.name -eq $ClusterName) {
-            Write-Host "Removing existing Arc connection for $ClusterName..." -ForegroundColor Yellow
-            az connectedk8s delete --name $ClusterName --resource-group $ResourceGroupName --yes 2>$null
-            Start-Sleep -Seconds 10
+        # Test again
+        $nodes = kubectl get nodes --kubeconfig $KubeConfigPath 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Error "Still cannot access cluster. Please check your AKS Edge deployment."
+            throw "Cannot access cluster after refresh"
         }
     }
+    Start-Sleep -Seconds 10
+    # Step 3: Azure CLI setup
+    Write-Host "`nStep 3: Setting up Azure CLI" -ForegroundColor Yellow
+
+    # Check Azure CLI login
+    $azAccount = az account show 2>$null | ConvertFrom-Json
+    if (-not $azAccount) {
+        Write-Host "Please login to Azure:" -ForegroundColor Red
+        az login
+        $azAccount = az account show 2>$null | ConvertFrom-Json
+    }
+
+    Write-Host "Logged in as: $($azAccount.user.name)" -ForegroundColor Green
+
+    # Set subscription
+    if ($azAccount.id -ne $SubscriptionId) {
+        Write-Host "Setting subscription..." -ForegroundColor Yellow
+        az account set --subscription $SubscriptionId
+    }
+
+    # Install connectedk8s extension
+    $extensions = az extension list --query "[?name=='connectedk8s'].name" -o tsv
+    if (-not $extensions) {
+        Write-Host "Installing Azure CLI connectedk8s extension..." -ForegroundColor Yellow
+        az extension add --name connectedk8s
+    }
+
+    # Step 4: Clean up any existing Arc connection
+    Write-Host "`nStep 4: Checking for existing Arc connections" -ForegroundColor Yellow
+
+    # List all Arc clusters in the resource group
+    $existingClusters = az connectedk8s list --resource-group $ResourceGroupName 2>$null | ConvertFrom-Json
+
+    if ($existingClusters -and $existingClusters.Count -gt 0) {
+        Write-Host "Found existing Arc clusters:" -ForegroundColor Yellow
+        foreach ($cluster in $existingClusters) {
+            Write-Host "  - $($cluster.name) (Status: $($cluster.connectivityStatus))" -ForegroundColor Gray
+
+            # If there's a cluster with the same name, delete it first
+            if ($cluster.name -eq $ClusterName) {
+                Write-Host "Removing existing Arc connection for $ClusterName..." -ForegroundColor Yellow
+                az connectedk8s delete --name $ClusterName --resource-group $ResourceGroupName --yes 2>$null
+                Start-Sleep -Seconds 10
+            }
+        }
+    }
+}
+catch {
+    Write-Error "Error during initial setup and validation: $_"
+    throw $_
 }
 
 # Step 5: Connect to Azure Arc
@@ -409,3 +376,6 @@ Write-Host "`n  # Enable GitOps:" -ForegroundColor Gray
 Write-Host "  az k8s-configuration flux create --name gitops-config --cluster-name $ClusterName --resource-group $ResourceGroupName --namespace gitops --cluster-type connectedClusters --scope cluster --url https://github.com/Azure/arc-k8s-demo --branch main --kustomization name=infra path=./infrastructure prune=true" -ForegroundColor Gray
 Start-Sleep -Seconds 15
 Write-Host "`nScript completed!" -ForegroundColor Green
+Write-Host "`nCheck the log file: $transcriptFile" -ForegroundColor Yellow
+
+Stop-Transcript | Out-Null
